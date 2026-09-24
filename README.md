@@ -11,7 +11,7 @@ On an Android tablet, open the link in Chrome, then **⋮ → Add to Home screen
 - **Top row** (Yes, No, More, All done, Help, Stop) is on every page and never moves.
 - **◀ ▶ arrows** flip between pages, like a Stream Deck. Each arrow shows the picture of the page it goes to, and they wrap around at the ends.
 - **Tap the page name** in the middle to jump straight to any page.
-- **Settings:** hold the ⚙ in the top banner for 1 second. Choose the voice (Michael, Fenrir, Heart or the tablet's own voice), speed and volume, and pick which pages to show.
+- **Settings:** hold the ⚙ in the top banner for 1 second. Choose the voice (Michael is the default; also Fenrir, Heart, Bella, Sarah, George, Emma, or the tablet's own voice), speed and volume, and pick which pages to show.
 
 12 pages: I want, I feel, Ouch, People, Mom & Dad, Fun, Toy Story, Food, My day, Places, Questions, Things.
 

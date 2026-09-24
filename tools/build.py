@@ -26,6 +26,10 @@ VOICES = [
     {'id': 'michael', 'kokoro': 'am_michael', 'name': 'Michael', 'desc': 'calm man'},
     {'id': 'fenrir',  'kokoro': 'am_fenrir',  'name': 'Fenrir',  'desc': 'deeper man'},
     {'id': 'heart',   'kokoro': 'af_heart',   'name': 'Heart',   'desc': 'warm woman'},
+    {'id': 'bella',   'kokoro': 'af_bella',   'name': 'Bella',   'desc': 'bright young woman'},
+    {'id': 'sarah',   'kokoro': 'af_sarah',   'name': 'Sarah',   'desc': 'friendly woman'},
+    {'id': 'george',  'kokoro': 'bm_george',  'name': 'George',  'desc': 'British man'},
+    {'id': 'emma',    'kokoro': 'bf_emma',    'name': 'Emma',    'desc': 'British woman'},
 ]
 SPEED = 0.92            # a touch slower than normal speech, easier to follow
 SAMPLE_TEXT = 'Hi! This is my voice.'
@@ -181,7 +185,8 @@ def build_voices(tiles):
             if manifest.get(tid) != key or not os.path.exists(dest):
                 if kokoro is None:
                     kokoro = Kokoro(*model)
-                samples, sr = kokoro.create(text, voice=v['kokoro'], speed=SPEED, lang='en-us')
+                samples, sr = kokoro.create(text, voice=v['kokoro'], speed=SPEED,
+                                            lang='en-gb' if v['kokoro'].startswith('b') else 'en-us')
                 audio = finish(np.asarray(samples, dtype=np.float32), sr)
                 buf = io.BytesIO()
                 sf.write(buf, audio, sr, format='WAV', subtype='PCM_16')
