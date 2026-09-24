@@ -95,7 +95,11 @@ window.TT_LIBRARY = {
       {"icon": "👩", "label": "Mom",        "say": "I want my mom"},
       {"icon": "📞", "label": "Call Mom",   "say": "Can I call my mom, please?"},
       {"icon": "🏘️", "label": "Mom's house", "say": "I want to go to Mom's house"},
-      {"icon": "📅", "label": "Mom coming?", "say": "Is Mom coming today?"}
+      {"icon": "📅", "label": "Mom coming?", "say": "Is Mom coming today?"},
+      {"icon": "👵", "label": "Grandma",    "say": "I want my grandma"},
+      {"icon": "👴", "label": "Grandpa",    "say": "I want my grandpa"},
+      {"icon": "👵", "label": "Nana",       "say": "I want my nana"},
+      {"icon": "👴", "label": "Papa",       "say": "I want my papa"}
     ]},
 
     {"name": "Fun", "icon": "🎉", "color": "#3F8A34", "tiles": [
