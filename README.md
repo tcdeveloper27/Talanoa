@@ -13,7 +13,7 @@ On an Android tablet, open the link in Chrome, then **⋮ → Add to Home screen
 - **Tap the page name** in the middle to jump straight to any page.
 - **Settings:** hold the ⚙ in the top banner for 1 second. Choose the voice (Michael, Fenrir, Heart or the tablet's own voice), speed and volume, and pick which pages to show.
 
-11 pages with 12 tiles each: I want, I feel, Ouch, People, Fun, Toy Story, Food, My day, Places, Questions, Things.
+12 pages: I want, I feel, Ouch, People, Mom & Dad, Fun, Toy Story, Food, My day, Places, Questions, Things.
 
 ## Changing the words
 

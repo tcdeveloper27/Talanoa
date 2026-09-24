@@ -89,6 +89,17 @@ window.TT_LIBRARY = {
       {"icon": "☝️", "label": "My turn",    "say": "It's my turn"}
     ]},
 
+    {"name": "Mom & Dad", "icon": "👪", "color": "#C2507E", "tiles": [
+      {"icon": "👨", "label": "Dad",        "say": "I want my dad"},
+      {"icon": "📞", "label": "Call Dad",   "say": "Can I call my dad, please?"},
+      {"icon": "🏡", "label": "Dad's house", "say": "I want to go to Dad's house"},
+      {"icon": "📅", "label": "Dad coming?", "say": "Is Dad coming today?"},
+      {"icon": "👩", "label": "Mom",        "say": "I want my mom"},
+      {"icon": "📞", "label": "Call Mom",   "say": "Can I call my mom, please?"},
+      {"icon": "🏘️", "label": "Mom's house", "say": "I want to go to Mom's house"},
+      {"icon": "📅", "label": "Mom coming?", "say": "Is Mom coming today?"}
+    ]},
+
     {"name": "Fun", "icon": "🎉", "color": "#3F8A34", "tiles": [
       {"icon": "🤠", "label": "Toy Story",  "say": "I want to watch Toy Story"},
       {"icon": "📺", "label": "Cartoons",   "say": "I want to watch cartoons"},
