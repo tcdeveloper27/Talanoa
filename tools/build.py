@@ -50,6 +50,23 @@ def load_library():
     return json.loads(src[start:src.rindex('}') + 1])
 
 
+def check_mom_under_dad(lib):
+    """Family rule: wherever a Dad tile appears, the same tile for Mom must sit
+    directly underneath it (one row down in the 4-wide grid)."""
+    problems = []
+    for p in lib['pages']:
+        tiles = p['tiles']
+        for i, t in enumerate(tiles):
+            if not re.search(r'\bdad\b', t['label'] + ' ' + (t.get('say') or ''), re.I):
+                continue
+            want = re.sub(r'\bDad\b', 'Mom', t['label']), re.sub(r'\bdad\b', 'mom', re.sub(r'\bDad\b', 'Mom', t.get('say') or ''))
+            below = tiles[i + 4] if i + 4 < len(tiles) and i % 12 < 8 else None
+            if not below or (below['label'], below.get('say') or '') != want:
+                problems.append(f'  page "{p["name"]}": "{t["label"]}" needs "{want[0]}" directly underneath it')
+    if problems:
+        sys.exit('Every Dad tile must have the matching Mom tile directly below it:\n' + '\n'.join(problems))
+
+
 def all_tiles(lib):
     """Every speakable tile (core + pages) with its id, checking ids are unique."""
     tiles, seen = [], {}
@@ -240,6 +257,7 @@ def write_outputs(pictures, clips):
 
 def main():
     lib = load_library()
+    check_mom_under_dad(lib)
     tiles = all_tiles(lib)
     print(f'{len(lib["pages"])} pages, {len(tiles)} tiles')
     pictures = build_pictures(lib)

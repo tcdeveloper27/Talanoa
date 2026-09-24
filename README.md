@@ -27,6 +27,8 @@ All words are in `library.js`, with one line per tile:
 
 Then run `python3 tools/build.py` to make the 3D picture and natural-voice recordings for any new or changed tiles. A new tile works even before that, using the emoji and the tablet's voice.
 
+**Family rule:** every Dad tile must have the same tile for Mom directly underneath it. All parent tiles live on the Mom & Dad page, and the build stops with a message if the rule is ever broken.
+
 To use a real photo instead of a picture, add `"img": "photos/dad.jpg"` to the tile and put the photo in a `photos` folder.
 
 ## Files

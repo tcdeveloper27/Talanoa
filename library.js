@@ -75,8 +75,6 @@ window.TT_LIBRARY = {
     ]},
 
     {"name": "People", "icon": "🧑‍🤝‍🧑", "color": "#7B5AA6", "tiles": [
-      {"icon": "👨", "label": "Dad",        "say": "I want my dad"},
-      {"icon": "📞", "label": "Call Dad",   "say": "Can I call my dad, please?"},
       {"icon": "👪", "label": "Family",     "say": "I want my family"},
       {"icon": "🧑‍⚕️", "label": "Staff",    "say": "I need someone to help me"},
       {"icon": "🧑‍🤝‍🧑", "label": "Friend", "say": "I want to see my friend"},
@@ -162,7 +160,6 @@ window.TT_LIBRARY = {
 
     {"name": "Places", "icon": "🗺️", "color": "#2E7D5B", "tiles": [
       {"icon": "🏠", "label": "Home",       "say": "I want to go home"},
-      {"icon": "🏡", "label": "Dad's house", "say": "I want to go to Dad's house"},
       {"icon": "🚪", "label": "My room",    "say": "I want to go to my room"},
       {"icon": "🛒", "label": "Store",      "say": "I want to go to the store"},
       {"icon": "🏞️", "label": "Park",       "say": "I want to go to the park"},
@@ -180,7 +177,6 @@ window.TT_LIBRARY = {
       {"icon": "⏭️", "label": "What's next?", "say": "What are we doing next?"},
       {"icon": "🧭", "label": "Where to?",  "say": "Where are we going?"},
       {"icon": "👤", "label": "Who?",       "say": "Who is coming?"},
-      {"icon": "📅", "label": "Dad coming?", "say": "Is Dad coming today?"},
       {"icon": "⏳", "label": "How long?",  "say": "How long do I have to wait?"},
       {"icon": "🍲", "label": "What's for dinner?", "say": "What is for dinner?"},
       {"icon": "👉", "label": "What's that?", "say": "What is that?"},
