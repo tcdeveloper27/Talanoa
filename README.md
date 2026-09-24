@@ -8,6 +8,8 @@ A tap-to-speak picture board (AAC). Tap a tile and it says the phrase out loud i
 
 On an Android tablet, open the link in Chrome, then **⋮ → Add to Home screen** (or **Install app**). It opens full screen like an app and keeps working with no internet.
 
+**Staff guide:** https://tcdeveloper27.github.io/Talanoa/manual/ (printable PDF: [manual/Talanoa-Staff-Guide.pdf](manual/Talanoa-Staff-Guide.pdf)). Also in the app: hold ⚙ → **Staff guide**.
+
 ## Using it
 
 - **Top row** (Yes, No, More, All done, Help, Stop) is on every page and never moves.
@@ -52,6 +54,7 @@ If there's a mistake in `library.js` (a missing comma or quote, or a Dad tile wi
 | `img/` | 3D pictures |
 | `voices/<name>/` | Natural-voice recordings, one MP3 per tile |
 | `tools/build.py` | Makes the pictures, voices and offline cache |
+| `manual/` | Staff guide (made by `tools/manual.py` from `tools/manual-template.html`; screenshots in `manual/img/`) |
 | `.github/workflows/build.yml` | Runs `tools/build.py` on GitHub whenever the words change |
 
 ## Credits

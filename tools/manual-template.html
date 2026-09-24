@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#6B4423">
+<title>Talanoa Staff Guide</title>
+<link rel="icon" href="../icons/icon-192.png">
+<!-- Generated from tools/manual-template.html by tools/manual.py. Edit the template. -->
+<style>
+  :root{
+    --ink:#2B1D0E; --muted:#6B5B4B; --bg:#FDF6E3; --paper:#FFFFFF; --line:#E8DDC6;
+    --brown:#8B5A2B; --brown-dark:#6B4423; --gold:#E8A317; --gold-soft:#FFF4D6;
+    --green:#3F8A34; --green-soft:#EAF4E6; --red:#C8342B; --red-soft:#FBEAE8; --blue:#3C6E9F; --blue-soft:#EAF1F8;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
+  a{color:var(--blue);}
+  img{max-width:100%;}
+  .wrap{max-width:900px;margin:0 auto;padding:0 18px 60px;}
+
+  /* top bar */
+  .bar{background:var(--brown);color:#fff;position:sticky;top:0;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,.2);}
+  .bar .wrap{display:flex;align-items:center;gap:12px;padding:10px 18px;}
+  .bar a{color:#fff;text-decoration:none;font-weight:800;background:rgba(255,255,255,.15);padding:8px 12px;border-radius:10px;font-size:15px;}
+  .bar .t{font-weight:800;flex:1;}
+  .bar button{font:inherit;font-weight:800;font-size:15px;border:0;border-radius:10px;padding:8px 12px;background:var(--gold);color:var(--ink);cursor:pointer;}
+
+  /* cover */
+  .cover{display:grid;grid-template-columns:1.4fr 1fr;gap:28px;align-items:center;padding:36px 0 18px;}
+  .cover .logo{width:96px;height:96px;}
+  .cover h1{font-size:48px;line-height:1.05;margin:10px 0 6px;letter-spacing:-.5px;}
+  .cover .say{color:var(--muted);font-size:18px;margin:0 0 14px;}
+  .cover .lead{font-size:20px;margin:0 0 14px;}
+  .cover .for{display:inline-block;background:var(--gold-soft);border:2px solid #F0D48A;border-radius:12px;padding:8px 12px;font-weight:700;}
+  .qrbox{background:var(--paper);border:2px solid var(--line);border-radius:20px;padding:18px;text-align:center;}
+  .qrbox .qr{width:190px;height:190px;display:block;margin:0 auto 8px;}
+  .qrbox b{display:block;font-size:17px;}
+  .qrbox .url{font-size:14px;word-break:break-all;color:var(--muted);}
+
+  /* contents */
+  .toc{background:var(--paper);border:2px solid var(--line);border-radius:18px;padding:16px 20px;margin:18px 0 8px;columns:2;column-gap:28px;}
+  .toc h2{column-span:all;margin:0 0 8px;font-size:18px;}
+  .toc a{display:block;text-decoration:none;color:var(--ink);padding:3px 0;font-weight:600;break-inside:avoid;}
+  .toc a span{display:inline-block;width:28px;height:28px;border-radius:50%;background:var(--brown);color:#fff;text-align:center;line-height:28px;font-size:14px;margin-right:8px;}
+
+  /* sections */
+  section{margin-top:44px;}
+  h2.sec{display:flex;align-items:center;gap:12px;font-size:28px;margin:0 0 6px;}
+  h2.sec .num{flex:none;width:44px;height:44px;border-radius:14px;background:var(--brown);color:#fff;display:grid;place-items:center;font-size:22px;}
+  .intro{color:var(--muted);font-size:18px;margin:0 0 16px;}
+  h3{font-size:20px;margin:26px 0 8px;}
+  p{margin:0 0 12px;}
+
+  /* callout boxes */
+  .note{border-radius:14px;padding:14px 16px;margin:14px 0;border-left:6px solid;}
+  .note b:first-child{display:block;margin-bottom:2px;}
+  .note.good{background:var(--green-soft);border-color:var(--green);}
+  .note.tip{background:var(--gold-soft);border-color:var(--gold);}
+  .note.warn{background:var(--red-soft);border-color:var(--red);}
+  .note.info{background:var(--blue-soft);border-color:var(--blue);}
+
+  /* steps */
+  .steps{list-style:none;margin:0;padding:0;display:grid;gap:12px;}
+  .steps li{display:grid;grid-template-columns:48px 1fr;gap:14px;align-items:start;background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:14px;}
+  .steps li .n{width:48px;height:48px;border-radius:50%;background:var(--gold);color:var(--ink);display:grid;place-items:center;font-weight:900;font-size:22px;}
+  .steps li b{font-size:18px;}
+  .steps li p{margin:4px 0 0;}
+
+  /* screenshots in a tablet frame */
+  .device{background:#1F1A16;border-radius:28px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.18);margin:16px 0 10px;}
+  .device.portrait{max-width:380px;margin-left:auto;margin-right:auto;border-radius:34px;}
+  .screen{position:relative;border-radius:10px;overflow:hidden;background:#fff;line-height:0;}
+  .screen img{width:100%;display:block;}
+  .sheetshot{position:relative;border:2px solid var(--line);border-radius:18px;overflow:hidden;background:#fff;line-height:0;max-width:520px;margin:12px auto;box-shadow:0 6px 20px rgba(0,0,0,.08);}
+  .sheetshot img{width:100%;display:block;}
+  .badge{position:absolute;transform:translate(-50%,-50%);width:34px;height:34px;border-radius:50%;background:#E23D28;color:#fff;
+         font:900 17px/34px system-ui,sans-serif;text-align:center;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);}
+  .caption{font-size:14px;color:var(--muted);text-align:center;margin:4px 0 14px;}
+
+  /* legend next to annotated screenshots */
+  .legend{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px;}
+  .legend li{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 12px;}
+  .legend .badge{position:static;transform:none;display:inline-block;}
+
+  /* core chips */
+  .core{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;}
+  .corechip{display:inline-flex;align-items:center;gap:6px;background:var(--c);color:#fff;font-weight:800;border-radius:12px;padding:6px 12px 6px 8px;}
+  .corechip img{width:28px;height:28px;}
+  .em{font-size:24px;line-height:1;}
+
+  /* page gallery */
+  .pages{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin:12px 0;}
+  .pagecard{background:var(--paper);border:3px solid var(--pc);border-radius:16px;overflow:hidden;}
+  .pc-top{display:flex;align-items:center;gap:10px;background:var(--pc);color:#fff;padding:8px 12px;font-size:18px;}
+  .pc-top img{width:36px;height:36px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));}
+  .pc-top b{flex:1;}
+  .pc-top .n{font-size:13px;background:rgba(255,255,255,.25);border-radius:20px;padding:1px 9px;}
+  .pc-body{padding:8px 12px;font-size:14px;color:var(--muted);}
+
+  /* two columns */
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
+
+  /* illustrations drawn in CSS */
+  .phone{background:#1F1A16;border-radius:30px;padding:12px;max-width:330px;margin:10px auto;box-shadow:0 10px 30px rgba(0,0,0,.18);}
+  .phone .scr{background:#fff;border-radius:18px;overflow:hidden;min-height:360px;position:relative;font-size:14px;line-height:1.3;}
+  .chrome-top{display:flex;align-items:center;gap:8px;background:#EEF1F4;padding:10px;}
+  .chrome-top .url{flex:1;background:#fff;border-radius:20px;padding:7px 12px;color:#333;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chrome-top .dots{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:20px;color:#333;}
+  .chrome-top .dots.hot{background:#FFE08A;box-shadow:0 0 0 3px #E23D28;}
+  .menu{position:absolute;right:8px;top:52px;width:220px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);padding:6px 0;}
+  .menu div{padding:10px 16px;color:#333;}
+  .menu div.hot{background:#FFF4D6;font-weight:800;box-shadow:inset 4px 0 0 #E23D28;}
+  .ghost{padding:14px;color:#bbb;}
+  .ghost i{display:block;height:12px;background:#EEE;border-radius:6px;margin:10px 0;}
+  .phone .scr.home{background:linear-gradient(160deg,#2E5E8C,#6B4B8A);min-height:360px;padding:26px 18px;display:grid;grid-template-columns:repeat(4,1fr);gap:18px 10px;align-content:start;}
+  .home .app{text-align:center;color:#fff;font-size:12px;}
+  .home .app span{display:block;width:52px;height:52px;border-radius:14px;margin:0 auto 5px;background:rgba(255,255,255,.28);}
+  .home .app.me span{background:url(../icons/icon-192.png) center/cover;box-shadow:0 0 0 3px #FFE08A;}
+  .home .app.me{font-weight:800;}
+  .hold{display:flex;align-items:center;justify-content:center;gap:18px;background:var(--brown);color:#fff;border-radius:16px;padding:16px;margin:12px 0;font-weight:800;}
+  .hold .g{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:28px;position:relative;}
+  .hold .g::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:4px solid #FFE08A;border-right-color:transparent;}
+  .timer{font-size:15px;opacity:.9;font-weight:600;}
+
+  /* tables */
+  table{width:100%;border-collapse:separate;border-spacing:0;background:var(--paper);border:2px solid var(--line);border-radius:14px;overflow:hidden;margin:10px 0;}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tr:last-child td{border-bottom:0;}
+  th{background:#F4ECDC;font-size:15px;}
+  .tag{display:inline-block;background:var(--green);color:#fff;font-size:12px;font-weight:800;border-radius:20px;padding:1px 8px;margin-left:6px;vertical-align:2px;}
+  .trouble td:first-child{font-weight:800;width:36%;}
+
+  /* flow diagram for updates */
+  .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;}
+  .flow div{background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:12px;text-align:center;font-size:15px;position:relative;}
+  .flow div b{display:block;font-size:26px;margin-bottom:4px;}
+  .flow div:not(:last-child)::after{content:"➜";position:absolute;right:-12px;top:50%;transform:translateY(-50%);color:var(--brown);font-size:18px;}
+
+  .people{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;}
+  .people div{background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:12px 14px;font-weight:800;font-size:18px;}
+  .contact{background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:10px;}
+  .contact div{margin:4px 0;}
+  footer{margin-top:50px;color:var(--muted);font-size:14px;text-align:center;}
+
+  @media (max-width:720px){
+    .cover,.two{grid-template-columns:1fr;}
+    .cover h1{font-size:38px;}
+    .toc{columns:1;}
+    .flow{grid-template-columns:1fr 1fr;}
+    .flow div:nth-child(2)::after{display:none;}
+    .badge{width:26px;height:26px;line-height:26px;font-size:13px;border-width:2px;}
+    .legend .badge{width:34px;height:34px;line-height:34px;font-size:17px;border-width:3px;}
+  }
+
+  /* printing: clean pages, no sticky bar */
+  @page{size:letter;margin:14mm 13mm;}
+  @media print{
+    body{background:#fff;font-size:12.5pt;}
+    .bar{display:none;}
+    .wrap{max-width:none;padding:0;}
+    section{margin-top:22px;}
+    section.newpage{page-break-before:always;break-before:page;margin-top:0;}
+    h2.sec,.intro,h3,.hold{break-after:avoid;page-break-after:avoid;}
+    .cover{grid-template-columns:1.4fr 1fr;padding:0 0 6px;gap:20px;}
+    .cover h1{font-size:34pt;}
+    .qrbox .qr{width:150px;height:150px;}
+    .toc{margin:10px 0 0;padding:10px 16px;}
+    .device{max-width:82%;margin:10px auto;padding:10px;border-radius:20px;}
+    .device.portrait{max-width:250px;}
+    .two .device{max-width:100%;}
+    .sheetshot{max-width:300px;}
+    .phone{max-width:250px;}
+    .phone .scr{min-height:280px;}
+    .phone .scr.home{min-height:230px;}
+    .steps li{padding:10px;}
+    .note{padding:10px 14px;margin:10px 0;}
+    .pages{grid-template-columns:repeat(3,1fr);gap:8px;}
+    .pc-body{font-size:10pt;}
+    .contact,#credits .people{break-inside:avoid;}
+    #credits{break-inside:avoid;}
+    table.voices td,table.voices th{padding:5px 10px;}
+    .cover{padding-top:10px;}
+    .device,.sheetshot,.phone,table,.steps li,.pagecard,.note,.flow div,.legend li{break-inside:avoid;}
+    .device{box-shadow:none;}
+    a{color:inherit;text-decoration:none;}
+    .toc a span,.badge,.num,.steps .n,.corechip,.pc-top,.tag,.hold,.home{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  }
+</style>
+</head>
+<body>
+
+<div class="bar"><div class="wrap">
+  <a href="../">‹ Talanoa</a>
+  <span class="t">Staff Guide</span>
+  <button onclick="window.print()">🖨 Print</button>
+</div></div>
+
+<div class="wrap">
+
+<!-- ================= COVER ================= -->
+<div class="cover">
+  <div>
+    <img class="logo" src="../icons/icon-192.png" alt="">
+    <h1>Talanoa<br>Staff Guide</h1>
+    <p class="say">tah-lah-NOH-ah · Tongan for <i>talking together</i></p>
+    <p class="lead">A picture board that speaks. A resident taps a picture and the tablet says the words out loud.</p>
+    <span class="for">For staff and families at Faleofaz</span>
+  </div>
+  <div class="qrbox">
+    {{QR}}
+    <b>Scan to open Talanoa</b>
+    <span class="url">{{APP_URL}}</span>
+  </div>
+</div>
+
+<nav class="toc">
+  <h2>What's inside</h2>
+  <a href="#what"><span>1</span>What Talanoa is</a>
+  <a href="#setup"><span>2</span>Setting up a tablet</a>
+  <a href="#screen"><span>3</span>The screen at a glance</a>
+  <a href="#talking"><span>4</span>Talking with it</a>
+  <a href="#pages"><span>5</span>Moving between pages</a>
+  <a href="#family"><span>6</span>The Mom &amp; Dad page</a>
+  <a href="#settings"><span>7</span>Settings</a>
+  <a href="#updates"><span>8</span>Updates</a>
+  <a href="#offline"><span>9</span>Without Wi-Fi</a>
+  <a href="#tips"><span>10</span>Tips for helping residents</a>
+  <a href="#trouble"><span>11</span>If something goes wrong</a>
+  <a href="#care"><span>12</span>Looking after the tablet</a>
+  <a href="#changes"><span>13</span>Asking for changes</a>
+  <a href="#credits"><span>14</span>Credits &amp; contact</a>
+</nav>
+
+<!-- ================= 1 ================= -->
+<section id="what">
+  <h2 class="sec"><span class="num">1</span>What Talanoa is</h2>
+  <p class="intro">Talanoa helps a person who can't speak tell you what they want, how they feel, and who they want to see.</p>
+  <p>It works like a set of talking picture cards on a tablet. Every picture says a short sentence out loud in a natural voice, for example the cookie picture says <i>"I want a snack."</i> The words also appear in big letters at the top, so you can read them from across the room.</p>
+  <p>There are {{PAGE_COUNT}} pages with {{TILE_COUNT}} pictures in total, plus six important buttons that are always on screen.</p>
+  <div class="note good"><b>Three promises the app keeps</b>
+    <ul style="margin:6px 0 0;padding-left:20px">
+      <li><b>It never stays silent.</b> If a voice recording can't play, the tablet's own voice says it instead.</li>
+      <li><b>The top row never moves.</b> Yes, No, More, All done, Help and Stop are always in the same place, so they can be found without looking.</li>
+      <li><b>It works without internet</b> once it has been set up.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= 2 ================= -->
+<section id="setup">
+  <h2 class="sec"><span class="num">2</span>Setting up a tablet</h2>
+  <p class="intro">You only do this once per tablet. It takes about two minutes and needs Wi-Fi.</p>
+  <div class="two">
+    <ol class="steps">
+      <li><span class="n">1</span><div><b>Open Google Chrome</b><p>Use Chrome, not a preview from email or Google Drive.</p></div></li>
+      <li><span class="n">2</span><div><b>Go to the Talanoa address</b><p>Scan the QR code on the front of this guide with the tablet camera, or type <b>tcdeveloper27.github.io/Talanoa</b> (capital T in Talanoa).</p></div></li>
+      <li><span class="n">3</span><div><b>Tap the ⋮ menu</b> (three dots, top right)<p>Choose <b>Add to Home screen</b> or <b>Install app</b>, then confirm.</p></div></li>
+      <li><span class="n">4</span><div><b>Open Talanoa from its new icon</b><p>It opens full screen like any other app.</p></div></li>
+      <li><span class="n">5</span><div><b>Leave it on Wi-Fi for a minute</b><p>It saves the pictures and voice onto the tablet. Check in <a href="#settings">Settings</a>: Status should say <b>✓ Ready to use with no internet</b>.</p></div></li>
+    </ol>
+    <div>
+      <div class="phone"><div class="scr">
+        <div class="chrome-top"><div class="url">tcdeveloper27.github.io/Talanoa</div><div class="dots hot">⋮</div></div>
+        <div class="ghost"><i style="width:70%"></i><i></i><i style="width:85%"></i><i style="width:60%"></i><i></i></div>
+        <div class="menu"><div>New tab</div><div>History</div><div>Bookmarks</div><div>Share…</div><div class="hot">➕ Add to Home screen</div><div>Settings</div></div>
+      </div></div>
+      <p class="caption">Step 3 (illustration). The menu on your tablet may look a little different.</p>
+      <div class="phone"><div class="scr home">
+        <div class="app"><span></span>Camera</div><div class="app"><span></span>Photos</div><div class="app"><span></span>Chrome</div><div class="app"><span></span>Clock</div>
+        <div class="app"><span></span>Settings</div><div class="app me"><span></span>Talanoa</div><div class="app"><span></span>Music</div><div class="app"><span></span>Files</div>
+      </div></div>
+      <p class="caption">Step 4 (illustration). The Talanoa icon on the home screen.</p>
+    </div>
+  </div>
+  <div class="note tip"><b>Tip</b>Turn the tablet's media volume up with the side buttons, and set the screen to stay on longer (see <a href="#care">section 12</a>).</div>
+</section>
+
+<!-- ================= 3 ================= -->
+<section id="screen" class="newpage">
+  <h2 class="sec"><span class="num">3</span>The screen at a glance</h2>
+  <p class="intro">This is exactly what residents see. The numbers match the list below.</p>
+  <div class="device"><div class="screen"><img src="img/main.webp" alt="The main Talanoa screen">{{MAIN_BADGES}}</div></div>
+  <ol class="legend">
+    <li><span class="badge">1</span><div><b>Spoken words.</b> Shows what was just said, in big letters, so staff can read it too. It flashes green on every tap.</div></li>
+    <li><span class="badge">2</span><div><b>The six "always" buttons.</b> On every page, never moving: <span class="core">{{CORE_CHIPS}}</span></div></li>
+    <li><span class="badge">3</span><div><b>Back arrow ◀.</b> Goes to the previous page. The small picture shows which page it goes to.</div></li>
+    <li><span class="badge">4</span><div><b>Page name.</b> Shows which page you're on; the dots show where you are in the pages. <b>Tap it to see all pages at once.</b></div></li>
+    <li><span class="badge">5</span><div><b>Next arrow ▶.</b> Goes to the next page. After the last page it goes back to the first.</div></li>
+    <li><span class="badge">6</span><div><b>Picture tiles.</b> 12 per page, always in the same spots. Tap one to speak.</div></li>
+    <li><span class="badge">7</span><div><b>Settings ⚙.</b> For staff only. It opens only when you <b>press and hold it for one second</b>, so residents won't open it by accident.</div></li>
+  </ol>
+  <div class="note info"><b>Turn the tablet any way you like</b>It works both sideways and upright; the tiles stay in the same order.</div>
+</section>
+
+<!-- ================= 4 ================= -->
+<section id="talking">
+  <h2 class="sec"><span class="num">4</span>Talking with it</h2>
+  <p class="intro">Tap a picture once and the tablet says the words.</p>
+  <div class="two">
+    <div>
+      <ul class="steps">
+        <li><span class="n">👆</span><div><b>One tap = one sentence</b><p>No double-tapping or holding needed.</p></div></li>
+        <li><span class="n">🔁</span><div><b>Tap again to repeat</b><p>It starts again from the beginning.</p></div></li>
+        <li><span class="n">⚡</span><div><b>Quick taps are fine</b><p>A new tap stops the last sentence and says the new one. Nothing gets stuck.</p></div></li>
+        <li><span class="n">📳</span><div><b>A little buzz</b><p>The tablet vibrates slightly on each tap, if it can.</p></div></li>
+      </ul>
+    </div>
+    <div class="device portrait"><div class="screen"><img src="img/portrait.webp" alt="Talanoa held upright, after tapping Hug"></div></div>
+  </div>
+  <p class="caption">Upright, after tapping <b>Hug</b>. The top says "I want a hug".</p>
+</section>
+
+<!-- ================= 5 ================= -->
+<section id="pages" class="newpage">
+  <h2 class="sec"><span class="num">5</span>Moving between pages</h2>
+  <p class="intro">Use the big ◀ ▶ arrows to flip through the pages, like turning the pages of a book.</p>
+  <p>To jump straight to a page, <b>tap the page name</b> in the middle. All pages appear as big buttons: tap one to go there, or tap <b>✕ Close</b>.</p>
+  <div class="device"><div class="screen"><img src="img/picker.webp" alt="All pages shown as buttons"></div></div>
+  <p class="caption">Tapping the page name shows every page.</p>
+  <h3>The {{PAGE_COUNT}} pages, in order</h3>
+  <div class="pages">
+{{PAGE_CARDS}}
+  </div>
+  <div class="two">
+    <div><div class="device"><div class="screen"><img src="img/page-ouch.webp" alt="The Ouch page"></div></div><p class="caption"><b>Ouch</b>: point to where it hurts.</p></div>
+    <div><div class="device"><div class="screen"><img src="img/page-questions.webp" alt="The Questions page"></div></div><p class="caption"><b>Questions</b>: what's next, where, who, how long.</p></div>
+  </div>
+  <div class="note tip"><b>Pages can be hidden</b>If a resident doesn't need a page, it can be turned off for that tablet in <a href="#settings">Settings</a>.</div>
+</section>
+
+<!-- ================= 6 ================= -->
+<section id="family">
+  <h2 class="sec"><span class="num">6</span>The Mom &amp; Dad page</h2>
+  <p class="intro">All the parent and grandparent tiles are together on one page.</p>
+  <div class="device"><div class="screen"><img src="img/momdad.webp" alt="The Mom and Dad page"></div></div>
+  <p>Every Dad tile has the matching Mom tile <b>directly underneath it</b>: Dad and Mom, Call Dad and Call Mom, Dad's house and Mom's house, Dad coming? and Mom coming? The bottom row has Grandma, Grandpa, Nana and Papa.</p>
+  <div class="note info"><b>This layout is deliberate</b>The family asked that Mom always appears under Dad. The app is built so this can't be changed by accident.</div>
+  <div class="note tip"><b>When a resident taps "Call Dad" or "Call Mom"</b>Treat it as a real request: tell them what will happen ("Let's call Mom after lunch") so they know they were heard.</div>
+</section>
+
+<!-- ================= 7 ================= -->
+<section id="settings" class="newpage">
+  <h2 class="sec"><span class="num">7</span>Settings</h2>
+  <p class="intro">Settings belong to each tablet. Changing them on one tablet doesn't change the others.</p>
+  <div class="hold"><span class="g">⚙</span><div>Press and <u>hold</u> the ⚙ in the top-right corner<div class="timer">Keep your finger on it for 1 second, then let go</div></div></div>
+  <div class="two">
+    <div>
+      <div class="sheetshot"><img src="img/settings-top.webp" alt="Settings: voices, speed and volume">{{SET_TOP_BADGES}}</div>
+    </div>
+    <div>
+      <ol class="legend">
+        <li><span class="badge">A</span><div><b>Voice.</b> Tap a name to choose it. You'll hear "Hi! This is my voice." Choose the one that suits the resident.</div></li>
+        <li><span class="badge">B</span><div><b>Speed.</b> Slide left for slower speech, right for faster. 1.00 is normal.</div></li>
+        <li><span class="badge">C</span><div><b>Volume.</b> The app's own loudness. Also check the tablet's side buttons.</div></li>
+      </ol>
+    </div>
+  </div>
+  <h3>The {{VOICE_COUNT}} voices</h3>
+  <table class="voices"><tr><th>Voice</th><th>Sounds like</th></tr>
+{{VOICE_ROWS}}
+  </table>
+  <div class="two">
+    <div>
+      <div class="sheetshot"><img src="img/settings-bottom.webp" alt="Settings: pages, status and updates">{{SET_BOTTOM_BADGES}}</div>
+    </div>
+    <div>
+      <ol class="legend">
+        <li><span class="badge">D</span><div><b>Pages to show.</b> Untick a page to hide it on this tablet; tick it to bring it back. At least one page always stays on.</div></li>
+        <li><span class="badge">E</span><div><b>Status.</b> "✓ Ready to use with no internet" means everything is saved. Below it you'll see the version and when it last checked for updates.</div></li>
+        <li><span class="badge">F</span><div><b>Check for updates now.</b> Gets the newest version straight away (see <a href="#updates">section 8</a>).</div></li>
+        <li><span class="badge">G</span><div><b>About &amp; credits.</b> Who made Talanoa and how to contact Faleofaz.</div></li>
+      </ol>
+      <p style="margin-top:12px">Tap <b>Done</b> at the bottom to close Settings.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 8 ================= -->
+<section id="updates">
+  <h2 class="sec"><span class="num">8</span>Updates</h2>
+  <p class="intro">You don't have to do anything. New words and fixes arrive by themselves.</p>
+  <div class="flow">
+    <div><b>✏️</b>The family changes the words</div>
+    <div><b>☁️</b>The new version is published online</div>
+    <div><b>📥</b>The tablet downloads it quietly in the background</div>
+    <div><b>✅</b>It switches on when nobody is using the board</div>
+  </div>
+  <ul>
+    <li>The tablet checks when Talanoa opens, when the screen turns back on, and every 30 minutes.</li>
+    <li>It <b>never changes while someone is tapping</b>. It waits until nobody has tapped for 2 minutes, or the screen is off, and then comes back on the same page.</li>
+    <li><b>To update right now:</b> hold ⚙ → <b>Check for updates now</b>. If there's something new, the app restarts by itself with it.</li>
+  </ul>
+  <table>
+    <tr><th>The message says…</th><th>Meaning</th></tr>
+    <tr><td>✓ You have the latest version.</td><td>Nothing to do.</td></tr>
+    <tr><td>Downloading the new version… the app will restart by itself.</td><td>Wait a few seconds.</td></tr>
+    <tr><td>A new version is ready and will switch on when the board is not in use.</td><td>It will update on its own soon.</td></tr>
+    <tr><td>Could not check: no internet connection right now.</td><td>Connect to Wi-Fi and try again. The board still works normally.</td></tr>
+  </table>
+</section>
+
+<!-- ================= 9 ================= -->
+<section id="offline">
+  <h2 class="sec"><span class="num">9</span>Without Wi-Fi</h2>
+  <p>Once a tablet shows <b>✓ Ready to use with no internet</b>, Talanoa works anywhere: on outings, in the car, or when the Wi-Fi is down. Pictures, words and the chosen voice are all saved on the tablet.</p>
+  <div class="note tip"><b>After choosing a new voice</b>Keep the tablet on Wi-Fi for a minute so the new voice can be saved. Until then, any sentence that isn't saved yet uses the tablet's own voice. It's never silent.</div>
+</section>
+
+<!-- ================= 10 ================= -->
+<section id="tips" class="newpage">
+  <h2 class="sec"><span class="num">10</span>Tips for helping residents</h2>
+  <p class="intro">A talking board works best when the people around it use it too.</p>
+  <ol class="steps">
+    <li><span class="n">🗣️</span><div><b>Show, don't test</b><p>While you talk, tap the pictures yourself ("Let's have <i>lunch</i>", tapping Lunch). This is how people learn where things are. Never quiz them.</p></div></li>
+    <li><span class="n">⏳</span><div><b>Give time</b><p>Wait after asking a question. Finding the right picture can take a while.</p></div></li>
+    <li><span class="n">💬</span><div><b>Every tap counts</b><p>Answer what was said, even if you think it was an accident. That's how they learn their words have power.</p></div></li>
+    <li><span class="n">📍</span><div><b>Keep it close and charged</b><p>The board only helps if it's within reach, all day, in every room.</p></div></li>
+    <li><span class="n">🤝</span><div><b>Tell the family</b><p>Let the family know which pictures get used, and which words are missing.</p></div></li>
+  </ol>
+  <div class="note info"><b>Talanoa supports, it doesn't replace</b>Talanoa is a simple, friendly board, not a full professional speech system. A speech-language pathologist can suggest what each resident needs.</div>
+</section>
+
+<!-- ================= 11 ================= -->
+<section id="trouble">
+  <h2 class="sec"><span class="num">11</span>If something goes wrong</h2>
+  <table class="trouble">
+    <tr><th>What you notice</th><th>What to do</th></tr>
+    <tr><td>No sound at all</td><td>Turn the tablet volume up with its side buttons. Check the tablet isn't on silent. In Settings, check <b>Volume</b> isn't low.</td></tr>
+    <tr><td>The voice sounds robotic</td><td>In Settings, <b>Tablet voice</b> is probably chosen. Choose <b>Michael</b> (or another named voice).</td></tr>
+    <tr><td>Only a brown bar, no pictures</td><td>It was opened in a preview (from email or Google Drive). Open Talanoa from its home-screen icon, or in Chrome.</td></tr>
+    <tr><td>A page is missing</td><td>Settings → <b>Pages to show</b> → tick it.</td></tr>
+    <tr><td>Settings won't open</td><td>Press and <b>hold</b> the ⚙ for a full second. A quick tap does nothing, on purpose.</td></tr>
+    <tr><td>New words from the family aren't showing</td><td>Connect to Wi-Fi, then Settings → <b>Check for updates now</b>.</td></tr>
+    <tr><td>"404 / There isn't a GitHub Pages site here"</td><td>The address was typed wrong. Use the QR code, or type <b>tcdeveloper27.github.io/Talanoa</b> with a capital T.</td></tr>
+    <tr><td>The ▶ arrow jumped back to "I want"</td><td>That's normal: after the last page it starts again at the first.</td></tr>
+    <tr><td>The screen keeps turning off</td><td>See "Screen timeout" in <a href="#care">section 12</a>.</td></tr>
+    <tr><td>Something else looks wrong</td><td>Close Talanoa completely and open it again from its icon. If it still happens, take a photo of the screen and send it to the family.</td></tr>
+  </table>
+</section>
+
+<!-- ================= 12 ================= -->
+<section id="care">
+  <h2 class="sec"><span class="num">12</span>Looking after the tablet</h2>
+  <div class="two">
+    <ul class="steps">
+      <li><span class="n">🔋</span><div><b>Charge every night</b><p>A flat tablet means a resident with no voice.</p></div></li>
+      <li><span class="n">⏲️</span><div><b>Screen timeout</b><p>On most Android tablets: <b>Settings → Display → Screen timeout</b>, and choose a longer time (for example 10 minutes).</p></div></li>
+    </ul>
+    <ul class="steps">
+      <li><span class="n">🔊</span><div><b>Volume</b><p>Use the side buttons while Talanoa is talking to set how loud it is.</p></div></li>
+      <li><span class="n">🧽</span><div><b>Clean and protect</b><p>Wipe the screen with a slightly damp cloth. A sturdy case is a good idea.</p></div></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= 13 ================= -->
+<section id="changes">
+  <h2 class="sec"><span class="num">13</span>Asking for changes</h2>
+  <p>New words, different wording, a real photo of someone instead of a picture: the family can add these. Write down what's needed (for example <i>"add Swing, 'I want to go on the swing'"</i>) and pass it to <b>Tim Broussard</b>. The change reaches every tablet automatically, usually the same day.</p>
+</section>
+
+<!-- ================= 14 ================= -->
+<section id="credits">
+  <h2 class="sec"><span class="num">14</span>Credits &amp; contact</h2>
+  <p class="intro">Talanoa was made with love by:</p>
+  <div class="people"><div>Tim Broussard</div><div>Brenton Broussard</div><div>Legion</div><div>Faleofaz</div></div>
+  <div class="contact">
+    <b>Faleofaz</b>
+    <div>📞 <a href="tel:+18013175454">801-317-5454</a></div>
+    <div>✉️ <a href="mailto:faleofaz@utfaleofaz.org">faleofaz@utfaleofaz.org</a></div>
+    <div>📍 West Valley City, Utah, serving Salt Lake County residents</div>
+    <div>📷 <a href="https://www.instagram.com/faleofaz_llc/">@faleofaz_llc</a> · 🌐 <a href="https://faleofaz.org/#contact">faleofaz.org</a></div>
+  </div>
+  <p style="margin-top:16px;font-size:14px;color:var(--muted)">Pictures: Fluent Emoji © Microsoft (MIT licence). Voices recorded with Kokoro, an open-source speech model (Apache 2.0).</p>
+  <footer>Talanoa Staff Guide · {{APP_URL}}manual/</footer>
+</section>
+
+</div>
+</body>
+</html>

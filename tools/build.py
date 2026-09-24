@@ -269,6 +269,8 @@ def main():
     build_app_icons()
     clips = build_voices(tiles)
     write_outputs(pictures, clips)
+    import manual
+    manual.main()
     print('Done.')
 
 

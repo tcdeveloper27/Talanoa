@@ -1,0 +1,114 @@
+{
+ "banner": {
+  "x": 0,
+  "y": 0,
+  "width": 1280,
+  "height": 56
+ },
+ "core": {
+  "x": 0,
+  "y": 56,
+  "width": 1280,
+  "height": 104
+ },
+ "prev": {
+  "x": 8,
+  "y": 166,
+  "width": 283.625,
+  "height": 62
+ },
+ "title": {
+  "x": 299.625,
+  "y": 166,
+  "width": 680.734375,
+  "height": 62
+ },
+ "next": {
+  "x": 988.359375,
+  "y": 166,
+  "width": 283.640625,
+  "height": 62
+ },
+ "stage": {
+  "x": 0,
+  "y": 236,
+  "width": 1280,
+  "height": 564
+ },
+ "gear": {
+  "x": 1236,
+  "y": 10,
+  "width": 36,
+  "height": 36
+ },
+ "snack": {
+  "x": 14,
+  "y": 250,
+  "width": 302.5,
+  "height": 169.328125
+ },
+ "s_voice": {
+  "x": 20,
+  "y": 115,
+  "width": 560,
+  "height": 448,
+  "sheetW": 600,
+  "sheetH": 1586.84375
+ },
+ "s_speed": {
+  "x": 22,
+  "y": 672,
+  "width": 560,
+  "height": 32,
+  "sheetW": 600,
+  "sheetH": 1586.84375
+ },
+ "s_vol": {
+  "x": 22,
+  "y": 748,
+  "width": 560,
+  "height": 32,
+  "sheetW": 600,
+  "sheetH": 1586.84375
+ },
+ "s_pages": {
+  "x": 20,
+  "y": 834,
+  "width": 560,
+  "height": 236,
+  "sheetW": 600,
+  "sheetH": 1586.84375
+ },
+ "s_status": {
+  "x": 20,
+  "y": 1120,
+  "width": 560,
+  "height": 50,
+  "sheetW": 600,
+  "sheetH": 1586.84375
+ },
+ "s_update": {
+  "x": 20,
+  "y": 1220,
+  "width": 560,
+  "height": 47,
+  "sheetW": 600,
+  "sheetH": 1586.84375
+ },
+ "s_about": {
+  "x": 20,
+  "y": 1392.84375,
+  "width": 560,
+  "height": 51,
+  "sheetW": 600,
+  "sheetH": 1586.84375
+ },
+ "s_done": {
+  "x": 20,
+  "y": 1517.84375,
+  "width": 560,
+  "height": 49,
+  "sheetW": 600,
+  "sheetH": 1586.84375
+ }
+}
