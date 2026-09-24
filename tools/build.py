@@ -245,7 +245,7 @@ def write_outputs(pictures, clips):
           'window.TT_ASSETS = ' + json.dumps(assets, ensure_ascii=False, indent=0) + ';\n')
     open(os.path.join(ROOT, 'assets.js'), 'w', encoding='utf-8').write(js)
 
-    shell = ['index.html', 'library.js', 'assets.js', 'manifest.webmanifest',
+    shell = ['index.html', 'credits.html', 'library.js', 'assets.js', 'manifest.webmanifest',
              'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-512-maskable.png']
     precache = shell + sorted(set(pictures.values()))
     version = file_hash(precache + ['tools/sw-template.js'])

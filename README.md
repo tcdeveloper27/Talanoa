@@ -44,5 +44,7 @@ To use a real photo instead of a picture, add `"img": "photos/dad.jpg"` to the t
 
 ## Credits
 
+Tim Broussard, Brenton Broussard, Legion, and Faleofaz ([contact](https://faleofaz.org/#contact)). In the app: hold ⚙ → **About & credits**.
+
 - Pictures: [Fluent Emoji](https://github.com/microsoft/fluentui-emoji) © Microsoft, MIT licence (see `img/LICENSE-fluent-emoji.txt`).
 - Voices: made with [Kokoro](https://github.com/hexgrad/kokoro) (Apache 2.0), an open-source speech model, so the tablet doesn't need to download a voice.

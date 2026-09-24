@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6B4423">
+<title>About Talanoa</title>
+<link rel="icon" href="icons/icon-192.png">
+<style>
+  :root{--ink:#2B1D0E;--bg:#FDF6E3;--brown:#8B5A2B;--brown-dark:#6B4423;--card:#FFFFFF;--muted:#6B5B4B;--line:#E5DCC8;--link:#2F5F8A;}
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);
+       padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
+  header{background:var(--brown);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 6px rgba(0,0,0,.25);}
+  header a{color:#fff;text-decoration:none;font-weight:800;font-size:18px;background:rgba(255,255,255,.15);border-radius:12px;padding:10px 14px;}
+  header h1{margin:0;font-size:22px;}
+  main{max-width:640px;margin:0 auto;padding:20px 16px 40px;}
+  .hero{display:flex;align-items:center;gap:16px;margin-bottom:8px;}
+  .hero img{width:72px;height:72px;flex:none;}
+  .hero h2{margin:0;font-size:32px;}
+  .hero p{margin:2px 0 0;color:var(--muted);font-size:16px;}
+  .about{font-size:17px;line-height:1.5;margin:14px 0 26px;}
+  h3{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:26px 0 10px;}
+  .people{list-style:none;margin:0;padding:0;display:grid;gap:10px;}
+  .people li{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:14px 16px;font-size:20px;font-weight:800;}
+  .people li small{display:block;font-size:15px;font-weight:500;margin-top:4px;}
+  a{color:var(--link);}
+  .tech{font-size:15px;line-height:1.55;color:var(--muted);}
+  .tech p{margin:0 0 8px;}
+</style>
+</head>
+<body>
+<header>
+  <a href="./">‹ Back</a>
+  <h1>About</h1>
+</header>
+<main>
+  <div class="hero">
+    <img src="icons/icon-192.png" alt="">
+    <div>
+      <h2>Talanoa</h2>
+      <p>tah-lah-NOH-ah: Tongan for talking together</p>
+    </div>
+  </div>
+  <p class="about">A tap-to-speak picture board. Tap a picture and it says the words out loud, so everyone can be heard.</p>
+
+  <h3>Credits</h3>
+  <ul class="people">
+    <li>Tim Broussard</li>
+    <li>Brenton Broussard</li>
+    <li>Legion</li>
+    <li>Faleofaz<small><a href="https://faleofaz.org/#contact" target="_blank" rel="noopener">Contact: faleofaz.org</a></small></li>
+  </ul>
+
+  <h3>Made with</h3>
+  <div class="tech">
+    <p>Pictures: <a href="https://github.com/microsoft/fluentui-emoji" target="_blank" rel="noopener">Fluent Emoji</a> © Microsoft, MIT licence.</p>
+    <p>Voices: recorded with <a href="https://github.com/hexgrad/kokoro" target="_blank" rel="noopener">Kokoro</a>, an open-source speech model (Apache 2.0).</p>
+  </div>
+</main>
+</body>
+</html>
