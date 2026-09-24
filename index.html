@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#8B4513">
+<title>TilerTalker</title>
+<meta name="application-name" content="TilerTalker">
+<meta name="apple-mobile-web-app-title" content="TilerTalker">
+<style>
+  :root{
+    --gold:#E8A317;
+    --gold-dark:#C4860F;
+    --red:#C8342B;
+    --red-dark:#9E2820;
+    --denim:#3C6E9F;
+    --denim-dark:#2A5178;
+    --brown:#8B5A2B;
+    --brown-dark:#6B4423;
+    --green:#4A8B3A;
+    --green-dark:#376B2A;
+    --purple:#7B5AA6;
+    --purple-dark:#5E4480;
+    --ink:#2B1D0E;
+    --bg:#FDF6E3;
+    --card:#FFFFFF;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    overscroll-behavior:none;
+    touch-action:manipulation;
+    user-select:none;
+    display:flex;flex-direction:column;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  /* ---------- Spoken banner ---------- */
+  #banner{
+    background:var(--brown);
+    color:#fff;
+    padding:10px 14px;
+    font-size:clamp(20px,3.6vw,34px);
+    font-weight:700;
+    text-align:center;
+    min-height:56px;
+    display:flex;align-items:center;justify-content:center;
+    letter-spacing:.3px;
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    z-index:5;
+  }
+  #banner.flash{background:var(--green);}
+
+  /* ---------- Core bar (never moves) ---------- */
+  #core{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:6px;
+    padding:6px;
+    background:#EADFC4;
+  }
+
+  /* ---------- Category tabs ---------- */
+  #tabs{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:6px;
+    padding:0 6px 6px;
+    background:#EADFC4;
+  }
+  .tab{
+    border:none;border-radius:12px;
+    padding:12px 4px;
+    font-size:clamp(14px,2.2vw,22px);
+    font-weight:800;
+    color:#fff;background:var(--brown-dark);
+    opacity:.55;
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    cursor:pointer;
+  }
+  .tab .ico{font-size:clamp(20px,3vw,30px);line-height:1;}
+  .tab[aria-selected="true"]{opacity:1;box-shadow:0 0 0 4px #fff inset,0 3px 8px rgba(0,0,0,.3);}
+
+  /* ---------- Main grid ---------- */
+  #grid{
+    flex:1;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:8px;
+    padding:8px;
+    overflow-y:auto;
+    align-content:start;
+  }
+
+  .btn{
+    border:none;border-radius:16px;
+    color:#fff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:6px;
+    padding:10px 6px;
+    min-height:118px;
+    font-size:clamp(15px,2.1vw,24px);
+    font-weight:800;
+    line-height:1.15;
+    text-align:center;
+    box-shadow:0 4px 0 rgba(0,0,0,.22);
+    cursor:pointer;
+    transition:transform .06s ease, box-shadow .06s ease, filter .06s ease;
+  }
+  .btn .ico{font-size:clamp(34px,5.6vw,58px);line-height:1;}
+  .btn img.ico{width:clamp(48px,8vw,86px);height:clamp(48px,8vw,86px);object-fit:cover;border-radius:12px;}
+  .btn:active,.btn.press{transform:translateY(4px);box-shadow:0 0 0 rgba(0,0,0,.22);filter:brightness(1.15);}
+
+  .c-gold{background:var(--gold);}    .c-gold:active{background:var(--gold-dark);}
+  .c-red{background:var(--red);}      .c-red:active{background:var(--red-dark);}
+  .c-denim{background:var(--denim);}  .c-denim:active{background:var(--denim-dark);}
+  .c-brown{background:var(--brown);}  .c-brown:active{background:var(--brown-dark);}
+  .c-green{background:var(--green);}  .c-green:active{background:var(--green-dark);}
+  .c-purple{background:var(--purple);}.c-purple:active{background:var(--purple-dark);}
+
+  .core-btn{min-height:74px;font-size:clamp(14px,1.9vw,21px);border-radius:12px;}
+  .core-btn .ico{font-size:clamp(24px,3.4vw,38px);}
+
+  /* ---------- Settings ---------- */
+  #gear{
+    position:fixed;right:4px;bottom:4px;
+    width:34px;height:34px;border-radius:50%;
+    border:none;background:rgba(0,0,0,.12);color:rgba(0,0,0,.35);
+    font-size:17px;cursor:pointer;z-index:20;
+  }
+  #panel{
+    position:fixed;inset:0;background:rgba(0,0,0,.72);
+    display:none;align-items:center;justify-content:center;z-index:30;padding:16px;
+  }
+  #panel.open{display:flex;}
+  .sheet{
+    background:var(--card);border-radius:16px;padding:20px;
+    width:min(560px,100%);max-height:88vh;overflow:auto;
+  }
+  .sheet h2{margin:0 0 4px;font-size:22px;}
+  .sheet p.hint{margin:0 0 16px;color:#666;font-size:14px;}
+  .row{margin-bottom:16px;}
+  .row label{display:block;font-weight:700;margin-bottom:6px;font-size:15px;}
+  .row select,.row input[type=range]{width:100%;font-size:16px;padding:8px;}
+  .sheet button.close{
+    width:100%;padding:14px;border:none;border-radius:12px;
+    background:var(--denim);color:#fff;font-size:18px;font-weight:800;cursor:pointer;
+  }
+  .warn{background:#FFF4D6;border-left:4px solid var(--gold);padding:10px 12px;font-size:13px;border-radius:6px;margin-bottom:16px;}
+  .stat{background:#EDF5E8;border-left:4px solid var(--green);padding:9px 11px;font-size:15px;font-weight:700;border-radius:6px;}
+  .sub{margin:8px 0 0;color:#666;font-size:13px;line-height:1.45;}
+  .sub code{background:#F1ECE0;padding:1px 5px;border-radius:4px;font-size:12px;}
+</style>
+</head>
+<body>
+
+<div id="banner">Tap a picture to talk</div>
+
+<div id="core"></div>
+<div id="tabs" role="tablist"></div>
+<div id="grid"></div>
+
+<button id="gear" aria-label="Settings (hold)">⚙</button>
+
+<div id="panel">
+  <div class="sheet">
+    <h2>Settings</h2>
+    <p class="hint">For caregivers — hold the ⚙ for 1 second to open.</p>
+    <div class="warn"><strong>Tip:</strong> On the tablet, open Chrome menu → <strong>Add to Home screen</strong>. It then opens full-screen like an app and works with no internet.</div>
+    <div class="row">
+      <label>Your recorded voice</label>
+      <div id="clipStat" class="stat">Checking…</div>
+      <p class="sub">Put recordings in a <strong>voice</strong> folder next to this file, named after
+      the button — <em>All done</em> → <code>all-done.mp3</code>. Anything not recorded uses the
+      built-in voice below.</p>
+    </div>
+    <div class="row">
+      <label for="voice">Built-in voice</label>
+      <select id="voice"></select>
+    </div>
+    <div class="row">
+      <label for="rate">Speed — <span id="rateVal">0.9</span></label>
+      <input type="range" id="rate" min="0.5" max="1.3" step="0.05" value="0.9">
+    </div>
+    <div class="row">
+      <label for="vol">Volume — <span id="volVal">1.0</span></label>
+      <input type="range" id="vol" min="0.1" max="1" step="0.1" value="1">
+    </div>
+    <button class="close" id="closePanel">Done</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   TILERTALKER  —  simple AAC board
+   Everything is in this one file. To change the words, edit the
+   BOARD object below:  icon (emoji), label (what's shown/spoken),
+   say (optional different spoken phrase), color class.
+   To use a real photo instead of an emoji, put the image next to
+   this file and write:  img:"snack.jpg"
+   ============================================================ */
+
+var CORE = [
+  {icon:"👍", label:"Yes",      say:"Yes",            c:"c-green"},
+  {icon:"👎", label:"No",       say:"No",             c:"c-red"},
+  {icon:"➕", label:"More",     say:"I want more",    c:"c-denim"},
+  {icon:"✅", label:"All done", say:"I am all done",  c:"c-brown"},
+  {icon:"🙋", label:"Help",     say:"I need help",    c:"c-purple"},
+  {icon:"✋", label:"Stop",     say:"Stop please",    c:"c-red"}
+];
+
+var BOARD = {
+  "I want": {icon:"🤠", items:[
+    {icon:"🍪", label:"Snack",    say:"I want a snack",        c:"c-gold"},
+    {icon:"🥤", label:"Drink",    say:"I want a drink",        c:"c-denim"},
+    {icon:"🚻", label:"Bathroom", say:"I need the bathroom",   c:"c-brown"},
+    {icon:"🛏️", label:"Rest",     say:"I want to lie down",    c:"c-purple"},
+    {icon:"🌳", label:"Outside",  say:"I want to go outside",  c:"c-green"},
+    {icon:"🚗", label:"Go ride",  say:"I want to go for a ride", c:"c-denim"},
+    {icon:"🤗", label:"Hug",      say:"I want a hug",          c:"c-red"},
+    {icon:"🤫", label:"Quiet",    say:"I want it quiet please", c:"c-brown"}
+  ]},
+  "I feel": {icon:"❤️", items:[
+    {icon:"😀", label:"Happy",      say:"I feel happy",              c:"c-gold"},
+    {icon:"😢", label:"Sad",        say:"I feel sad",                c:"c-denim"},
+    {icon:"😠", label:"Frustrated", say:"I am frustrated",           c:"c-red"},
+    {icon:"😨", label:"Scared",     say:"I feel scared",             c:"c-purple"},
+    {icon:"🤒", label:"Hurt",       say:"I do not feel good. It hurts.", c:"c-red"},
+    {icon:"😴", label:"Tired",      say:"I am tired",                c:"c-brown"},
+    {icon:"🥱", label:"Bored",      say:"I am bored",                c:"c-denim"},
+    {icon:"😖", label:"Too loud",   say:"It is too loud for me",     c:"c-purple"}
+  ]},
+  "People": {icon:"👨", items:[
+    {icon:"👨", label:"Dad",     say:"I want my dad",            c:"c-denim"},
+    {icon:"📞", label:"Call Dad",say:"Can I call my dad please",  c:"c-green"},
+    {icon:"👪", label:"Family",  say:"I want my family",          c:"c-gold"},
+    {icon:"🧑‍⚕️", label:"Staff",  say:"I need someone to help me", c:"c-purple"},
+    {icon:"👋", label:"Hi",      say:"Hi!",                       c:"c-gold"},
+    {icon:"🤝", label:"Bye",     say:"Bye! See you later",        c:"c-brown"},
+    {icon:"🙏", label:"Please",  say:"Please",                    c:"c-green"},
+    {icon:"💛", label:"Thanks",  say:"Thank you",                 c:"c-gold"}
+  ]},
+  "Fun": {icon:"🎬", items:[
+    {icon:"🤠", label:"Toy Story", say:"I want to watch Toy Story", c:"c-gold"},
+    {icon:"📺", label:"Cartoons",  say:"I want to watch cartoons",  c:"c-denim"},
+    {icon:"👗", label:"Costume",   say:"I want to put on my costume", c:"c-red"},
+    {icon:"🎵", label:"Music",     say:"I want music please",       c:"c-purple"},
+    {icon:"🧸", label:"Toys",      say:"I want to play with my toys", c:"c-green"},
+    {icon:"📖", label:"Book",      say:"I want a book",             c:"c-brown"},
+    {icon:"🎨", label:"Draw",      say:"I want to draw",            c:"c-gold"},
+    {icon:"🚶", label:"Walk",      say:"I want to go for a walk",   c:"c-green"}
+  ]},
+  "Day": {icon:"📅", items:[
+    {icon:"🍳", label:"Breakfast", say:"I am ready for breakfast",   c:"c-gold"},
+    {icon:"🍽️", label:"Lunch",     say:"I am ready for lunch",       c:"c-denim"},
+    {icon:"🍝", label:"Dinner",    say:"I am ready for dinner",      c:"c-brown"},
+    {icon:"🚿", label:"Shower",    say:"I want to take a shower",    c:"c-denim"},
+    {icon:"🦷", label:"Teeth",     say:"Time to brush my teeth",     c:"c-green"},
+    {icon:"👕", label:"Clothes",   say:"I want to get dressed",      c:"c-purple"},
+    {icon:"🌙", label:"Bed",       say:"I am ready for bed",         c:"c-brown"},
+    {icon:"❓", label:"What now?", say:"What are we doing now?",     c:"c-red"}
+  ]}
+};
+
+/* ============================================================
+   DAD'S VOICE — recorded audio, with automatic TTS fallback
+   ------------------------------------------------------------
+   Put your recordings in a folder called "voice" next to this
+   file. Name each file after the button LABEL, lower-case, with
+   spaces turned into dashes, ending in .mp3:
+
+        All done   ->  voice/all-done.mp3
+        Snack      ->  voice/snack.mp3
+        Toy Story  ->  voice/toy-story.mp3
+        What now?  ->  voice/what-now.mp3
+
+   That is the whole setup. No code editing needed.
+
+   * Any phrase WITHOUT a recording automatically speaks with the
+     built-in voice instead. It is never silent.
+   * Record as few or as many as you like, in any order.
+   * Hold the gear icon to see how many were found.
+   * To override a filename for one button, add  audio:"foo.mp3"
+     to that entry in the list above.
+   ============================================================ */
+var VOICE_DIR  = 'voice/';                /* folder holding the recordings    */
+var VOICE_AUTO = true;                    /* set false to disable auto-lookup */
+var VOICE_EXT  = ['mp3','m4a','wav'];     /* tried in this order              */
+
+/* EMBEDDED recordings, keyed by slug -> "data:audio/...;base64,...".
+   Empty in the source file. The packaged single-file build (built by
+   package-voice.js) fills this in so the whole app is ONE file with the
+   recordings baked in — no voice/ folder needed, still fully offline. */
+var EMBED = window.WT_EMBED || {};
+
+var clips = {}, clipCount = 0, clipTotal = 0, nowPlaying = null;
+
+function slug(s){
+  return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+}
+
+/* Candidate file names for one button, best first. */
+function clipSrcs(item){
+  var key = slug(item.label);
+  if (EMBED[key])     return [EMBED[key]];              /* baked-in recording (packaged) */
+  if (item.audioData) return [item.audioData];          /* embedded per-item override    */
+  if (item.audio)     return [VOICE_DIR + item.audio];  /* explicit filename override    */
+  if (!VOICE_AUTO)    return [];
+  var base = VOICE_DIR + key + '.';
+  return VOICE_EXT.map(function(e){ return base + e; });
+}
+
+/* Try each candidate in turn; first one that decodes wins. A phrase with no
+   recording simply exhausts the list and is left to TTS — that is the normal
+   state, not an error. */
+function registerClip(item){
+  var srcs = clipSrcs(item); if (!srcs.length) return;
+  var key = slug(item.label);
+  if (key in clips) return;                 /* already probed */
+  clips[key] = null; clipTotal++;
+
+  (function tryNext(i){
+    if (i >= srcs.length) return;           /* no recording for this phrase */
+    var a = new Audio();
+    a.preload = 'auto';
+    function ok(){
+      if (clips[key] === null){ clips[key] = a; clipCount++; updateClipStat(); }
+    }
+    a.addEventListener('loadeddata', ok);
+    a.addEventListener('canplaythrough', ok);
+    a.addEventListener('error', function(){ tryNext(i+1); });
+    a.addEventListener('ended', function(){ if (nowPlaying === a) nowPlaying = null; });
+    a.src = srcs[i];
+  })(0);
+}
+
+function registerAllClips(){
+  CORE.forEach(registerClip);
+  Object.keys(BOARD).forEach(function(n){ BOARD[n].items.forEach(registerClip); });
+  updateClipStat();
+}
+
+function updateClipStat(){
+  var el = document.getElementById('clipStat'); if (!el) return;
+  el.textContent = clipCount
+    ? clipCount + ' of ' + clipTotal + ' phrases play in your recorded voice.'
+    : 'No recordings found — every phrase uses the built-in voice.';
+}
+
+/* ---------------- speech ---------------- */
+var synth = window.speechSynthesis, voices = [], chosen = null;
+var rate = 0.9, vol = 1.0;
+
+function loadVoices(){
+  voices = synth ? synth.getVoices() : [];
+  var sel = document.getElementById('voice');
+  sel.innerHTML = '';
+  var en = voices.filter(function(v){ return /^en/i.test(v.lang); });
+  var list = en.length ? en : voices;
+  list.forEach(function(v){
+    var o = document.createElement('option');
+    o.value = v.name; o.textContent = v.name + ' (' + v.lang + ')';
+    sel.appendChild(o);
+  });
+  var saved = localStorage.getItem('wt_voice');
+  if (saved && list.some(function(v){return v.name===saved;})) { chosen = saved; sel.value = saved; }
+  else if (list.length) { chosen = list[0].name; sel.value = chosen; }
+}
+if (synth){ loadVoices(); synth.onvoiceschanged = loadVoices; }
+
+function speak(text){
+  if (!synth) return;
+  synth.cancel();
+  var u = new SpeechSynthesisUtterance(text);
+  var v = voices.filter(function(x){return x.name===chosen;})[0];
+  if (v) u.voice = v;
+  u.rate = rate; u.volume = vol; u.pitch = 1;
+  synth.speak(u);
+}
+
+/* Stop whatever is currently talking — recorded clip or TTS.
+   Keeps rapid tapping behaving the same either way: a new tap
+   always interrupts the previous one. */
+function stopTalking(){
+  if (synth) synth.cancel();
+  if (nowPlaying){
+    try { nowPlaying.pause(); nowPlaying.currentTime = 0; } catch(e){}
+    nowPlaying = null;
+  }
+}
+
+/* Dad's recording if we have one, otherwise the built-in voice.
+   If playback is refused for any reason, fall through to TTS so a
+   tap NEVER produces silence. */
+function say(item, text){
+  stopTalking();
+  var a = clips[slug(item.label)];
+  if (a){
+    try { a.currentTime = 0; } catch(e){}
+    a.volume = vol;
+    nowPlaying = a;
+    var p = a.play();
+    if (p && p.catch) p.catch(function(){ nowPlaying = null; speak(text); });
+    return;
+  }
+  speak(text);
+}
+
+var banner = document.getElementById('banner');
+function announce(item){
+  var text = item.say || item.label;
+  banner.textContent = text;
+  banner.classList.add('flash');
+  setTimeout(function(){ banner.classList.remove('flash'); }, 420);
+  say(item, text);
+  if (navigator.vibrate) { try{ navigator.vibrate(28); }catch(e){} }
+}
+
+/* ---------------- build UI ---------------- */
+function makeBtn(item, extraClass){
+  var b = document.createElement('button');
+  b.className = 'btn ' + (item.c || 'c-denim') + (extraClass ? ' ' + extraClass : '');
+  var ico;
+  if (item.img){ ico = document.createElement('img'); ico.className='ico'; ico.src=item.img; ico.alt=''; }
+  else { ico = document.createElement('div'); ico.className='ico'; ico.textContent = item.icon || '⬜'; }
+  var lab = document.createElement('div'); lab.textContent = item.label;
+  b.appendChild(ico); b.appendChild(lab);
+  b.addEventListener('click', function(){ announce(item); });
+  return b;
+}
+
+var coreEl = document.getElementById('core');
+CORE.forEach(function(i){ coreEl.appendChild(makeBtn(i,'core-btn')); });
+
+var tabsEl = document.getElementById('tabs'), gridEl = document.getElementById('grid');
+var names = Object.keys(BOARD), current = names[0];
+
+function renderGrid(){
+  gridEl.innerHTML = '';
+  BOARD[current].items.forEach(function(i){ gridEl.appendChild(makeBtn(i)); });
+  gridEl.scrollTop = 0;
+}
+names.forEach(function(n){
+  var t = document.createElement('button');
+  t.className='tab'; t.setAttribute('role','tab');
+  t.setAttribute('aria-selected', String(n===current));
+  var ic=document.createElement('div'); ic.className='ico'; ic.textContent=BOARD[n].icon;
+  var lb=document.createElement('div'); lb.textContent=n;
+  t.appendChild(ic); t.appendChild(lb);
+  t.addEventListener('click', function(){
+    current = n;
+    Array.prototype.forEach.call(tabsEl.children, function(c){ c.setAttribute('aria-selected','false'); });
+    t.setAttribute('aria-selected','true');
+    renderGrid();
+  });
+  tabsEl.appendChild(t);
+});
+renderGrid();
+registerAllClips();
+
+/* ---------------- settings (hold gear) ---------------- */
+var gear=document.getElementById('gear'), panel=document.getElementById('panel'), holdT=null;
+function startHold(e){ e.preventDefault(); holdT=setTimeout(function(){ panel.classList.add('open'); },1000); }
+function endHold(){ clearTimeout(holdT); }
+gear.addEventListener('touchstart',startHold,{passive:false});
+gear.addEventListener('touchend',endHold);
+gear.addEventListener('touchcancel',endHold);
+gear.addEventListener('mousedown',startHold);
+gear.addEventListener('mouseup',endHold);
+gear.addEventListener('mouseleave',endHold);
+document.getElementById('closePanel').addEventListener('click',function(){ panel.classList.remove('open'); });
+panel.addEventListener('click',function(e){ if(e.target===panel) panel.classList.remove('open'); });
+
+document.getElementById('voice').addEventListener('change',function(e){
+  chosen=e.target.value; localStorage.setItem('wt_voice',chosen); speak('Hello. This is my voice.');
+});
+var rEl=document.getElementById('rate'), rV=document.getElementById('rateVal');
+rate = parseFloat(localStorage.getItem('wt_rate')||'0.9'); rEl.value=rate; rV.textContent=rate.toFixed(2);
+rEl.addEventListener('input',function(e){ rate=parseFloat(e.target.value); rV.textContent=rate.toFixed(2); localStorage.setItem('wt_rate',rate); });
+rEl.addEventListener('change',function(){ speak('This is how fast I talk'); });
+
+var vEl=document.getElementById('vol'), vV=document.getElementById('volVal');
+vol = parseFloat(localStorage.getItem('wt_vol')||'1'); vEl.value=vol; vV.textContent=vol.toFixed(1);
+vEl.addEventListener('input',function(e){ vol=parseFloat(e.target.value); vV.textContent=vol.toFixed(1); localStorage.setItem('wt_vol',vol); });
+
+/* stop pinch-zoom (iOS Safari only event; harmless elsewhere) */
+document.addEventListener('gesturestart',function(e){e.preventDefault();});
+
+/* 🔴 DO NOT ADD A touchend/double-tap preventDefault HANDLER HERE.
+   One used to live here and it BROKE RAPID TAPPING. Calling preventDefault()
+   on touchend suppresses Chrome's synthesized click, so the second of any two
+   taps within 300ms was silently dead — tap "More" twice, or two buttons in
+   quick succession, and nothing spoke. For a non-verbal user who cannot report
+   a dead button, that is the worst failure mode this app can have.
+   It was also redundant: double-tap zoom is ALREADY disabled by
+   `touch-action:manipulation` on body plus `user-scalable=no, maximum-scale=1`
+   in the viewport meta. Both verified live. Removed 2026-08-16. */
+</script>
+</body>
+</html>
