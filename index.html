@@ -192,6 +192,8 @@
   .stat{background:#EDF5E8;border-left:4px solid var(--green);padding:9px 11px;font-size:14px;font-weight:700;border-radius:6px;margin-bottom:8px;}
   .sub{margin:6px 0 0;color:#666;font-size:13px;line-height:1.45;}
   .sub a{color:#3C6E9F;}
+  .sheet button.plain{width:100%;padding:12px;margin:0 0 14px;border:2px solid #3C6E9F;border-radius:12px;
+              background:#fff;color:#3C6E9F;font-size:16px;font-weight:800;cursor:pointer;}
   .about-link{display:block;text-align:center;padding:13px;margin-top:14px;border:2px solid #E5DCC8;border-radius:12px;
               color:#6B4423;font-weight:800;font-size:17px;text-decoration:none;}
 </style>
@@ -234,6 +236,8 @@
 
     <h3>Status</h3>
     <div id="offlineStat" class="stat">Checking…</div>
+    <div id="updateStat" class="stat">Version: checking…</div>
+    <button class="plain" id="checkUpdate">Check for updates now</button>
     <div id="clipStat" class="stat" hidden></div>
     <div class="warn"><strong>Tip:</strong> on the tablet, open this page in Chrome, then menu ⋮ → <strong>Add to Home screen</strong> (or <strong>Install app</strong>). It opens full screen like an app and keeps working with no internet.</div>
     <p class="sub">Pictures: <a href="https://github.com/microsoft/fluentui-emoji" target="_blank" rel="noopener">Fluent Emoji</a> © Microsoft, MIT licence. Voices: <a href="https://github.com/hexgrad/kokoro" target="_blank" rel="noopener">Kokoro</a>, Apache 2.0.</p>
@@ -484,6 +488,12 @@ function visiblePages(){
   return v.length ? v : allPages;
 }
 var pages = visiblePages(), current = 0;
+/* After an automatic update the app reloads; come back to the same page. */
+try {
+  var resume = sessionStorage.getItem('tt_resume_page');
+  sessionStorage.removeItem('tt_resume_page');
+  pages.forEach(function(p, i){ if (p.name === resume) current = i; });
+} catch(e){}
 var stage = document.getElementById('stage'), gridEl = null;
 var prevBtn = document.getElementById('prev'), nextBtn = document.getElementById('next'), titleBtn = document.getElementById('title');
 
@@ -586,7 +596,7 @@ gear.addEventListener('mouseleave', endHold);
 document.getElementById('closePanel').addEventListener('click', function(){ panel.classList.remove('open'); });
 panel.addEventListener('click', function(e){ if (e.target === panel) panel.classList.remove('open'); });
 
-function openSettings(){ buildVoiceList(); buildPageList(); refreshOffline(); panel.classList.add('open'); }
+function openSettings(){ buildVoiceList(); buildPageList(); refreshOffline(); showVersion(); panel.classList.add('open'); }
 
 function buildVoiceList(){
   var box = document.getElementById('voiceList'); box.innerHTML = '';
@@ -702,13 +712,81 @@ function refreshOffline(){
   });
 }
 
+/* ============================================================
+   UPDATES
+   The tablet checks for a new version when the app opens, when it
+   comes back on screen, and every 30 minutes. A new version downloads
+   in the background; it is only switched on when nobody is using the
+   board (no tap for 2 minutes, or the screen is off), so the screen
+   never changes under his finger. "Check for updates now" in Settings
+   applies it straight away.
+   ============================================================ */
+var CHECK_EVERY = 30 * 60 * 1000, IDLE_BEFORE_UPDATE = 2 * 60 * 1000;
+var swReg = null, updateReady = false, applyNow = false, lastTap = Date.now();
+var hadController = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+document.addEventListener('pointerdown', function(){ lastTap = Date.now(); }, true);
+
+function checkForUpdate(){
+  if (!swReg) return Promise.resolve(false);
+  return swReg.update().then(function(){
+    store('tt_checked', String(Date.now()));
+    return !!(swReg.installing || swReg.waiting);
+  });
+}
+function applyUpdate(){
+  try { sessionStorage.setItem('tt_resume_page', pages[current] ? pages[current].name : ''); } catch(e){}
+  location.reload();
+}
+function maybeApply(){
+  if (!updateReady) return;
+  if (applyNow){ applyUpdate(); return; }
+  if (panel.classList.contains('open') || picker.classList.contains('open')) return;
+  if (document.hidden || Date.now() - lastTap > IDLE_BEFORE_UPDATE) applyUpdate();
+}
+
+function showVersion(text){
+  var el = document.getElementById('updateStat');
+  if (text){ el.textContent = text; return; }
+  if (!navigator.serviceWorker || !navigator.serviceWorker.controller){ el.textContent = 'Version: not installed yet'; return; }
+  var checked = parseInt(store('tt_checked') || '0', 10);
+  var when = checked ? new Date(checked).toLocaleString([], {month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'}) : 'not yet';
+  var ch = new MessageChannel();
+  ch.port1.onmessage = function(e){
+    el.textContent = updateReady ? 'A new version is ready and will switch on when the board is not in use.'
+                                 : 'Version ' + e.data.version + ' · last checked ' + when;
+  };
+  navigator.serviceWorker.controller.postMessage('version', [ch.port2]);
+}
+document.getElementById('checkUpdate').addEventListener('click', function(){
+  if (!swReg){ showVersion('Updates need the app to be opened from its web address.'); return; }
+  if (updateReady){ applyUpdate(); return; }
+  if (navigator.onLine === false){ showVersion('Could not check: no internet connection right now.'); return; }
+  showVersion('Checking…');
+  checkForUpdate().then(function(found){
+    if (found){ applyNow = true; showVersion('Downloading the new version… the app will restart by itself.'); }
+    else { showVersion('✓ You have the latest version.'); setTimeout(function(){ showVersion(); }, 2500); }
+  }, function(){ showVersion('Could not check: no internet connection right now.'); });
+});
+
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
-  navigator.serviceWorker.register('sw.js').then(function(){
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    if (!hadController){ hadController = true; warmVoice(); return; }   /* first install, nothing to switch */
+    updateReady = true;
+    maybeApply();
+  });
+  navigator.serviceWorker.register('sw.js').then(function(reg){
+    swReg = reg;
     return navigator.serviceWorker.ready;
   }).then(function(){
     if (navigator.serviceWorker.controller) warmVoice();
-    else navigator.serviceWorker.addEventListener('controllerchange', function(){ warmVoice(); }, {once: true});
+    checkForUpdate().catch(function(){});
   }).catch(function(){});
+  setInterval(function(){ if (!document.hidden) checkForUpdate().catch(function(){}); }, CHECK_EVERY);
+  setInterval(maybeApply, 15000);
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden) maybeApply();
+    else checkForUpdate().catch(function(){});
+  });
 }
 
 /* stop pinch-zoom (iOS Safari only event; harmless elsewhere) */

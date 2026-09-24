@@ -47,7 +47,12 @@ def slug(s):
 def load_library():
     src = open(os.path.join(ROOT, 'library.js'), encoding='utf-8').read()
     start = src.index('{', src.index('window.TT_LIBRARY'))
-    return json.loads(src[start:src.rindex('}') + 1])
+    try:
+        return json.loads(src[start:src.rindex('}') + 1])
+    except json.JSONDecodeError as e:
+        line = src[:start].count('\n') + e.lineno
+        sys.exit(f'library.js has a typo on or just before line {line}: {e.msg}. '
+                 'Check for a missing comma or quote mark. (The last tile in a list has no comma after it.)')
 
 
 def check_mom_under_dad(lib):

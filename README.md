@@ -31,6 +31,17 @@ Then run `python3 tools/build.py` to make the 3D picture and natural-voice recor
 
 To use a real photo instead of a picture, add `"img": "photos/dad.jpg"` to the tile and put the photo in a `photos` folder.
 
+## Updating the board
+
+**To change words or add tiles:** edit `library.js` on GitHub (open the file, click the ✏️ pencil, make the change, then **Commit changes**). That's all.
+
+1. GitHub automatically makes the 3D pictures and natural voices for anything new (the **Build pictures and voices** run under the **Actions** tab, a few minutes; the first run takes longer).
+2. It publishes the update to the website.
+3. Tablets pick it up by themselves: they check when the app opens, when the screen comes back on, and every 30 minutes. The new version downloads in the background and only switches on when nobody has tapped for 2 minutes (or the screen is off), coming back to the same page, so the board never changes mid-sentence.
+4. To update a tablet right away: hold ⚙ → **Check for updates now**. Settings also shows the version and when it last checked.
+
+If there's a mistake in `library.js` (a missing comma or quote, or a Dad tile without its Mom tile underneath), the Actions run turns red with a message saying what and where, GitHub emails you, and tablets stay on the last good version until it's fixed.
+
 ## Files
 
 | File | What it is |
@@ -41,6 +52,7 @@ To use a real photo instead of a picture, add `"img": "photos/dad.jpg"` to the t
 | `img/` | 3D pictures |
 | `voices/<name>/` | Natural-voice recordings, one MP3 per tile |
 | `tools/build.py` | Makes the pictures, voices and offline cache |
+| `.github/workflows/build.yml` | Runs `tools/build.py` on GitHub whenever the words change |
 
 ## Credits
 

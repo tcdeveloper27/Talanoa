@@ -4,7 +4,7 @@
    Everything the board needs is kept on the tablet, so it keeps working with no
    internet. Voice clips go in their own cache ("tt-voices") that survives app
    updates; the page fills it for whichever voice is selected. */
-var VERSION = '9cac1c473a7f';
+var VERSION = '4f407599e1e4';
 var CACHE = 'tt-app-' + VERSION;
 var VOICE_CACHE = 'tt-voices';
 var PRECACHE = [
@@ -174,6 +174,11 @@ self.addEventListener('activate', function (e) {
       return k.indexOf('tt-app-') === 0 && k !== CACHE;
     }).map(function (k) { return caches.delete(k); }));
   }).then(function () { return self.clients.claim(); }));
+});
+
+/* The page asks which version is running (shown in Settings). */
+self.addEventListener('message', function (e) {
+  if (e.data === 'version' && e.ports && e.ports[0]) e.ports[0].postMessage({ version: VERSION });
 });
 
 /* Audio elements ask for byte ranges. Answer them from the full cached file. */

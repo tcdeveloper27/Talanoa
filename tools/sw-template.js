@@ -23,6 +23,11 @@ self.addEventListener('activate', function (e) {
   }).then(function () { return self.clients.claim(); }));
 });
 
+/* The page asks which version is running (shown in Settings). */
+self.addEventListener('message', function (e) {
+  if (e.data === 'version' && e.ports && e.ports[0]) e.ports[0].postMessage({ version: VERSION });
+});
+
 /* Audio elements ask for byte ranges. Answer them from the full cached file. */
 function slice(req, res) {
   var range = req.headers.get('range');
