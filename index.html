@@ -5,501 +5,721 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#8B4513">
+<meta name="theme-color" content="#6B4423">
 <title>TilerTalker</title>
 <meta name="application-name" content="TilerTalker">
 <meta name="apple-mobile-web-app-title" content="TilerTalker">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <style>
   :root{
-    --gold:#E8A317;
-    --gold-dark:#C4860F;
-    --red:#C8342B;
-    --red-dark:#9E2820;
-    --denim:#3C6E9F;
-    --denim-dark:#2A5178;
-    --brown:#8B5A2B;
-    --brown-dark:#6B4423;
-    --green:#4A8B3A;
-    --green-dark:#376B2A;
-    --purple:#7B5AA6;
-    --purple-dark:#5E4480;
     --ink:#2B1D0E;
     --bg:#FDF6E3;
+    --bar:#EADFC4;
+    --brown:#8B5A2B;
+    --brown-dark:#6B4423;
+    --green:#3F8A34;
     --card:#FFFFFF;
+    --banner-h:clamp(40px,7vh,68px);
+    --core-h:clamp(62px,13vh,116px);
+    --nav-h:clamp(52px,9.5vh,92px);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;height:100%;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
   body{
     font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
     background:var(--bg);
     color:var(--ink);
     overscroll-behavior:none;
     touch-action:manipulation;
-    user-select:none;
+    user-select:none;-webkit-user-select:none;
     display:flex;flex-direction:column;
+    height:100vh;height:100dvh;
     padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
+  button{font:inherit;color:inherit;}
+  img{-webkit-user-drag:none;pointer-events:none;}
 
   /* ---------- Spoken banner ---------- */
   #banner{
-    background:var(--brown);
-    color:#fff;
-    padding:10px 14px;
-    font-size:clamp(20px,3.6vw,34px);
-    font-weight:700;
-    text-align:center;
-    min-height:56px;
+    flex:0 0 var(--banner-h);height:var(--banner-h);min-height:0;
+    background:var(--brown);color:#fff;
+    padding:4px 52px;
+    font-size:clamp(20px,min(3.4vw,5vh),34px);font-weight:800;
+    text-align:center;letter-spacing:.2px;
     display:flex;align-items:center;justify-content:center;
-    letter-spacing:.3px;
     box-shadow:0 2px 6px rgba(0,0,0,.25);
-    z-index:5;
+    position:relative;z-index:5;
+    transition:background .15s;
   }
   #banner.flash{background:var(--green);}
+  #said{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-  /* ---------- Core bar (never moves) ---------- */
+  /* ---------- Core bar: never moves ---------- */
   #core{
-    display:grid;
-    grid-template-columns:repeat(6,1fr);
-    gap:6px;
-    padding:6px;
-    background:#EADFC4;
+    flex:0 0 var(--core-h);height:var(--core-h);min-height:0;
+    display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:minmax(0,1fr);gap:8px;
+    padding:8px 8px 6px;background:var(--bar);
   }
+  .core-btn{
+    border:none;border-radius:14px;color:#fff;
+    background:var(--c);box-shadow:0 4px 0 var(--c-dark);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    padding:4px;min-width:0;min-height:0;cursor:pointer;
+    font-size:clamp(14px,1.9vw,22px);font-weight:800;line-height:1.1;
+    transition:transform .06s ease, box-shadow .06s ease;
+  }
+  .core-btn .pic{height:52%;max-height:64px;min-height:0;}
+  .core-btn .pic img{height:100%;width:auto;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));}
 
-  /* ---------- Category tabs ---------- */
-  #tabs{
-    display:grid;
-    grid-template-columns:repeat(5,1fr);
-    gap:6px;
-    padding:0 6px 6px;
-    background:#EADFC4;
+  /* ---------- Page nav: ◀  page  ▶ ---------- */
+  #nav{
+    flex:0 0 var(--nav-h);height:var(--nav-h);min-height:0;
+    display:grid;grid-template-columns:1fr 2.4fr 1fr;grid-template-rows:minmax(0,1fr);gap:8px;
+    padding:6px 8px 8px;background:var(--bar);
   }
-  .tab{
-    border:none;border-radius:12px;
-    padding:12px 4px;
-    font-size:clamp(14px,2.2vw,22px);
-    font-weight:800;
-    color:#fff;background:var(--brown-dark);
-    opacity:.55;
-    display:flex;flex-direction:column;align-items:center;gap:2px;
-    cursor:pointer;
+  .arrow{
+    border:none;border-radius:16px;cursor:pointer;
+    background:var(--brown-dark);color:#fff;
+    box-shadow:0 4px 0 #4A2F18;
+    display:flex;align-items:center;justify-content:center;gap:clamp(4px,1.2vw,14px);
+    padding:4px 10px;min-width:0;
+    transition:transform .06s ease, box-shadow .06s ease;
   }
-  .tab .ico{font-size:clamp(20px,3vw,30px);line-height:1;}
-  .tab[aria-selected="true"]{opacity:1;box-shadow:0 0 0 4px #fff inset,0 3px 8px rgba(0,0,0,.3);}
+  .arrow svg{height:62%;max-height:52px;width:auto;flex:none;}
+  .arrow .pic{height:62%;max-height:52px;aspect-ratio:1;flex:none;}
+  .arrow .pic img{height:100%;width:100%;object-fit:contain;}
+  #title{
+    border:none;border-radius:16px;cursor:pointer;
+    background:var(--pc);color:#fff;
+    box-shadow:0 4px 0 var(--pc-dark);
+    display:flex;align-items:center;justify-content:center;gap:12px;
+    padding:4px 12px;min-width:0;
+  }
+  #title .pic{height:66%;max-height:58px;aspect-ratio:1;flex:none;}
+  #title .pic img{height:100%;width:100%;object-fit:contain;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));}
+  #title .txt{display:flex;flex-direction:column;align-items:flex-start;min-width:0;}
+  #title .name{font-size:clamp(18px,min(3.2vw,4.4vh),34px);font-weight:900;line-height:1.05;white-space:nowrap;}
+  #dots{display:flex;gap:6px;margin-top:min(5px,.6vh);flex-wrap:wrap;}
+  #dots i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.4);}
+  #dots i.on{background:#fff;transform:scale(1.35);}
 
-  /* ---------- Main grid ---------- */
-  #grid{
-    flex:1;
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-    gap:8px;
-    padding:8px;
-    overflow-y:auto;
-    align-content:start;
+  /* ---------- The 4 x 3 page of tiles ---------- */
+  #stage{flex:1;min-height:0;position:relative;overflow:hidden;}
+  .grid{
+    position:absolute;inset:0;
+    display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(3,1fr);
+    gap:clamp(8px,1.4vw,14px);padding:clamp(8px,1.4vw,14px);
   }
-
-  .btn{
-    border:none;border-radius:16px;
-    color:#fff;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:6px;
-    padding:10px 6px;
-    min-height:118px;
-    font-size:clamp(15px,2.1vw,24px);
-    font-weight:800;
-    line-height:1.15;
-    text-align:center;
-    box-shadow:0 4px 0 rgba(0,0,0,.22);
-    cursor:pointer;
+  .grid.enter-next{animation:inR .18s ease-out;}
+  .grid.enter-prev{animation:inL .18s ease-out;}
+  @keyframes inR{from{transform:translateX(7%);opacity:.3}to{transform:none;opacity:1}}
+  @keyframes inL{from{transform:translateX(-7%);opacity:.3}to{transform:none;opacity:1}}
+  .tile{
+    border:3px solid var(--pc);border-radius:18px;cursor:pointer;
+    background:var(--pc-tint);
+    box-shadow:0 5px 0 var(--pc-dark);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    padding:6px 4px 8px;min-width:0;min-height:0;
+    color:var(--ink);
+    font-size:clamp(15px,min(2.8vw,3.4vh),28px);font-weight:800;line-height:1.1;text-align:center;
     transition:transform .06s ease, box-shadow .06s ease, filter .06s ease;
   }
-  .btn .ico{font-size:clamp(34px,5.6vw,58px);line-height:1;}
-  .btn img.ico{width:clamp(48px,8vw,86px);height:clamp(48px,8vw,86px);object-fit:cover;border-radius:12px;}
-  .btn:active,.btn.press{transform:translateY(4px);box-shadow:0 0 0 rgba(0,0,0,.22);filter:brightness(1.15);}
+  .tile .pic{flex:1 1 auto;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;}
+  .tile .pic img{max-height:100%;max-width:78%;height:100%;object-fit:contain;filter:drop-shadow(0 3px 3px rgba(0,0,0,.18));}
+  .tile .pic img.photo{max-width:92%;object-fit:cover;border-radius:12px;width:92%;}
+  .tile .lab{flex:none;padding:0 4px;}
+  .emoji{font-size:clamp(36px,6vw,70px);line-height:1;}
+  .core-btn .emoji{font-size:clamp(24px,3.6vw,40px);}
+  .arrow .emoji,#title .emoji{font-size:clamp(24px,3.6vw,40px);}
+  .slot{visibility:hidden;}
 
-  .c-gold{background:var(--gold);}    .c-gold:active{background:var(--gold-dark);}
-  .c-red{background:var(--red);}      .c-red:active{background:var(--red-dark);}
-  .c-denim{background:var(--denim);}  .c-denim:active{background:var(--denim-dark);}
-  .c-brown{background:var(--brown);}  .c-brown:active{background:var(--brown-dark);}
-  .c-green{background:var(--green);}  .c-green:active{background:var(--green-dark);}
-  .c-purple{background:var(--purple);}.c-purple:active{background:var(--purple-dark);}
+  .tile:active,.tile.press{transform:translateY(5px);box-shadow:0 0 0 var(--pc-dark);filter:brightness(1.06);}
+  .core-btn:active,.core-btn.press,.arrow:active,.arrow.press{transform:translateY(4px);box-shadow:none;}
+  #title:active{transform:translateY(4px);box-shadow:none;}
 
-  .core-btn{min-height:74px;font-size:clamp(14px,1.9vw,21px);border-radius:12px;}
-  .core-btn .ico{font-size:clamp(24px,3.4vw,38px);}
+  /* ---------- Page picker ---------- */
+  .overlay{
+    position:fixed;inset:0;z-index:30;background:rgba(30,20,10,.78);
+    display:none;align-items:center;justify-content:center;padding:16px;
+  }
+  .overlay.open{display:flex;}
+  #pickGrid{
+    width:min(980px,100%);max-height:100%;overflow:auto;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;
+  }
+  .pick{
+    border:none;border-radius:18px;cursor:pointer;background:var(--pc);color:#fff;
+    box-shadow:0 5px 0 var(--pc-dark);
+    display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;
+    font-size:22px;font-weight:900;
+  }
+  .pick .pic{height:72px;} .pick .pic img{height:100%;}
+  .pick.here{outline:5px solid #fff;outline-offset:-5px;}
+  .pick.close{background:#444;box-shadow:0 5px 0 #222;justify-content:center;}
 
   /* ---------- Settings ---------- */
+  /* Lives in the banner, away from every tile, so a tap aimed at a tile can
+     never land on it. Opens only on a 1-second hold. */
   #gear{
-    position:fixed;right:4px;bottom:4px;
-    width:34px;height:34px;border-radius:50%;
-    border:none;background:rgba(0,0,0,.12);color:rgba(0,0,0,.35);
-    font-size:17px;cursor:pointer;z-index:20;
+    position:absolute;right:8px;top:50%;transform:translateY(-50%);
+    width:36px;height:36px;border-radius:50%;
+    border:none;background:rgba(255,255,255,.12);color:rgba(255,255,255,.55);
+    font-size:18px;cursor:pointer;z-index:6;padding:0;
   }
-  #panel{
-    position:fixed;inset:0;background:rgba(0,0,0,.72);
-    display:none;align-items:center;justify-content:center;z-index:30;padding:16px;
-  }
-  #panel.open{display:flex;}
   .sheet{
     background:var(--card);border-radius:16px;padding:20px;
-    width:min(560px,100%);max-height:88vh;overflow:auto;
+    width:min(600px,100%);max-height:92vh;overflow:auto;user-select:text;
   }
   .sheet h2{margin:0 0 4px;font-size:22px;}
-  .sheet p.hint{margin:0 0 16px;color:#666;font-size:14px;}
-  .row{margin-bottom:16px;}
-  .row label{display:block;font-weight:700;margin-bottom:6px;font-size:15px;}
+  .sheet h3{margin:22px 0 8px;font-size:17px;}
+  .sheet p.hint{margin:0 0 14px;color:#666;font-size:14px;}
+  .row{margin-bottom:14px;}
+  .row label.big{display:block;font-weight:700;margin-bottom:6px;font-size:15px;}
   .row select,.row input[type=range]{width:100%;font-size:16px;padding:8px;}
+  .choice{display:flex;align-items:center;gap:10px;padding:10px 12px;border:2px solid #E5DCC8;border-radius:12px;margin-bottom:8px;cursor:pointer;font-size:16px;}
+  .choice input{width:22px;height:22px;flex:none;}
+  .choice small{color:#666;}
+  .choice:has(input:checked){border-color:#3C6E9F;background:#EEF4FA;}
+  .pages{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;}
+  .pages .choice{margin:0;}
   .sheet button.close{
-    width:100%;padding:14px;border:none;border-radius:12px;
-    background:var(--denim);color:#fff;font-size:18px;font-weight:800;cursor:pointer;
+    width:100%;padding:14px;border:none;border-radius:12px;margin-top:10px;
+    background:#3C6E9F;color:#fff;font-size:18px;font-weight:800;cursor:pointer;
   }
-  .warn{background:#FFF4D6;border-left:4px solid var(--gold);padding:10px 12px;font-size:13px;border-radius:6px;margin-bottom:16px;}
-  .stat{background:#EDF5E8;border-left:4px solid var(--green);padding:9px 11px;font-size:15px;font-weight:700;border-radius:6px;}
-  .sub{margin:8px 0 0;color:#666;font-size:13px;line-height:1.45;}
-  .sub code{background:#F1ECE0;padding:1px 5px;border-radius:4px;font-size:12px;}
+  .warn{background:#FFF4D6;border-left:4px solid #E8A317;padding:10px 12px;font-size:13px;border-radius:6px;margin-bottom:14px;}
+  .stat{background:#EDF5E8;border-left:4px solid var(--green);padding:9px 11px;font-size:14px;font-weight:700;border-radius:6px;margin-bottom:8px;}
+  .sub{margin:6px 0 0;color:#666;font-size:13px;line-height:1.45;}
+  .sub a{color:#3C6E9F;}
 </style>
 </head>
 <body>
 
-<div id="banner">Tap a picture to talk</div>
-
+<div id="banner"><span id="said">Tap a picture to talk</span><button id="gear" aria-label="Settings (hold)">⚙</button></div>
 <div id="core"></div>
-<div id="tabs" role="tablist"></div>
-<div id="grid"></div>
+<div id="nav">
+  <button class="arrow" id="prev" aria-label="Previous page"></button>
+  <button id="title" aria-label="Show all pages"></button>
+  <button class="arrow" id="next" aria-label="Next page"></button>
+</div>
+<div id="stage"></div>
 
-<button id="gear" aria-label="Settings (hold)">⚙</button>
+<div class="overlay" id="picker"><div id="pickGrid"></div></div>
 
-<div id="panel">
+<div class="overlay" id="panel">
   <div class="sheet">
     <h2>Settings</h2>
-    <p class="hint">For caregivers — hold the ⚙ for 1 second to open.</p>
-    <div class="warn"><strong>Tip:</strong> On the tablet, open Chrome menu → <strong>Add to Home screen</strong>. It then opens full-screen like an app and works with no internet.</div>
-    <div class="row">
-      <label>Your recorded voice</label>
-      <div id="clipStat" class="stat">Checking…</div>
-      <p class="sub">Put recordings in a <strong>voice</strong> folder next to this file, named after
-      the button — <em>All done</em> → <code>all-done.mp3</code>. Anything not recorded uses the
-      built-in voice below.</p>
+    <p class="hint">For caregivers: hold the ⚙ for 1 second to open.</p>
+
+    <h3>Voice</h3>
+    <div id="voiceList"></div>
+    <div class="row" id="deviceRow">
+      <label class="big" for="deviceVoice">Tablet voice (also used as a backup)</label>
+      <select id="deviceVoice"></select>
     </div>
     <div class="row">
-      <label for="voice">Built-in voice</label>
-      <select id="voice"></select>
+      <label class="big" for="speed">Speed: <span id="speedVal">1.00</span></label>
+      <input type="range" id="speed" min="0.6" max="1.3" step="0.05" value="1">
     </div>
     <div class="row">
-      <label for="rate">Speed — <span id="rateVal">0.9</span></label>
-      <input type="range" id="rate" min="0.5" max="1.3" step="0.05" value="0.9">
-    </div>
-    <div class="row">
-      <label for="vol">Volume — <span id="volVal">1.0</span></label>
+      <label class="big" for="vol">Volume: <span id="volVal">1.0</span></label>
       <input type="range" id="vol" min="0.1" max="1" step="0.1" value="1">
     </div>
+
+    <h3>Pages to show</h3>
+    <div class="pages" id="pageList"></div>
+
+    <h3>Status</h3>
+    <div id="offlineStat" class="stat">Checking…</div>
+    <div id="clipStat" class="stat" hidden></div>
+    <div class="warn"><strong>Tip:</strong> on the tablet, open this page in Chrome, then menu ⋮ → <strong>Add to Home screen</strong> (or <strong>Install app</strong>). It opens full screen like an app and keeps working with no internet.</div>
+    <p class="sub">Pictures: <a href="https://github.com/microsoft/fluentui-emoji" target="_blank" rel="noopener">Fluent Emoji</a> © Microsoft, MIT licence. Voices: <a href="https://github.com/hexgrad/kokoro" target="_blank" rel="noopener">Kokoro</a>, Apache 2.0.</p>
+
     <button class="close" id="closePanel">Done</button>
   </div>
 </div>
 
+<script src="library.js"></script>
+<script src="assets.js"></script>
 <script>
 /* ============================================================
-   TILERTALKER  —  simple AAC board
-   Everything is in this one file. To change the words, edit the
-   BOARD object below:  icon (emoji), label (what's shown/spoken),
-   say (optional different spoken phrase), color class.
-   To use a real photo instead of an emoji, put the image next to
-   this file and write:  img:"snack.jpg"
+   TILERTALKER: tap-to-speak picture board (AAC)
+   The words are in library.js. Pictures and natural voices are
+   made by tools/build.py and listed in assets.js.
+
+   Talking order for every tap, first that works wins:
+     1. a recording of your own voice   (voice/<name>.mp3, see below)
+     2. the natural voice chosen in Settings
+     3. the tablet's own voice
+   A tap is never silent: anything that fails falls through to 3.
    ============================================================ */
+var LIB = window.TT_LIBRARY || {core: [], pages: []};
+var ASSETS = window.TT_ASSETS || {voices: [], img: {}, clips: {}};
 
-var CORE = [
-  {icon:"👍", label:"Yes",      say:"Yes",            c:"c-green"},
-  {icon:"👎", label:"No",       say:"No",             c:"c-red"},
-  {icon:"➕", label:"More",     say:"I want more",    c:"c-denim"},
-  {icon:"✅", label:"All done", say:"I am all done",  c:"c-brown"},
-  {icon:"🙋", label:"Help",     say:"I need help",    c:"c-purple"},
-  {icon:"✋", label:"Stop",     say:"Stop please",    c:"c-red"}
-];
+function slug(s){ return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+function store(k, v){ try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch(e){ return null; } }
 
-var BOARD = {
-  "I want": {icon:"🤠", items:[
-    {icon:"🍪", label:"Snack",    say:"I want a snack",        c:"c-gold"},
-    {icon:"🥤", label:"Drink",    say:"I want a drink",        c:"c-denim"},
-    {icon:"🚻", label:"Bathroom", say:"I need the bathroom",   c:"c-brown"},
-    {icon:"🛏️", label:"Rest",     say:"I want to lie down",    c:"c-purple"},
-    {icon:"🌳", label:"Outside",  say:"I want to go outside",  c:"c-green"},
-    {icon:"🚗", label:"Go ride",  say:"I want to go for a ride", c:"c-denim"},
-    {icon:"🤗", label:"Hug",      say:"I want a hug",          c:"c-red"},
-    {icon:"🤫", label:"Quiet",    say:"I want it quiet please", c:"c-brown"}
-  ]},
-  "I feel": {icon:"❤️", items:[
-    {icon:"😀", label:"Happy",      say:"I feel happy",              c:"c-gold"},
-    {icon:"😢", label:"Sad",        say:"I feel sad",                c:"c-denim"},
-    {icon:"😠", label:"Frustrated", say:"I am frustrated",           c:"c-red"},
-    {icon:"😨", label:"Scared",     say:"I feel scared",             c:"c-purple"},
-    {icon:"🤒", label:"Hurt",       say:"I do not feel good. It hurts.", c:"c-red"},
-    {icon:"😴", label:"Tired",      say:"I am tired",                c:"c-brown"},
-    {icon:"🥱", label:"Bored",      say:"I am bored",                c:"c-denim"},
-    {icon:"😖", label:"Too loud",   say:"It is too loud for me",     c:"c-purple"}
-  ]},
-  "People": {icon:"👨", items:[
-    {icon:"👨", label:"Dad",     say:"I want my dad",            c:"c-denim"},
-    {icon:"📞", label:"Call Dad",say:"Can I call my dad please",  c:"c-green"},
-    {icon:"👪", label:"Family",  say:"I want my family",          c:"c-gold"},
-    {icon:"🧑‍⚕️", label:"Staff",  say:"I need someone to help me", c:"c-purple"},
-    {icon:"👋", label:"Hi",      say:"Hi!",                       c:"c-gold"},
-    {icon:"🤝", label:"Bye",     say:"Bye! See you later",        c:"c-brown"},
-    {icon:"🙏", label:"Please",  say:"Please",                    c:"c-green"},
-    {icon:"💛", label:"Thanks",  say:"Thank you",                 c:"c-gold"}
-  ]},
-  "Fun": {icon:"🎬", items:[
-    {icon:"🤠", label:"Toy Story", say:"I want to watch Toy Story", c:"c-gold"},
-    {icon:"📺", label:"Cartoons",  say:"I want to watch cartoons",  c:"c-denim"},
-    {icon:"👗", label:"Costume",   say:"I want to put on my costume", c:"c-red"},
-    {icon:"🎵", label:"Music",     say:"I want music please",       c:"c-purple"},
-    {icon:"🧸", label:"Toys",      say:"I want to play with my toys", c:"c-green"},
-    {icon:"📖", label:"Book",      say:"I want a book",             c:"c-brown"},
-    {icon:"🎨", label:"Draw",      say:"I want to draw",            c:"c-gold"},
-    {icon:"🚶", label:"Walk",      say:"I want to go for a walk",   c:"c-green"}
-  ]},
-  "Day": {icon:"📅", items:[
-    {icon:"🍳", label:"Breakfast", say:"I am ready for breakfast",   c:"c-gold"},
-    {icon:"🍽️", label:"Lunch",     say:"I am ready for lunch",       c:"c-denim"},
-    {icon:"🍝", label:"Dinner",    say:"I am ready for dinner",      c:"c-brown"},
-    {icon:"🚿", label:"Shower",    say:"I want to take a shower",    c:"c-denim"},
-    {icon:"🦷", label:"Teeth",     say:"Time to brush my teeth",     c:"c-green"},
-    {icon:"👕", label:"Clothes",   say:"I want to get dressed",      c:"c-purple"},
-    {icon:"🌙", label:"Bed",       say:"I am ready for bed",         c:"c-brown"},
-    {icon:"❓", label:"What now?", say:"What are we doing now?",     c:"c-red"}
-  ]}
-};
+/* ---------------- colours ---------------- */
+function mix(hex, to, amt){
+  var a = parseInt(hex.slice(1), 16), b = parseInt(to.slice(1), 16), out = 0;
+  for (var s = 16; s >= 0; s -= 8){
+    var x = (a >> s) & 255, y = (b >> s) & 255;
+    out = out * 256 + Math.round(x + (y - x) * amt);
+  }
+  return '#' + (out + 0x1000000).toString(16).slice(1);
+}
+function paint(el, color){
+  el.style.setProperty('--pc', color);
+  el.style.setProperty('--pc-dark', mix(color, '#000000', .32));
+  el.style.setProperty('--pc-tint', mix(color, '#FFFFFF', .78));
+}
+
+/* ---------------- pictures ---------------- */
+function picture(item, cls){
+  var box = document.createElement('div'); box.className = 'pic';
+  var src = item.img || ASSETS.img[item.icon];
+  if (src){
+    var im = document.createElement('img');
+    im.alt = ''; im.src = src; im.draggable = false;
+    if (item.img) im.className = 'photo';
+    im.onerror = function(){ box.innerHTML = ''; box.appendChild(emoji(item.icon)); };
+    box.appendChild(im);
+  } else {
+    box.appendChild(emoji(item.icon));
+  }
+  return box;
+}
+function emoji(ch){ var s = document.createElement('span'); s.className = 'emoji'; s.textContent = ch || '⬜'; return s; }
 
 /* ============================================================
-   DAD'S VOICE — recorded audio, with automatic TTS fallback
-   ------------------------------------------------------------
-   Put your recordings in a folder called "voice" next to this
-   file. Name each file after the button LABEL, lower-case, with
-   spaces turned into dashes, ending in .mp3:
-
-        All done   ->  voice/all-done.mp3
-        Snack      ->  voice/snack.mp3
-        Toy Story  ->  voice/toy-story.mp3
-        What now?  ->  voice/what-now.mp3
-
-   That is the whole setup. No code editing needed.
-
-   * Any phrase WITHOUT a recording automatically speaks with the
-     built-in voice instead. It is never silent.
-   * Record as few or as many as you like, in any order.
-   * Hold the gear icon to see how many were found.
-   * To override a filename for one button, add  audio:"foo.mp3"
-     to that entry in the list above.
+   YOUR OWN RECORDINGS (e.g. Dad's voice)
+   Only used when this file is opened from your own computer or
+   tablet, never on the public website. Put recordings in a folder
+   called "voice" next to index.html, named after the tile's label,
+   lower-case with dashes:  All done -> voice/all-done.mp3
+   .mp3, .m4a and .wav all work. Anything not recorded uses the
+   natural voice instead.
    ============================================================ */
-var VOICE_DIR  = 'voice/';                /* folder holding the recordings    */
-var VOICE_AUTO = true;                    /* set false to disable auto-lookup */
-var VOICE_EXT  = ['mp3','m4a','wav'];     /* tried in this order              */
+var VOICE_DIR  = 'voice/';
+var VOICE_EXT  = ['mp3','m4a','wav'];
+var VOICE_AUTO = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+var EMBED = window.WT_EMBED || {};          /* recordings baked into a packaged single file */
+var mine = {}, mineCount = 0, mineTotal = 0;
 
-/* EMBEDDED recordings, keyed by slug -> "data:audio/...;base64,...".
-   Empty in the source file. The packaged single-file build (built by
-   package-voice.js) fills this in so the whole app is ONE file with the
-   recordings baked in — no voice/ folder needed, still fully offline. */
-var EMBED = window.WT_EMBED || {};
-
-var clips = {}, clipCount = 0, clipTotal = 0, nowPlaying = null;
-
-function slug(s){
-  return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
-}
-
-/* Candidate file names for one button, best first. */
-function clipSrcs(item){
-  var key = slug(item.label);
-  if (EMBED[key])     return [EMBED[key]];              /* baked-in recording (packaged) */
-  if (item.audioData) return [item.audioData];          /* embedded per-item override    */
-  if (item.audio)     return [VOICE_DIR + item.audio];  /* explicit filename override    */
-  if (!VOICE_AUTO)    return [];
-  var base = VOICE_DIR + key + '.';
-  return VOICE_EXT.map(function(e){ return base + e; });
-}
-
-/* Try each candidate in turn; first one that decodes wins. A phrase with no
-   recording simply exhausts the list and is left to TTS — that is the normal
-   state, not an error. */
-function registerClip(item){
-  var srcs = clipSrcs(item); if (!srcs.length) return;
-  var key = slug(item.label);
-  if (key in clips) return;                 /* already probed */
-  clips[key] = null; clipTotal++;
-
+function probeMine(id, label){
+  if (EMBED[id]){ mine[id] = EMBED[id]; mineCount++; return; }
+  if (!VOICE_AUTO) return;
+  mineTotal++;
   (function tryNext(i){
-    if (i >= srcs.length) return;           /* no recording for this phrase */
-    var a = new Audio();
-    a.preload = 'auto';
-    function ok(){
-      if (clips[key] === null){ clips[key] = a; clipCount++; updateClipStat(); }
-    }
-    a.addEventListener('loadeddata', ok);
-    a.addEventListener('canplaythrough', ok);
-    a.addEventListener('error', function(){ tryNext(i+1); });
-    a.addEventListener('ended', function(){ if (nowPlaying === a) nowPlaying = null; });
-    a.src = srcs[i];
+    if (i >= VOICE_EXT.length) return;
+    var a = new Audio(); a.preload = 'metadata';
+    a.addEventListener('loadedmetadata', function(){ if (!mine[id]){ mine[id] = a.src; mineCount++; showMineStat(); } }, {once: true});
+    a.addEventListener('error', function(){ tryNext(i + 1); }, {once: true});
+    a.src = VOICE_DIR + id + '.' + VOICE_EXT[i];
   })(0);
 }
-
-function registerAllClips(){
-  CORE.forEach(registerClip);
-  Object.keys(BOARD).forEach(function(n){ BOARD[n].items.forEach(registerClip); });
-  updateClipStat();
+function showMineStat(){
+  var el = document.getElementById('clipStat');
+  if (!VOICE_AUTO && !mineCount) return;
+  el.hidden = false;
+  el.textContent = mineCount
+    ? mineCount + ' of ' + (mineTotal || mineCount) + ' tiles play your own recording.'
+    : 'No recordings found in the voice folder.';
 }
 
-function updateClipStat(){
-  var el = document.getElementById('clipStat'); if (!el) return;
-  el.textContent = clipCount
-    ? clipCount + ' of ' + clipTotal + ' phrases play in your recorded voice.'
-    : 'No recordings found — every phrase uses the built-in voice.';
+/* ---------------- settings state ---------------- */
+var voiceId = store('tt_voice') || (ASSETS.voices[0] ? ASSETS.voices[0].id : 'device');
+if (voiceId !== 'device' && !ASSETS.clips[voiceId]) voiceId = ASSETS.voices[0] ? ASSETS.voices[0].id : 'device';
+var speed = parseFloat(store('tt_speed') || '1');
+var vol = parseFloat(store('tt_vol') || '1');
+var hidden = [];
+try { hidden = JSON.parse(store('tt_hidden') || '[]'); } catch(e){}
+
+/* ---------------- tablet (device) voice ---------------- */
+var synth = window.speechSynthesis, deviceVoices = [], deviceChoice = store('tt_device_voice') || 'auto';
+
+/* Best-sounding voice first: natural/neural/online voices beat the old robotic ones. */
+function voiceScore(v){
+  var n = v.name, s = 0;
+  if (/^en[-_]US/i.test(v.lang)) s += 3; else if (/^en/i.test(v.lang)) s += 2;
+  if (/natural|neural/i.test(n)) s += 6;
+  if (/enhanced|premium|wavenet|studio/i.test(n)) s += 5;
+  if (/online/i.test(n)) s += 3;
+  if (/google/i.test(n)) s += 3;
+  if (/samantha|aria|jenny|guy|davis|andrew|brian|ava|emma/i.test(n)) s += 1;
+  if (/espeak|zira|david|mark|hazel|desktop/i.test(n)) s -= 2;
+  return s;
 }
-
-/* ---------------- speech ---------------- */
-var synth = window.speechSynthesis, voices = [], chosen = null;
-var rate = 0.9, vol = 1.0;
-
-function loadVoices(){
-  voices = synth ? synth.getVoices() : [];
-  var sel = document.getElementById('voice');
+function loadDeviceVoices(){
+  if (!synth) return;
+  var all = synth.getVoices();
+  var en = all.filter(function(v){ return /^en/i.test(v.lang); });
+  deviceVoices = (en.length ? en : all).slice().sort(function(a, b){ return voiceScore(b) - voiceScore(a); });
+  var sel = document.getElementById('deviceVoice');
   sel.innerHTML = '';
-  var en = voices.filter(function(v){ return /^en/i.test(v.lang); });
-  var list = en.length ? en : voices;
-  list.forEach(function(v){
-    var o = document.createElement('option');
-    o.value = v.name; o.textContent = v.name + ' (' + v.lang + ')';
+  var auto = document.createElement('option');
+  auto.value = 'auto';
+  auto.textContent = 'Automatic: best available' + (deviceVoices[0] ? ' (' + deviceVoices[0].name + ')' : '');
+  sel.appendChild(auto);
+  deviceVoices.forEach(function(v){
+    var o = document.createElement('option'); o.value = v.name; o.textContent = v.name + ' (' + v.lang + ')';
     sel.appendChild(o);
   });
-  var saved = localStorage.getItem('wt_voice');
-  if (saved && list.some(function(v){return v.name===saved;})) { chosen = saved; sel.value = saved; }
-  else if (list.length) { chosen = list[0].name; sel.value = chosen; }
+  sel.value = deviceVoices.some(function(v){ return v.name === deviceChoice; }) ? deviceChoice : 'auto';
 }
-if (synth){ loadVoices(); synth.onvoiceschanged = loadVoices; }
+if (synth){ loadDeviceVoices(); synth.onvoiceschanged = loadDeviceVoices; }
 
-function speak(text){
+function speakDevice(text){
   if (!synth) return;
   synth.cancel();
   var u = new SpeechSynthesisUtterance(text);
-  var v = voices.filter(function(x){return x.name===chosen;})[0];
-  if (v) u.voice = v;
-  u.rate = rate; u.volume = vol; u.pitch = 1;
+  var v = deviceChoice === 'auto' ? deviceVoices[0] : deviceVoices.filter(function(x){ return x.name === deviceChoice; })[0];
+  if (v){ u.voice = v; u.lang = v.lang; }
+  u.rate = 0.9 * speed; u.volume = vol; u.pitch = 1;
   synth.speak(u);
 }
 
-/* Stop whatever is currently talking — recorded clip or TTS.
-   Keeps rapid tapping behaving the same either way: a new tap
-   always interrupts the previous one. */
+/* ---------------- audio clips ---------------- */
+var audioCache = {}, audioOrder = [], nowPlaying = null, token = 0;
+
+function getAudio(src){
+  var a = audioCache[src];
+  if (!a){
+    a = new Audio(); a.preload = 'auto'; a.src = src;
+    audioCache[src] = a; audioOrder.push(src);
+    if (audioOrder.length > 60){ var old = audioOrder.shift(); if (audioCache[old] !== nowPlaying) delete audioCache[old]; }
+  }
+  return a;
+}
+function clipFor(id){
+  if (mine[id]) return mine[id];
+  if (voiceId === 'device') return null;
+  var set = ASSETS.clips[voiceId];
+  return set && set[id] ? set[id] : null;
+}
+function preload(items){
+  items.forEach(function(it){ var src = clipFor(slug(it.label)); if (src) getAudio(src); });
+}
+
 function stopTalking(){
+  token++;
   if (synth) synth.cancel();
-  if (nowPlaying){
-    try { nowPlaying.pause(); nowPlaying.currentTime = 0; } catch(e){}
-    nowPlaying = null;
-  }
+  if (nowPlaying){ try { nowPlaying.pause(); nowPlaying.currentTime = 0; } catch(e){} nowPlaying = null; }
 }
 
-/* Dad's recording if we have one, otherwise the built-in voice.
-   If playback is refused for any reason, fall through to TTS so a
-   tap NEVER produces silence. */
-function say(item, text){
+/* Play the clip; if it errors, is refused, or hasn't started within 1.5 s,
+   say it with the tablet voice instead. Never silent. */
+function say(id, text){
   stopTalking();
-  var a = clips[slug(item.label)];
-  if (a){
-    try { a.currentTime = 0; } catch(e){}
-    a.volume = vol;
-    nowPlaying = a;
-    var p = a.play();
-    if (p && p.catch) p.catch(function(){ nowPlaying = null; speak(text); });
-    return;
+  var my = token, src = clipFor(id);
+  if (!src){ speakDevice(text); return; }
+  var a = getAudio(src), started = false, done = false;
+  function tidy(){ a.removeEventListener('playing', onPlaying); a.removeEventListener('error', fallback); }
+  function onPlaying(){ started = true; tidy(); }
+  /* Runs at most once per tap: the timer, an error and a refused play() can
+     all fire for the same stalled clip, but the phrase must only be said once. */
+  function fallback(){
+    if (done || my !== token || started) return;
+    done = true; tidy();
+    try { a.pause(); } catch(e){}
+    if (nowPlaying === a) nowPlaying = null;
+    speakDevice(text);
   }
-  speak(text);
+  a.addEventListener('playing', onPlaying);
+  a.addEventListener('error', fallback);
+  try { a.currentTime = 0; } catch(e){}
+  a.defaultPlaybackRate = speed; a.playbackRate = speed;
+  a.preservesPitch = true; a.mozPreservesPitch = true; a.webkitPreservesPitch = true;
+  a.volume = vol;
+  nowPlaying = a;
+  var p = a.play();
+  if (p && p.catch) p.catch(fallback);
+  setTimeout(fallback, 1500);
 }
 
-var banner = document.getElementById('banner');
+var banner = document.getElementById('banner'), said = document.getElementById('said'), flashT = null;
 function announce(item){
   var text = item.say || item.label;
-  banner.textContent = text;
+  said.textContent = text;
   banner.classList.add('flash');
-  setTimeout(function(){ banner.classList.remove('flash'); }, 420);
-  say(item, text);
-  if (navigator.vibrate) { try{ navigator.vibrate(28); }catch(e){} }
+  clearTimeout(flashT); flashT = setTimeout(function(){ banner.classList.remove('flash'); }, 420);
+  say(slug(item.label), text);
+  if (navigator.vibrate){ try { navigator.vibrate(28); } catch(e){} }
 }
 
-/* ---------------- build UI ---------------- */
-function makeBtn(item, extraClass){
+/* ---------------- core bar ---------------- */
+var coreEl = document.getElementById('core');
+LIB.core.forEach(function(item){
   var b = document.createElement('button');
-  b.className = 'btn ' + (item.c || 'c-denim') + (extraClass ? ' ' + extraClass : '');
-  var ico;
-  if (item.img){ ico = document.createElement('img'); ico.className='ico'; ico.src=item.img; ico.alt=''; }
-  else { ico = document.createElement('div'); ico.className='ico'; ico.textContent = item.icon || '⬜'; }
-  var lab = document.createElement('div'); lab.textContent = item.label;
-  b.appendChild(ico); b.appendChild(lab);
+  b.className = 'core-btn';
+  b.style.setProperty('--c', item.color || '#3C6E9F');
+  b.style.setProperty('--c-dark', mix(item.color || '#3C6E9F', '#000000', .32));
+  b.setAttribute('aria-label', item.say || item.label);
+  b.appendChild(picture(item));
+  var l = document.createElement('div'); l.textContent = item.label; b.appendChild(l);
+  b.addEventListener('click', function(){ announce(item); });
+  coreEl.appendChild(b);
+  probeMine(slug(item.label));
+});
+
+/* ---------------- pages ---------------- */
+var PER_PAGE = 12;
+var allPages = [];            /* long pages are split into "Food 2", "Food 3", ... */
+LIB.pages.forEach(function(p){
+  for (var i = 0; i < Math.max(1, p.tiles.length); i += PER_PAGE){
+    var part = i / PER_PAGE;
+    allPages.push({key: slug(p.name), name: p.name + (part ? ' ' + (part + 1) : ''), icon: p.icon,
+                   color: p.color || '#3C6E9F', tiles: p.tiles.slice(i, i + PER_PAGE)});
+  }
+  p.tiles.forEach(function(t){ probeMine(slug(t.label)); });
+});
+showMineStat();
+
+function visiblePages(){
+  var v = allPages.filter(function(p){ return hidden.indexOf(p.key) === -1; });
+  return v.length ? v : allPages;
+}
+var pages = visiblePages(), current = 0;
+var stage = document.getElementById('stage'), gridEl = null;
+var prevBtn = document.getElementById('prev'), nextBtn = document.getElementById('next'), titleBtn = document.getElementById('title');
+
+var CHEVRON_L = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 3.5 7 12l8.5 8.5" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var CHEVRON_R = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 3.5 17 12l-8.5 8.5" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function render(dir){
+  var page = pages[current];
+  var g = document.createElement('div');
+  g.className = 'grid' + (dir ? ' enter-' + dir : '');
+  paint(g, page.color);
+  for (var i = 0; i < PER_PAGE; i++){
+    var item = page.tiles[i];
+    if (!item){ var s = document.createElement('div'); s.className = 'slot'; g.appendChild(s); continue; }
+    g.appendChild(makeTile(item));
+  }
+  if (gridEl) stage.removeChild(gridEl);
+  stage.appendChild(gridEl = g);
+
+  /* title + dots */
+  paint(titleBtn, page.color);
+  titleBtn.innerHTML = '';
+  titleBtn.appendChild(picture(page));
+  var txt = document.createElement('div'); txt.className = 'txt';
+  var nm = document.createElement('div'); nm.className = 'name'; nm.textContent = page.name; txt.appendChild(nm);
+  var dots = document.createElement('div'); dots.id = 'dots';
+  pages.forEach(function(_, i){ var d = document.createElement('i'); if (i === current) d.className = 'on'; dots.appendChild(d); });
+  txt.appendChild(dots); titleBtn.appendChild(txt);
+
+  /* arrows show the picture of the page they lead to */
+  var prev = pages[(current - 1 + pages.length) % pages.length], next = pages[(current + 1) % pages.length];
+  prevBtn.innerHTML = CHEVRON_L; prevBtn.appendChild(picture(prev));
+  nextBtn.innerHTML = ''; nextBtn.appendChild(picture(next)); nextBtn.insertAdjacentHTML('beforeend', CHEVRON_R);
+  prevBtn.setAttribute('aria-label', 'Previous page: ' + prev.name);
+  nextBtn.setAttribute('aria-label', 'Next page: ' + next.name);
+
+  preload(page.tiles);
+}
+
+function makeTile(item){
+  var b = document.createElement('button');
+  b.className = 'tile';
+  b.setAttribute('aria-label', item.say || item.label);
+  b.appendChild(picture(item));
+  var l = document.createElement('div'); l.className = 'lab'; l.textContent = item.label; b.appendChild(l);
   b.addEventListener('click', function(){ announce(item); });
   return b;
 }
 
-var coreEl = document.getElementById('core');
-CORE.forEach(function(i){ coreEl.appendChild(makeBtn(i,'core-btn')); });
-
-var tabsEl = document.getElementById('tabs'), gridEl = document.getElementById('grid');
-var names = Object.keys(BOARD), current = names[0];
-
-function renderGrid(){
-  gridEl.innerHTML = '';
-  BOARD[current].items.forEach(function(i){ gridEl.appendChild(makeBtn(i)); });
-  gridEl.scrollTop = 0;
+/* Wraps around at the ends, so an arrow tap always does something. */
+function go(step){
+  current = (current + step + pages.length) % pages.length;
+  render(step > 0 ? 'next' : 'prev');
 }
-names.forEach(function(n){
-  var t = document.createElement('button');
-  t.className='tab'; t.setAttribute('role','tab');
-  t.setAttribute('aria-selected', String(n===current));
-  var ic=document.createElement('div'); ic.className='ico'; ic.textContent=BOARD[n].icon;
-  var lb=document.createElement('div'); lb.textContent=n;
-  t.appendChild(ic); t.appendChild(lb);
-  t.addEventListener('click', function(){
-    current = n;
-    Array.prototype.forEach.call(tabsEl.children, function(c){ c.setAttribute('aria-selected','false'); });
-    t.setAttribute('aria-selected','true');
-    renderGrid();
+prevBtn.addEventListener('click', function(){ go(-1); });
+nextBtn.addEventListener('click', function(){ go(1); });
+document.addEventListener('keydown', function(e){
+  if (panel.classList.contains('open') || picker.classList.contains('open')) return;
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'ArrowRight') go(1);
+});
+
+/* ---------------- page picker (tap the page name) ---------------- */
+var picker = document.getElementById('picker'), pickGrid = document.getElementById('pickGrid');
+function openPicker(){
+  pickGrid.innerHTML = '';
+  pages.forEach(function(p, i){
+    var b = document.createElement('button');
+    b.className = 'pick' + (i === current ? ' here' : '');
+    paint(b, p.color);
+    b.appendChild(picture(p));
+    var l = document.createElement('div'); l.textContent = p.name; b.appendChild(l);
+    b.addEventListener('click', function(){
+      var dir = i === current ? '' : (i > current ? 'next' : 'prev');
+      current = i; picker.classList.remove('open'); render(dir);
+    });
+    pickGrid.appendChild(b);
   });
-  tabsEl.appendChild(t);
-});
-renderGrid();
-registerAllClips();
+  var c = document.createElement('button');
+  c.className = 'pick close'; c.textContent = '✕ Close';
+  c.addEventListener('click', function(){ picker.classList.remove('open'); });
+  pickGrid.appendChild(c);
+  picker.classList.add('open');
+}
+titleBtn.addEventListener('click', openPicker);
+picker.addEventListener('click', function(e){ if (e.target === picker) picker.classList.remove('open'); });
 
-/* ---------------- settings (hold gear) ---------------- */
-var gear=document.getElementById('gear'), panel=document.getElementById('panel'), holdT=null;
-function startHold(e){ e.preventDefault(); holdT=setTimeout(function(){ panel.classList.add('open'); },1000); }
+render('');
+
+/* ---------------- settings (hold the gear) ---------------- */
+var gear = document.getElementById('gear'), panel = document.getElementById('panel'), holdT = null;
+function startHold(e){ e.preventDefault(); holdT = setTimeout(openSettings, 1000); }
 function endHold(){ clearTimeout(holdT); }
-gear.addEventListener('touchstart',startHold,{passive:false});
-gear.addEventListener('touchend',endHold);
-gear.addEventListener('touchcancel',endHold);
-gear.addEventListener('mousedown',startHold);
-gear.addEventListener('mouseup',endHold);
-gear.addEventListener('mouseleave',endHold);
-document.getElementById('closePanel').addEventListener('click',function(){ panel.classList.remove('open'); });
-panel.addEventListener('click',function(e){ if(e.target===panel) panel.classList.remove('open'); });
+gear.addEventListener('touchstart', startHold, {passive: false});
+gear.addEventListener('touchend', endHold);
+gear.addEventListener('touchcancel', endHold);
+gear.addEventListener('mousedown', startHold);
+gear.addEventListener('mouseup', endHold);
+gear.addEventListener('mouseleave', endHold);
+document.getElementById('closePanel').addEventListener('click', function(){ panel.classList.remove('open'); });
+panel.addEventListener('click', function(e){ if (e.target === panel) panel.classList.remove('open'); });
 
-document.getElementById('voice').addEventListener('change',function(e){
-  chosen=e.target.value; localStorage.setItem('wt_voice',chosen); speak('Hello. This is my voice.');
+function openSettings(){ buildVoiceList(); buildPageList(); refreshOffline(); panel.classList.add('open'); }
+
+function buildVoiceList(){
+  var box = document.getElementById('voiceList'); box.innerHTML = '';
+  var opts = ASSETS.voices.map(function(v){ return {id: v.id, name: v.name, desc: v.desc}; });
+  opts.push({id: 'device', name: 'Tablet voice', desc: 'the voice built into this device'});
+  opts.forEach(function(o){
+    var lab = document.createElement('label'); lab.className = 'choice';
+    var r = document.createElement('input'); r.type = 'radio'; r.name = 'voice'; r.value = o.id; r.checked = o.id === voiceId;
+    var t = document.createElement('span'); t.innerHTML = '<strong></strong> <small></small>';
+    t.firstChild.textContent = o.name; t.lastChild.textContent = o.desc;
+    lab.appendChild(r); lab.appendChild(t);
+    r.addEventListener('change', function(){
+      voiceId = o.id; store('tt_voice', voiceId);
+      sample();
+      warmVoice();
+    });
+    box.appendChild(lab);
+  });
+}
+function sample(){
+  var text = 'Hi! This is my voice.';
+  said.textContent = text;
+  say('_sample', text);
+}
+
+document.getElementById('deviceVoice').addEventListener('change', function(e){
+  deviceChoice = e.target.value; store('tt_device_voice', deviceChoice);
+  stopTalking(); speakDevice('Hi! This is my voice.');
 });
-var rEl=document.getElementById('rate'), rV=document.getElementById('rateVal');
-rate = parseFloat(localStorage.getItem('wt_rate')||'0.9'); rEl.value=rate; rV.textContent=rate.toFixed(2);
-rEl.addEventListener('input',function(e){ rate=parseFloat(e.target.value); rV.textContent=rate.toFixed(2); localStorage.setItem('wt_rate',rate); });
-rEl.addEventListener('change',function(){ speak('This is how fast I talk'); });
 
-var vEl=document.getElementById('vol'), vV=document.getElementById('volVal');
-vol = parseFloat(localStorage.getItem('wt_vol')||'1'); vEl.value=vol; vV.textContent=vol.toFixed(1);
-vEl.addEventListener('input',function(e){ vol=parseFloat(e.target.value); vV.textContent=vol.toFixed(1); localStorage.setItem('wt_vol',vol); });
+var sEl = document.getElementById('speed'), sV = document.getElementById('speedVal');
+sEl.value = speed; sV.textContent = speed.toFixed(2);
+sEl.addEventListener('input', function(e){ speed = parseFloat(e.target.value); sV.textContent = speed.toFixed(2); store('tt_speed', speed); });
+sEl.addEventListener('change', function(){ said.textContent = 'This is how fast I talk'; say('_speed', 'This is how fast I talk'); });
+
+var vEl = document.getElementById('vol'), vV = document.getElementById('volVal');
+vEl.value = vol; vV.textContent = vol.toFixed(1);
+vEl.addEventListener('input', function(e){ vol = parseFloat(e.target.value); vV.textContent = vol.toFixed(1); store('tt_vol', vol); });
+
+function buildPageList(){
+  var box = document.getElementById('pageList'); box.innerHTML = '';
+  var seen = {};
+  allPages.forEach(function(p){
+    if (seen[p.key]) return; seen[p.key] = 1;
+    var lab = document.createElement('label'); lab.className = 'choice';
+    var c = document.createElement('input'); c.type = 'checkbox'; c.checked = hidden.indexOf(p.key) === -1;
+    var t = document.createElement('span'); t.textContent = p.icon + ' ' + p.name.replace(/ \d+$/, '');
+    lab.appendChild(c); lab.appendChild(t);
+    c.addEventListener('change', function(){
+      if (c.checked) hidden = hidden.filter(function(k){ return k !== p.key; });
+      else if (hidden.indexOf(p.key) === -1) hidden.push(p.key);
+      if (!allPages.some(function(q){ return hidden.indexOf(q.key) === -1; })){
+        hidden = hidden.filter(function(k){ return k !== p.key; });   /* keep at least one page */
+        c.checked = true;
+      }
+      store('tt_hidden', JSON.stringify(hidden));
+      var here = pages[current] && pages[current].key;
+      pages = visiblePages();
+      var idx = -1;
+      pages.forEach(function(q, i){ if (idx === -1 && q.key === here) idx = i; });
+      current = idx === -1 ? 0 : idx;
+      render('');
+    });
+    box.appendChild(lab);
+  });
+}
+
+/* ---------------- offline ---------------- */
+var VOICE_CACHE = 'tt-voices';
+function voiceUrls(){
+  if (voiceId === 'device' || !ASSETS.clips[voiceId]) return [];
+  var set = ASSETS.clips[voiceId];
+  return Object.keys(set).map(function(k){ return new URL(set[k], location.href).href; });
+}
+/* Download every clip of the chosen voice so it works offline; drop stale ones. */
+var warming = null;
+function warmVoice(){
+  if (!('caches' in window) || !navigator.serviceWorker || !navigator.serviceWorker.controller) return Promise.resolve();
+  var urls = voiceUrls(), want = {};
+  urls.forEach(function(u){ want[u] = 1; });
+  var job = caches.open(VOICE_CACHE).then(function(c){
+    return c.keys().then(function(keys){
+      var have = {};
+      keys.forEach(function(r){
+        var u = r.url;
+        if (want[u]) have[u] = 1;
+        else if (u.indexOf('/voices/' + voiceId + '/') !== -1) c.delete(r);   /* an older recording of a changed phrase */
+      });
+      var todo = urls.filter(function(u){ return !have[u]; });
+      function next(){
+        var u = todo.shift(); if (!u) return Promise.resolve();
+        return fetch(u).then(function(r){ return r.ok ? r.arrayBuffer() : null; }).catch(function(){}).then(next);
+      }
+      return Promise.all([next(), next(), next(), next()]);
+    });
+  }).then(refreshOffline, refreshOffline);
+  warming = job;
+  return job;
+}
+function refreshOffline(){
+  var el = document.getElementById('offlineStat');
+  if (!navigator.serviceWorker){ el.textContent = 'Offline use needs a newer browser. Online it works normally.'; return; }
+  if (!navigator.serviceWorker.controller){ el.textContent = 'Getting ready for offline use… (reopen the app once)'; return; }
+  var urls = voiceUrls();
+  if (!urls.length || !('caches' in window)){ el.textContent = '✓ Ready to use with no internet.'; return; }
+  caches.open(VOICE_CACHE).then(function(c){
+    return Promise.all(urls.map(function(u){ return c.match(u).then(function(r){ return !!r; }); }));
+  }).then(function(hits){
+    var n = hits.filter(Boolean).length;
+    el.textContent = n === urls.length
+      ? '✓ Ready to use with no internet (pictures and voice saved on this device).'
+      : 'Saving the voice for offline use: ' + n + ' of ' + urls.length + '…';
+  });
+}
+
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
+  navigator.serviceWorker.register('sw.js').then(function(){
+    return navigator.serviceWorker.ready;
+  }).then(function(){
+    if (navigator.serviceWorker.controller) warmVoice();
+    else navigator.serviceWorker.addEventListener('controllerchange', function(){ warmVoice(); }, {once: true});
+  }).catch(function(){});
+}
 
 /* stop pinch-zoom (iOS Safari only event; harmless elsewhere) */
-document.addEventListener('gesturestart',function(e){e.preventDefault();});
+document.addEventListener('gesturestart', function(e){ e.preventDefault(); });
 
 /* 🔴 DO NOT ADD A touchend/double-tap preventDefault HANDLER HERE.
    One used to live here and it BROKE RAPID TAPPING. Calling preventDefault()
    on touchend suppresses Chrome's synthesized click, so the second of any two
-   taps within 300ms was silently dead — tap "More" twice, or two buttons in
+   taps within 300ms was silently dead: tap "More" twice, or two tiles in
    quick succession, and nothing spoke. For a non-verbal user who cannot report
    a dead button, that is the worst failure mode this app can have.
-   It was also redundant: double-tap zoom is ALREADY disabled by
+   It is also redundant: double-tap zoom is ALREADY disabled by
    `touch-action:manipulation` on body plus `user-scalable=no, maximum-scale=1`
-   in the viewport meta. Both verified live. Removed 2026-08-16. */
+   in the viewport meta. */
 </script>
 </body>
 </html>
