@@ -2,6 +2,8 @@
 
 *Talanoa* (tah-lah-NOH-ah) is Tongan for talking together.
 
+Made for the residents of Faleofaz.
+
 A tap-to-speak picture board (AAC). Tap a tile and it says the phrase out loud in a natural voice.
 
 **Open it:** https://tcdeveloper27.github.io/Talanoa/
