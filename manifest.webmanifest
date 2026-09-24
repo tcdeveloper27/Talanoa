@@ -1,6 +1,6 @@
 {
-  "name": "TilerTalker",
-  "short_name": "TilerTalker",
+  "name": "Talanoa",
+  "short_name": "Talanoa",
   "description": "Tap a picture to talk.",
   "start_url": "./",
   "scope": "./",

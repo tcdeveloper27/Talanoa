@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build TilerTalker's pictures, natural voices and offline file list.
+"""Build Talanoa's pictures, natural voices and offline file list.
 
 Run from the repo root after changing library.js:
 

@@ -1,4 +1,4 @@
-/* TilerTalker offline cache.
+/* Talanoa offline cache.
    sw.js is generated from tools/sw-template.js by tools/build.py; edit the template.
 
    Everything the board needs is kept on the tablet, so it keeps working with no

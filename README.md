@@ -1,8 +1,10 @@
-# TilerTalker
+# Talanoa
+
+*Talanoa* (tah-lah-NOH-ah) is Tongan for talking together.
 
 A tap-to-speak picture board (AAC). Tap a tile and it says the phrase out loud in a natural voice.
 
-**Open it:** https://tcdeveloper27.github.io/TilerTalker/
+**Open it:** https://tcdeveloper27.github.io/Talanoa/
 
 On an Android tablet, open the link in Chrome, then **⋮ → Add to Home screen** (or **Install app**). It opens full screen like an app and keeps working with no internet.
 

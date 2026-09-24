@@ -1,5 +1,5 @@
 /* ============================================================
-   TilerTalker library: every word on the board lives here.
+   Talanoa library: every word on the board lives here.
 
    CORE  = the 6 buttons along the top. They NEVER move and are on
            every page, so they can be found without looking.
