@@ -14,7 +14,7 @@ What it does
   3. Writes assets.js (what the app loads) and sw.js (the offline cache).
 
 One-time setup (about 400 MB of downloads, into ~/.cache/tilertalker):
-    pip install kokoro-onnx soundfile pillow imageio-ffmpeg
+    pip install kokoro-onnx soundfile pillow imageio-ffmpeg qrcode
 """
 import hashlib, io, json, os, re, subprocess, sys, tarfile, tempfile, urllib.request
 

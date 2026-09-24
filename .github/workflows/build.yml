@@ -39,7 +39,7 @@ jobs:
           key: talanoa-downloads-v1
 
       - name: Install the voice and picture tools
-        run: pip install kokoro-onnx soundfile pillow imageio-ffmpeg
+        run: pip install kokoro-onnx soundfile pillow imageio-ffmpeg qrcode
 
       - name: Make pictures and voices
         run: python3 tools/build.py

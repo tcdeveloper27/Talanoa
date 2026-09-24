@@ -25,7 +25,7 @@ def qr_svg(url):
     try:
         import qrcode, qrcode.image.svg
     except ImportError:
-        return ''
+        sys.exit('The staff guide needs the qrcode package: pip install qrcode')
     img = qrcode.make(url, image_factory=qrcode.image.svg.SvgPathImage, box_size=10, border=2)
     svg = img.to_string(encoding='unicode')
     svg = re.sub(r'<\?xml[^>]*\?>', '', svg)
