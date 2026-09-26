@@ -40,48 +40,51 @@ def main():
     img = assets['img']
     boxes = json.load(open(os.path.join(ROOT, 'manual', 'boxes.json')))
 
-    def pic(emoji):
-        src = img.get(emoji)
+    def pic(emoji, photo=None):
+        src = photo or img.get(emoji)
         return f'<img src="../{src}" alt="">' if src else f'<span class="em">{html.escape(emoji)}</span>'
+
+    def tiles(p):
+        return [t for t in p['tiles'] if not build.blank(t)]
 
     # page gallery
     cards = []
     for i, p in enumerate(lib['pages'], 1):
-        sample = ', '.join(html.escape(t['label']) for t in p['tiles'][:4])
+        sample = ', '.join(html.escape(t['label']) for t in tiles(p)[:4])
         cards.append(
-            f'<div class="pagecard" style="--pc:{p["color"]}"><div class="pc-top">{pic(p["icon"])}'
+            f'<div class="pagecard" style="--pc:{p["color"]}"><div class="pc-top">{pic(p["icon"], p.get("img"))}'
             f'<b>{html.escape(p["name"])}</b><span class="n">{i}</span></div>'
-            f'<div class="pc-body">{len(p["tiles"])} tiles: {sample}…</div></div>')
+            f'<div class="pc-body">{len(tiles(p))} tiles: {sample}…</div></div>')
 
     # voices
     rows = []
     for i, v in enumerate(build.VOICES):
         tag = ' <span class="tag">default</span>' if i == 0 else ''
         rows.append(f'<tr><td><b>{html.escape(v["name"])}</b>{tag}</td><td>{html.escape(v["desc"])}</td></tr>')
-    rows.append('<tr><td><b>Tablet voice</b></td><td>the voice built into the tablet (sound depends on the tablet)</td></tr>')
+    rows.append('<tr><td><b>Built-in voice</b></td><td>the voice built into the phone or tablet (sound depends on the device)</td></tr>')
 
     # core row
     core = ''.join(f'<span class="corechip" style="--c:{c["color"]}">{pic(c["icon"])}{html.escape(c["label"])}</span>'
                    for c in lib['core'])
 
-    # callouts on the main screenshot (1280 x 800 CSS pixels)
-    W, H = 1280, 800
-    def at(name, dx=0, dy=0, where='tl'):
+    # callouts on the main screenshot (its size in CSS pixels is in boxes.json)
+    W, H = boxes['shot']['width'], boxes['shot']['height']
+    def at(name, ax, ay, dx=0, dy=0):
+        """A point on a measured box: ax, ay = 0 for its left/top edge, .5 middle, 1 right/bottom."""
         r = boxes[name]
-        x = r['x'] + (r['width'] / 2 if where == 'c' else 0) + dx
-        y = r['y'] + (r['height'] / 2 if where == 'c' else 0) + dy
-        return pct(x, W), pct(y, H)
+        return pct(r['x'] + r['width'] * ax + dx, W), pct(r['y'] + r['height'] * ay + dy, H)
     main_badges = ''.join([
-        badge(1, *at('banner', 330, 28)),
-        badge(2, *at('core', 18, 14)),
-        badge(3, *at('prev', 14, 14)),
-        badge(4, *at('title', 14, 14)),
-        badge(5, *at('next', 14, 14)),
-        badge(6, *at('snack', 16, 16)),
-        badge(7, *at('gear', -22, 18)),
+        badge(1, *at('banner', 0, .5, 26)),
+        badge(2, *at('core', 0, 0, 18, 16)),
+        badge(3, *at('prev', 0, 0, 14, 12)),
+        badge(4, *at('title', 0, 0, 14, 12)),
+        badge(5, *at('next', 1, 0, -14, 12)),
+        badge(6, *at('snack', 0, 0, 16, 16)),
+        badge(7, *at('gear', 0, .5, -16)),
+        badge(8, *at('lit', 1, 0, -14, 14)),
     ])
 
-    # callouts on the two settings crops (sheet is 600 CSS px wide, cut 44px above "Pages to show")
+    # callouts on the two settings crops (cut 44 CSS px above "Pages to show")
     sw = boxes['s_voice']['sheetW']
     cut = boxes['s_pages']['y'] - 44
     total = boxes['s_pages']['sheetH']
@@ -92,13 +95,14 @@ def main():
         return pct(sw - 16, sw), pct(y, h)
     top_badges = ''.join([badge('A', *sat('s_voice', True)), badge('B', *sat('s_speed', True)),
                           badge('C', *sat('s_vol', True))])
-    bottom_badges = ''.join([badge('D', *sat('s_pages', False)), badge('E', *sat('s_status', False)),
-                             badge('F', *sat('s_update', False)), badge('G', *sat('s_about', False))])
+    bottom_badges = ''.join([badge('D', *sat('s_pages', False)), badge('E', *sat('s_swipe', False)),
+                             badge('F', *sat('s_status', False)), badge('G', *sat('s_update', False)),
+                             badge('H', *sat('s_about', False))])
 
     tpl = open(os.path.join(ROOT, 'tools', 'manual-template.html'), encoding='utf-8').read()
     out = (tpl.replace('{{PAGE_CARDS}}', '\n'.join(cards))
               .replace('{{PAGE_COUNT}}', str(len(lib['pages'])))
-              .replace('{{TILE_COUNT}}', str(sum(len(p['tiles']) for p in lib['pages'])))
+              .replace('{{TILE_COUNT}}', str(sum(len(tiles(p)) for p in lib['pages'])))
               .replace('{{VOICE_ROWS}}', '\n'.join(rows))
               .replace('{{VOICE_COUNT}}', str(len(build.VOICES)))
               .replace('{{CORE_CHIPS}}', core)

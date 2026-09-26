@@ -16,7 +16,7 @@ What it does
 One-time setup (about 400 MB of downloads, into ~/.cache/tilertalker):
     pip install kokoro-onnx soundfile pillow imageio-ffmpeg qrcode
 """
-import hashlib, io, json, os, re, subprocess, sys, tarfile, tempfile, urllib.request
+import hashlib, io, json, os, re, subprocess, sys, tarfile, tempfile, unicodedata, urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CACHE = os.path.expanduser('~/.cache/tilertalker')
@@ -44,6 +44,16 @@ def slug(s):
     return re.sub(r'^-+|-+$', '', re.sub(r'[^a-z0-9]+', '-', str(s).lower()))
 
 
+def file_slug(s):
+    """slug() for file names: accented letters become plain ones (Mālō -> malo)."""
+    return slug(unicodedata.normalize('NFKD', str(s)).encode('ascii', 'ignore').decode())
+
+
+def blank(t):
+    """An empty spot on a page: {"empty": true} (or anything without a label)."""
+    return not isinstance(t, dict) or not t.get('label')
+
+
 def load_library():
     src = open(os.path.join(ROOT, 'library.js'), encoding='utf-8').read()
     start = src.index('{', src.index('window.TT_LIBRARY'))
@@ -62,26 +72,58 @@ def check_mom_under_dad(lib):
     for p in lib['pages']:
         tiles = p['tiles']
         for i, t in enumerate(tiles):
-            if not re.search(r'\bdad\b', t['label'] + ' ' + (t.get('say') or ''), re.I):
+            if blank(t) or not re.search(r'\bdad\b', t['label'] + ' ' + (t.get('say') or ''), re.I):
                 continue
             want = re.sub(r'\bDad\b', 'Mom', t['label']), re.sub(r'\bdad\b', 'mom', re.sub(r'\bDad\b', 'Mom', t.get('say') or ''))
             below = tiles[i + 4] if i + 4 < len(tiles) and i % 12 < 8 else None
-            if not below or (below['label'], below.get('say') or '') != want:
+            if blank(below) or (below['label'], below.get('say') or '') != want:
                 problems.append(f'  page "{p["name"]}": "{t["label"]}" needs "{want[0]}" directly underneath it')
     if problems:
         sys.exit('Every Dad tile must have the matching Mom tile directly below it:\n' + '\n'.join(problems))
 
 
 def all_tiles(lib):
-    """Every speakable tile (core + pages) with its id, checking ids are unique."""
-    tiles, seen = [], {}
-    for t in lib['core'] + [t for p in lib['pages'] for t in p['tiles']]:
-        tid = slug(t['label'])
-        if tid in seen and seen[tid] != (t.get('say') or t['label']):
-            sys.exit(f'Two different tiles are both labelled "{t["label"]}". Give one a different label.')
-        seen[tid] = t.get('say') or t['label']
-        tiles.append((tid, t))
-    return tiles
+    """Every speakable tile: the top row, then each page's tiles in order."""
+    return lib['core'] + [t for p in lib['pages'] for t in p['tiles'] if not blank(t)]
+
+
+def recordings(lib):
+    """Every different sentence on the board and the file its recording is saved as.
+
+    The app finds a recording by the sentence itself, so tiles that say the same
+    thing share one, and one label can say different things on different pages.
+    A file is named after its tile's label; if another tile with that label says
+    something else, the later one is named after its sentence instead."""
+    jobs, taken = {SAMPLE_TEXT: '_sample', SPEED_TEXT: '_speed'}, {}
+    for t in all_tiles(lib):
+        text = t.get('say') or t['label']
+        if text in jobs:
+            continue
+        name = file_slug(t['label'])
+        if not name or taken.get(name, text) != text:
+            base = name = file_slug(text) or 'tile'
+            n = 2
+            while taken.get(name, text) != text:
+                name, n = f'{base}-{n}', n + 1
+        taken[name] = text
+        jobs[text] = name
+    return jobs
+
+
+def photos(lib):
+    """Real photos ("img") used by pages and tiles. They are saved on the phone
+    for offline use, so each one must exist: a missing photo would stop every
+    update from installing."""
+    found = []
+    for item in lib['core'] + lib['pages'] + all_tiles(lib):
+        src = item.get('img')
+        if not src or re.match(r'^[a-z]+:', src):
+            continue
+        if not os.path.isfile(os.path.join(ROOT, src)):
+            sys.exit(f'The photo "{src}" (for "{item.get("label") or item.get("name")}") is missing. '
+                     'Upload it, or remove that "img" line from library.js.')
+        found.append(src)
+    return sorted(set(found))
 
 
 def download(url, dest):
@@ -117,7 +159,7 @@ def emoji_file(src_dir, emoji):
 def build_pictures(lib):
     src_dir = emoji_dir()
     icons = [t['icon'] for t in lib['core']] + [p['icon'] for p in lib['pages']]
-    icons += [t['icon'] for p in lib['pages'] for t in p['tiles']]
+    icons += [t['icon'] for p in lib['pages'] for t in p['tiles'] if not blank(t)]
     out, missing = {}, []
     os.makedirs(os.path.join(ROOT, 'img'), exist_ok=True)
     for e in dict.fromkeys(icons):
@@ -185,15 +227,13 @@ def finish(s, sr):
     return np.concatenate([np.zeros(int(sr * 0.02), dtype=s.dtype), s])
 
 
-def build_voices(tiles):
+def build_voices(jobs):
     import numpy as np, soundfile as sf, imageio_ffmpeg
     from kokoro_onnx import Kokoro
     model = [download(KOKORO_BASE + f, os.path.join(CACHE, 'kokoro', f)) for f in KOKORO_FILES]
     ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
     kokoro = None
     result = {}
-    jobs = [('_sample', SAMPLE_TEXT), ('_speed', SPEED_TEXT)] + [(tid, t.get('say') or t['label']) for tid, t in tiles]
-    jobs = list(dict(jobs).items())
     for v in VOICES:
         vdir = os.path.join(ROOT, 'voices', v['id'])
         os.makedirs(vdir, exist_ok=True)
@@ -201,7 +241,7 @@ def build_voices(tiles):
         manifest = json.load(open(man_path)) if os.path.exists(man_path) else {}
         made = 0
         clips = {}
-        for tid, text in jobs:
+        for text, tid in jobs.items():
             key = hashlib.sha1(f'{v["kokoro"]}|{SPEED}|{PROCESS}|{text}'.encode()).hexdigest()[:10]
             dest = os.path.join(vdir, tid + '.mp3')
             if manifest.get(tid) != key or not os.path.exists(dest):
@@ -217,10 +257,11 @@ def build_voices(tiles):
                                 '-b:a', '48k', dest], input=buf.getvalue(), check=True)
                 manifest[tid] = key
                 made += 1
-            clips[tid] = f'voices/{v["id"]}/{tid}.mp3?v={key}'
-        # forget clips for tiles that no longer exist
+            clips[text] = f'voices/{v["id"]}/{tid}.mp3?v={key}'
+        # forget recordings of sentences no tile says any more
+        names = set(jobs.values())
         for tid in list(manifest):
-            if tid not in clips:
+            if tid not in names:
                 del manifest[tid]
                 p = os.path.join(vdir, tid + '.mp3')
                 if os.path.exists(p):
@@ -240,7 +281,8 @@ def file_hash(paths):
     return h.hexdigest()[:12]
 
 
-def write_outputs(pictures, clips):
+def write_outputs(pictures, clips, photo_files):
+    # clips: for each voice, sentence -> recording
     assets = {
         'voices': [{k: v[k] for k in ('id', 'name', 'desc')} for v in VOICES],
         'img': pictures,
@@ -252,7 +294,7 @@ def write_outputs(pictures, clips):
 
     shell = ['index.html', 'credits.html', 'library.js', 'assets.js', 'manifest.webmanifest',
              'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-512-maskable.png']
-    precache = shell + sorted(set(pictures.values()))
+    precache = shell + sorted(set(pictures.values())) + photo_files
     version = file_hash(precache + ['tools/sw-template.js'])
     tpl = open(os.path.join(ROOT, 'tools', 'sw-template.js'), encoding='utf-8').read()
     sw = tpl.replace('__VERSION__', version).replace('__PRECACHE__', json.dumps(['./'] + precache, indent=1))
@@ -263,12 +305,13 @@ def write_outputs(pictures, clips):
 def main():
     lib = load_library()
     check_mom_under_dad(lib)
-    tiles = all_tiles(lib)
-    print(f'{len(lib["pages"])} pages, {len(tiles)} tiles')
+    photo_files = photos(lib)
+    jobs = recordings(lib)
+    print(f'{len(lib["pages"])} pages, {len(all_tiles(lib))} tiles, {len(jobs) - 2} different sentences')
     pictures = build_pictures(lib)
     build_app_icons()
-    clips = build_voices(tiles)
-    write_outputs(pictures, clips)
+    clips = build_voices(jobs)
+    write_outputs(pictures, clips, photo_files)
     import manual
     manual.main()
     print('Done.')

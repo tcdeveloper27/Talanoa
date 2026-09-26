@@ -4,7 +4,7 @@
    Everything the board needs is kept on the tablet, so it keeps working with no
    internet. Voice clips go in their own cache ("tt-voices") that survives app
    updates; the page fills it for whichever voice is selected. */
-var VERSION = 'ae5f8a1358f0';
+var VERSION = '5507e3a76255';
 var CACHE = 'tt-app-' + VERSION;
 var VOICE_CACHE = 'tt-voices';
 var PRECACHE = [
@@ -27,7 +27,6 @@ var PRECACHE = [
  "img/1f35d.webp",
  "img/1f35f.webp",
  "img/1f366.webp",
- "img/1f36a.webp",
  "img/1f372.webp",
  "img/1f373.webp",
  "img/1f37d-fe0f.webp",
@@ -48,6 +47,7 @@ var PRECACHE = [
  "img/1f3de-fe0f.webp",
  "img/1f3e0.webp",
  "img/1f3e1.webp",
+ "img/1f3ea.webp",
  "img/1f40d.webp",
  "img/1f415.webp",
  "img/1f434.webp",
@@ -69,6 +69,7 @@ var PRECACHE = [
  "img/1f474.webp",
  "img/1f475.webp",
  "img/1f47d.webp",
+ "img/1f481.webp",
  "img/1f488.webp",
  "img/1f48a.webp",
  "img/1f49b.webp",
@@ -80,7 +81,6 @@ var PRECACHE = [
  "img/1f4d6.webp",
  "img/1f4da.webp",
  "img/1f4de.webp",
- "img/1f4f1.webp",
  "img/1f4f7.webp",
  "img/1f4fa.webp",
  "img/1f504.webp",
@@ -100,6 +100,7 @@ var PRECACHE = [
  "img/1f624.webp",
  "img/1f628.webp",
  "img/1f634.webp",
+ "img/1f647.webp",
  "img/1f64b.webp",
  "img/1f64f.webp",
  "img/1f680.webp",
@@ -124,9 +125,11 @@ var PRECACHE = [
  "img/1f932.webp",
  "img/1f937.webp",
  "img/1f954.webp",
+ "img/1f955.webp",
  "img/1f95b.webp",
  "img/1f961.webp",
  "img/1f964.webp",
+ "img/1f968.webp",
  "img/1f96a.webp",
  "img/1f971.webp",
  "img/1f975.webp",
@@ -146,8 +149,11 @@ var PRECACHE = [
  "img/1f9f8.webp",
  "img/1f9fa.webp",
  "img/1f9fb.webp",
+ "img/1f9fc.webp",
+ "img/1f9fe.webp",
  "img/1fa79.webp",
  "img/1fa7a.webp",
+ "img/1fa91.webp",
  "img/1faa5.webp",
  "img/1faf6.webp",
  "img/23ed-fe0f.webp",

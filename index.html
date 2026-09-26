@@ -33,7 +33,7 @@
     color:var(--ink);
     overscroll-behavior:none;
     touch-action:manipulation;
-    user-select:none;-webkit-user-select:none;
+    user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
     display:flex;flex-direction:column;
     height:100vh;height:100dvh;
     padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
@@ -59,19 +59,21 @@
   /* ---------- Core bar: never moves ---------- */
   #core{
     flex:0 0 var(--core-h);height:var(--core-h);min-height:0;
-    display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:minmax(0,1fr);gap:8px;
-    padding:8px 8px 6px;background:var(--bar);
+    display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:minmax(0,1fr);gap:clamp(4px,1.6vw,8px);
+    padding:8px clamp(4px,1.6vw,8px) 6px;background:var(--bar);
+    touch-action:none;                 /* taps are handled by the app: see TAPS AND SWIPES */
   }
   .core-btn{
     border:none;border-radius:14px;color:#fff;
     background:var(--c);box-shadow:0 4px 0 var(--c-dark);
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-    padding:4px;min-width:0;min-height:0;cursor:pointer;
+    padding:4px clamp(1px,.6vw,4px);min-width:0;min-height:0;cursor:pointer;position:relative;
     font-size:clamp(14px,1.9vw,22px);font-weight:800;line-height:1.1;
     transition:transform .06s ease, box-shadow .06s ease;
   }
   .core-btn .pic{height:52%;max-height:64px;min-height:0;}
   .core-btn .pic img{height:100%;width:auto;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));}
+  .core-btn .lab{max-width:100%;text-align:center;hyphens:manual;-webkit-hyphens:manual;}
 
   /* ---------- Page nav: ◀  page  ▶ ---------- */
   #nav{
@@ -101,12 +103,12 @@
   #title .pic img{height:100%;width:100%;object-fit:contain;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));}
   #title .txt{display:flex;flex-direction:column;align-items:flex-start;min-width:0;}
   #title .name{font-size:clamp(18px,min(3.2vw,4.4vh),34px);font-weight:900;line-height:1.05;white-space:nowrap;}
-  #dots{display:flex;gap:6px;margin-top:min(5px,.6vh);flex-wrap:wrap;}
-  #dots i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.4);}
+  #dots{display:flex;gap:clamp(3px,1.1vw,6px);margin-top:min(5px,.6vh);flex-wrap:wrap;}
+  #dots i{width:clamp(6px,2.2vw,9px);height:clamp(6px,2.2vw,9px);border-radius:50%;background:rgba(255,255,255,.4);}
   #dots i.on{background:#fff;transform:scale(1.35);}
 
   /* ---------- The 4 x 3 page of tiles ---------- */
-  #stage{flex:1;min-height:0;position:relative;overflow:hidden;}
+  #stage{flex:1;min-height:0;position:relative;overflow:hidden;touch-action:none;}
   .grid{
     position:absolute;inset:0;
     display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(3,1fr);
@@ -121,7 +123,7 @@
     background:var(--pc-tint);
     box-shadow:0 5px 0 var(--pc-dark);
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-    padding:6px 4px 8px;min-width:0;min-height:0;
+    padding:6px clamp(2px,1vw,4px) 8px;min-width:0;min-height:0;position:relative;
     color:var(--ink);
     font-size:clamp(15px,min(2.8vw,3.4vh),28px);font-weight:800;line-height:1.1;text-align:center;
     transition:transform .06s ease, box-shadow .06s ease, filter .06s ease;
@@ -129,7 +131,8 @@
   .tile .pic{flex:1 1 auto;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;}
   .tile .pic img{max-height:100%;max-width:78%;height:100%;object-fit:contain;filter:drop-shadow(0 3px 3px rgba(0,0,0,.18));}
   .tile .pic img.photo{max-width:92%;object-fit:cover;border-radius:12px;width:92%;}
-  .tile .lab{flex:none;padding:0 4px;}
+  .tile .lab{flex:none;padding:0 clamp(0px,.8vw,4px);max-width:100%;}
+  .lab{hyphens:auto;-webkit-hyphens:auto;}
   .emoji{font-size:clamp(36px,6vw,70px);line-height:1;}
   .core-btn .emoji{font-size:clamp(24px,3.6vw,40px);}
   .arrow .emoji,#title .emoji{font-size:clamp(24px,3.6vw,40px);}
@@ -138,6 +141,18 @@
   .tile:active,.tile.press{transform:translateY(5px);box-shadow:0 0 0 var(--pc-dark);filter:brightness(1.06);}
   .core-btn:active,.core-btn.press,.arrow:active,.arrow.press{transform:translateY(4px);box-shadow:none;}
   #title:active{transform:translateY(4px);box-shadow:none;}
+
+  /* ---------- The last tile tapped glows for 30 seconds ---------- */
+  /* A slow, soft pulse (one breath every 2 s), never a flash. */
+  .tile.lit,.core-btn.lit{z-index:1;}
+  .tile.lit::after,.core-btn.lit::after{
+    content:"";position:absolute;inset:-6px;border-radius:23px;pointer-events:none;
+    border:4px solid #FFD21F;box-shadow:0 0 0 2px #2B1D0E,0 0 16px 5px rgba(255,196,0,.8);
+    animation:glow 2s ease-in-out infinite;
+  }
+  .core-btn.lit::after{border-radius:19px;}
+  @keyframes glow{0%,100%{opacity:1}50%{opacity:.45}}
+  @media (prefers-reduced-motion:reduce){.tile.lit::after,.core-btn.lit::after{animation:none;}}
 
   /* ---------- Page picker ---------- */
   .overlay{
@@ -219,7 +234,7 @@
     <h3>Voice</h3>
     <div id="voiceList"></div>
     <div class="row" id="deviceRow">
-      <label class="big" for="deviceVoice">Tablet voice (also used as a backup)</label>
+      <label class="big" for="deviceVoice">Built-in voice (also used as a backup)</label>
       <select id="deviceVoice"></select>
     </div>
     <div class="row">
@@ -234,12 +249,15 @@
     <h3>Pages to show</h3>
     <div class="pages" id="pageList"></div>
 
+    <h3>Turning pages</h3>
+    <label class="choice"><input type="checkbox" id="swipeOn"><span><strong>Swipe to change pages</strong> <small>The ◀ ▶ arrows always work too.</small></span></label>
+
     <h3>Status</h3>
     <div id="offlineStat" class="stat">Checking…</div>
     <div id="updateStat" class="stat">Version: checking…</div>
     <button class="plain" id="checkUpdate">Check for updates now</button>
     <div id="clipStat" class="stat" hidden></div>
-    <div class="warn"><strong>Tip:</strong> on the tablet, open this page in Chrome, then menu ⋮ → <strong>Add to Home screen</strong> (or <strong>Install app</strong>). It opens full screen like an app and keeps working with no internet.</div>
+    <div class="warn"><strong>Tip:</strong> on the phone or tablet, open this page in Chrome, then menu ⋮ → <strong>Add to Home screen</strong> (or <strong>Install app</strong>). It opens full screen like an app and keeps working with no internet.</div>
     <p class="sub">Pictures: <a href="https://github.com/microsoft/fluentui-emoji" target="_blank" rel="noopener">Fluent Emoji</a> © Microsoft, MIT licence. Voices: <a href="https://github.com/hexgrad/kokoro" target="_blank" rel="noopener">Kokoro</a>, Apache 2.0.</p>
 
     <a class="about-link" href="manual/">📖 Staff guide ›</a>
@@ -259,7 +277,7 @@
    Talking order for every tap, first that works wins:
      1. a recording of your own voice   (voice/<name>.mp3, see below)
      2. the natural voice chosen in Settings
-     3. the tablet's own voice
+     3. the phone's own built-in voice
    A tap is never silent: anything that fails falls through to 3.
    ============================================================ */
 var LIB = window.TT_LIBRARY || {core: [], pages: []};
@@ -267,6 +285,7 @@ var ASSETS = window.TT_ASSETS || {voices: [], img: {}, clips: {}};
 
 function slug(s){ return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
 function store(k, v){ try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch(e){ return null; } }
+function blank(item){ return !item || !item.label; }     /* {"empty": true} keeps a spot free */
 
 /* ---------------- colours ---------------- */
 function mix(hex, to, amt){
@@ -299,6 +318,29 @@ function picture(item, cls){
   return box;
 }
 function emoji(ch){ var s = document.createElement('span'); s.className = 'emoji'; s.textContent = ch || '⬜'; return s; }
+
+/* A label too long for its button on a small phone is made a little smaller
+   until it fits, instead of spilling over the edge. If it would have to get
+   too small and the tile has a "short" label, that is shown instead (the tile
+   still says its whole sentence). */
+var SMALLEST = 10;
+function fitLabels(root){
+  var labs = root.querySelectorAll('.lab');
+  for (var i = 0; i < labs.length; i++){
+    var l = labs[i], item = l.parentNode._item;
+    if (item) l.textContent = item.label;
+    l.style.overflowWrap = '';
+    if (shrinkToFit(l, item && item.short ? SMALLEST + 1 : SMALLEST)) continue;
+    if (item && item.short){ l.textContent = item.short; if (shrinkToFit(l, SMALLEST)) continue; }
+    l.style.overflowWrap = 'anywhere';           /* last resort: never spill out */
+  }
+}
+function shrinkToFit(l, smallest){
+  l.style.fontSize = '';
+  var size = parseFloat(getComputedStyle(l).fontSize);
+  while (l.scrollWidth > l.clientWidth + 1 && size > smallest){ size -= 1; l.style.fontSize = size + 'px'; }
+  return l.scrollWidth <= l.clientWidth + 1;
+}
 
 /* ============================================================
    YOUR OWN RECORDINGS (e.g. Dad's voice)
@@ -341,10 +383,11 @@ var voiceId = store('tt_voice') || (ASSETS.voices[0] ? ASSETS.voices[0].id : 'de
 if (voiceId !== 'device' && !ASSETS.clips[voiceId]) voiceId = ASSETS.voices[0] ? ASSETS.voices[0].id : 'device';
 var speed = parseFloat(store('tt_speed') || '1');
 var vol = parseFloat(store('tt_vol') || '1');
+var swipeOn = store('tt_swipe') !== '0';
 var hidden = [];
 try { hidden = JSON.parse(store('tt_hidden') || '[]'); } catch(e){}
 
-/* ---------------- tablet (device) voice ---------------- */
+/* ---------------- built-in (device) voice ---------------- */
 var synth = window.speechSynthesis, deviceVoices = [], deviceChoice = store('tt_device_voice') || 'auto';
 
 /* Best-sounding voice first: natural/neural/online voices beat the old robotic ones. */
@@ -400,14 +443,16 @@ function getAudio(src){
   }
   return a;
 }
-function clipFor(id){
+/* The natural-voice recording is found by the sentence itself, so tiles that
+   say the same thing share one (see assets.js). */
+function clipFor(id, text){
   if (mine[id]) return mine[id];
   if (voiceId === 'device') return null;
   var set = ASSETS.clips[voiceId];
-  return set && set[id] ? set[id] : null;
+  return set && set[text] ? set[text] : null;
 }
 function preload(items){
-  items.forEach(function(it){ var src = clipFor(slug(it.label)); if (src) getAudio(src); });
+  items.forEach(function(it){ if (blank(it)) return; var src = clipFor(slug(it.label), it.say || it.label); if (src) getAudio(src); });
 }
 
 function stopTalking(){
@@ -417,10 +462,10 @@ function stopTalking(){
 }
 
 /* Play the clip; if it errors, is refused, or hasn't started within 1.5 s,
-   say it with the tablet voice instead. Never silent. */
+   say it with the built-in voice instead. Never silent. */
 function say(id, text){
   stopTalking();
-  var my = token, src = clipFor(id);
+  var my = token, src = clipFor(id, text);
   if (!src){ speakDevice(text); return; }
   var a = getAudio(src), started = false, done = false;
   function tidy(){ a.removeEventListener('playing', onPlaying); a.removeEventListener('error', fallback); }
@@ -446,10 +491,34 @@ function say(id, text){
   setTimeout(fallback, 1500);
 }
 
-var banner = document.getElementById('banner'), said = document.getElementById('said'), flashT = null;
+/* ============================================================
+   WHAT WAS JUST SAID
+   The words stay in the banner, and the tile that said them glows,
+   for 30 seconds: time to look, lift the phone and show someone.
+   Tapping another tile moves the glow to it straight away.
+   ============================================================ */
+var SHOW_FOR = 30 * 1000;
+var banner = document.getElementById('banner'), said = document.getElementById('said');
+var HINT = said.textContent, flashT = null, showT = null, litItem = null;
+
+function show(text, item){
+  said.textContent = text;
+  litItem = item || null;
+  lightUp();
+  clearTimeout(showT);
+  showT = setTimeout(function(){ said.textContent = HINT; litItem = null; lightUp(); }, SHOW_FOR);
+}
+function lightUp(){
+  var els = document.querySelectorAll('.tile, .core-btn');
+  for (var i = 0; i < els.length; i++){
+    var el = els[i];
+    el.classList.remove('lit');
+    if (litItem && el._item === litItem){ void el.offsetWidth; el.classList.add('lit'); }   /* restart the glow */
+  }
+}
 function announce(item){
   var text = item.say || item.label;
-  said.textContent = text;
+  show(text, item);
   banner.classList.add('flash');
   clearTimeout(flashT); flashT = setTimeout(function(){ banner.classList.remove('flash'); }, 420);
   say(slug(item.label), text);
@@ -461,12 +530,12 @@ var coreEl = document.getElementById('core');
 LIB.core.forEach(function(item){
   var b = document.createElement('button');
   b.className = 'core-btn';
+  b._item = item;
   b.style.setProperty('--c', item.color || '#3C6E9F');
   b.style.setProperty('--c-dark', mix(item.color || '#3C6E9F', '#000000', .32));
   b.setAttribute('aria-label', item.say || item.label);
   b.appendChild(picture(item));
-  var l = document.createElement('div'); l.textContent = item.label; b.appendChild(l);
-  b.addEventListener('click', function(){ announce(item); });
+  var l = document.createElement('div'); l.className = 'lab'; l.textContent = item.label; b.appendChild(l);
   coreEl.appendChild(b);
   probeMine(slug(item.label));
 });
@@ -477,10 +546,10 @@ var allPages = [];            /* long pages are split into "Food 2", "Food 3", .
 LIB.pages.forEach(function(p){
   for (var i = 0; i < Math.max(1, p.tiles.length); i += PER_PAGE){
     var part = i / PER_PAGE;
-    allPages.push({key: slug(p.name), name: p.name + (part ? ' ' + (part + 1) : ''), icon: p.icon,
+    allPages.push({key: slug(p.name), name: p.name + (part ? ' ' + (part + 1) : ''), icon: p.icon, img: p.img,
                    color: p.color || '#3C6E9F', tiles: p.tiles.slice(i, i + PER_PAGE)});
   }
-  p.tiles.forEach(function(t){ probeMine(slug(t.label)); });
+  p.tiles.forEach(function(t){ if (!blank(t)) probeMine(slug(t.label)); });
 });
 showMineStat();
 
@@ -501,20 +570,33 @@ var prevBtn = document.getElementById('prev'), nextBtn = document.getElementById
 var CHEVRON_L = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 3.5 7 12l8.5 8.5" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 var CHEVRON_R = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 3.5 17 12l-8.5 8.5" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-function render(dir){
-  var page = pages[current];
+function wrap(i){ return (i % pages.length + pages.length) % pages.length; }
+
+function buildGrid(page){
   var g = document.createElement('div');
-  g.className = 'grid' + (dir ? ' enter-' + dir : '');
+  g.className = 'grid';
   paint(g, page.color);
   for (var i = 0; i < PER_PAGE; i++){
     var item = page.tiles[i];
-    if (!item){ var s = document.createElement('div'); s.className = 'slot'; g.appendChild(s); continue; }
+    if (blank(item)){ var s = document.createElement('div'); s.className = 'slot'; g.appendChild(s); continue; }
     g.appendChild(makeTile(item));
   }
+  return g;
+}
+
+function render(dir){
+  settle(); dropPeek();
+  var g = buildGrid(pages[current]);
+  if (dir) g.classList.add('enter-' + dir);
   if (gridEl) stage.removeChild(gridEl);
   stage.appendChild(gridEl = g);
+  fitLabels(g);
+  showPageInfo();
+}
 
-  /* title + dots */
+/* The page name, the dots, and the arrows (which show the page they go to). */
+function showPageInfo(){
+  var page = pages[current];
   paint(titleBtn, page.color);
   titleBtn.innerHTML = '';
   titleBtn.appendChild(picture(page));
@@ -524,8 +606,7 @@ function render(dir){
   pages.forEach(function(_, i){ var d = document.createElement('i'); if (i === current) d.className = 'on'; dots.appendChild(d); });
   txt.appendChild(dots); titleBtn.appendChild(txt);
 
-  /* arrows show the picture of the page they lead to */
-  var prev = pages[(current - 1 + pages.length) % pages.length], next = pages[(current + 1) % pages.length];
+  var prev = pages[wrap(current - 1)], next = pages[wrap(current + 1)];
   prevBtn.innerHTML = CHEVRON_L; prevBtn.appendChild(picture(prev));
   nextBtn.innerHTML = ''; nextBtn.appendChild(picture(next)); nextBtn.insertAdjacentHTML('beforeend', CHEVRON_R);
   prevBtn.setAttribute('aria-label', 'Previous page: ' + prev.name);
@@ -536,17 +617,18 @@ function render(dir){
 
 function makeTile(item){
   var b = document.createElement('button');
-  b.className = 'tile';
+  b.className = 'tile' + (item === litItem ? ' lit' : '');
+  b._item = item;
   b.setAttribute('aria-label', item.say || item.label);
   b.appendChild(picture(item));
   var l = document.createElement('div'); l.className = 'lab'; l.textContent = item.label; b.appendChild(l);
-  b.addEventListener('click', function(){ announce(item); });
   return b;
 }
 
 /* Wraps around at the ends, so an arrow tap always does something. */
 function go(step){
-  current = (current + step + pages.length) % pages.length;
+  settle();
+  current = wrap(current + step);
   render(step > 0 ? 'next' : 'prev');
 }
 prevBtn.addEventListener('click', function(){ go(-1); });
@@ -557,9 +639,126 @@ document.addEventListener('keydown', function(e){
   if (e.key === 'ArrowRight') go(1);
 });
 
+/* ============================================================
+   TAPS AND SWIPES
+   A tile speaks when the finger lifts: however long it was held,
+   and even if it slid a little on the way (up to TAP_SLOP pixels).
+   The browser's own "click" drops both of those taps without a
+   sound, and a person who can't speak can't tell anyone a button
+   didn't work. Every tap is handled on its own, so fast taps all count.
+
+   Sliding sideways across the tiles turns the page instead. The page
+   follows the finger; let go past about a quarter of the screen (or
+   flick) and it turns, let go early and it springs back. A swipe
+   never says the tile it started on.
+
+   🔴 Never call preventDefault() on touchend: see the note at the end.
+   ============================================================ */
+var TAP_SLOP = 30, SWIPE_START = 30;
+var finger = null, lastLift = 0;
+
+function tileAt(target, root){
+  var el = target && target.closest ? target.closest('.tile, .core-btn') : null;
+  return el && root.contains(el) ? el : null;
+}
+function unpress(f){ if (f && f.el) f.el.classList.remove('press'); }
+
+function listenForTaps(root, canSwipe){
+  root.addEventListener('pointerdown', function(e){
+    if (!e.isPrimary || e.button > 0) return;
+    if (finger){ unpress(finger); if (finger.drag) letGo(0, 0); }
+    settle();
+    finger = {id: e.pointerId, root: root, x: e.clientX, y: e.clientY, lx: e.clientX, lt: e.timeStamp, v: 0,
+              el: tileAt(e.target, root) || tileAt(document.elementFromPoint(e.clientX, e.clientY), root),
+              moved: false, drag: false, ox: 0, canSwipe: canSwipe};
+    try { root.setPointerCapture(e.pointerId); } catch(err){}
+    if (finger.el) finger.el.classList.add('press');
+  });
+  root.addEventListener('pointermove', function(e){
+    var f = finger;
+    if (!f || f.id !== e.pointerId || f.root !== root) return;
+    var dx = e.clientX - f.x, dy = e.clientY - f.y;
+    if (e.timeStamp > f.lt){ f.v = (e.clientX - f.lx) / (e.timeStamp - f.lt); f.lx = e.clientX; f.lt = e.timeStamp; }
+    if (!f.moved && (Math.abs(dx) > TAP_SLOP || Math.abs(dy) > TAP_SLOP)){ f.moved = true; unpress(f); }
+    if (!f.drag && f.canSwipe && swipeOn && pages.length > 1 &&
+        Math.abs(dx) > SWIPE_START && Math.abs(dx) > Math.abs(dy) * 1.2){
+      f.drag = true; f.moved = true; f.ox = dx; unpress(f);
+    }
+    if (f.drag) drag(dx - f.ox);
+  });
+  function lift(e, cancelled){
+    var f = finger;
+    if (!f || f.id !== e.pointerId || f.root !== root) return;
+    finger = null; unpress(f); lastLift = Date.now();
+    if (f.drag){ letGo(cancelled ? 0 : e.clientX - f.x, cancelled ? 0 : f.v); return; }
+    if (!cancelled && !f.moved && f.el && f.el._item) announce(f.el._item);
+  }
+  root.addEventListener('pointerup', function(e){ lift(e, false); });
+  root.addEventListener('pointercancel', function(e){ lift(e, true); });
+  /* A click that no finger made (a keyboard, a switch, a screen reader: these
+     have detail 0) still speaks. The click the browser sends after a finger is
+     skipped: the finger already spoke. */
+  root.addEventListener('click', function(e){
+    if (e.detail > 0 && Date.now() - lastLift < 1000) return;
+    var el = tileAt(e.target, root);
+    if (el && el._item) announce(el._item);
+  });
+  /* A long press must stay a tap, not open a menu. */
+  root.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+}
+
+/* ---- the page following the finger ---- */
+var peekEl = null, peekDir = 0, settling = null;
+
+function place(el, x, animate){
+  el.style.transition = animate ? 'transform .2s ease-out' : 'none';
+  el.style.transform = x ? 'translateX(' + x + 'px)' : '';
+}
+function drag(shift){
+  var w = stage.clientWidth, dir = shift < 0 ? 1 : -1;      /* finger going left shows the next page */
+  if (!peekEl || peekDir !== dir){
+    if (peekEl) stage.removeChild(peekEl);
+    peekEl = buildGrid(pages[wrap(current + dir)]); peekDir = dir;
+    stage.appendChild(peekEl); fitLabels(peekEl);
+  }
+  gridEl.classList.remove('enter-next', 'enter-prev');
+  place(gridEl, shift, false);
+  place(peekEl, shift + dir * w, false);
+}
+/* dist = how far the finger travelled sideways in all, v = its speed at the end
+   (pixels per millisecond). */
+function letGo(dist, v){
+  if (!peekEl){ place(gridEl, 0, false); return; }
+  var w = stage.clientWidth, dir = peekDir, old = gridEl, peek = peekEl;
+  var toward = (dist < 0 ? 1 : -1) === dir;
+  var far = Math.abs(dist) > Math.max(80, w * 0.25);
+  var flick = Math.abs(dist) > 50 && Math.abs(v) > 0.45 && (v < 0 ? 1 : -1) === dir;
+  var turn = toward && (far || flick);
+  place(old, turn ? -dir * w : 0, true);
+  place(peek, turn ? 0 : dir * w, true);
+  var t = setTimeout(function(){ settle(); }, 230);
+  settling = function(){
+    settling = null; clearTimeout(t);
+    if (turn){ stage.removeChild(old); gridEl = peek; current = wrap(current + dir); showPageInfo(); }
+    else stage.removeChild(peek);
+    peekEl = null; peekDir = 0;
+    place(gridEl, 0, false);
+  };
+}
+/* Finish a page turn that is still moving (a new touch, or an arrow tap). */
+function settle(){ if (settling) settling(); }
+function dropPeek(){
+  if (finger && finger.drag) finger = null;
+  if (peekEl){ stage.removeChild(peekEl); peekEl = null; peekDir = 0; }
+}
+
+listenForTaps(coreEl, false);
+listenForTaps(stage, true);
+
 /* ---------------- page picker (tap the page name) ---------------- */
 var picker = document.getElementById('picker'), pickGrid = document.getElementById('pickGrid');
 function openPicker(){
+  settle();
   pickGrid.innerHTML = '';
   pages.forEach(function(p, i){
     var b = document.createElement('button');
@@ -583,6 +782,8 @@ titleBtn.addEventListener('click', openPicker);
 picker.addEventListener('click', function(e){ if (e.target === picker) picker.classList.remove('open'); });
 
 render('');
+fitLabels(coreEl);
+window.addEventListener('resize', function(){ fitLabels(coreEl); if (gridEl) fitLabels(gridEl); });
 
 /* ---------------- settings (hold the gear) ---------------- */
 var gear = document.getElementById('gear'), panel = document.getElementById('panel'), holdT = null;
@@ -597,12 +798,12 @@ gear.addEventListener('mouseleave', endHold);
 document.getElementById('closePanel').addEventListener('click', function(){ panel.classList.remove('open'); });
 panel.addEventListener('click', function(e){ if (e.target === panel) panel.classList.remove('open'); });
 
-function openSettings(){ buildVoiceList(); buildPageList(); refreshOffline(); showVersion(); panel.classList.add('open'); }
+function openSettings(){ settle(); buildVoiceList(); buildPageList(); refreshOffline(); showVersion(); panel.classList.add('open'); }
 
 function buildVoiceList(){
   var box = document.getElementById('voiceList'); box.innerHTML = '';
   var opts = ASSETS.voices.map(function(v){ return {id: v.id, name: v.name, desc: v.desc}; });
-  opts.push({id: 'device', name: 'Tablet voice', desc: 'the voice built into this device'});
+  opts.push({id: 'device', name: 'Built-in voice', desc: 'the voice built into this phone or tablet'});
   opts.forEach(function(o){
     var lab = document.createElement('label'); lab.className = 'choice';
     var r = document.createElement('input'); r.type = 'radio'; r.name = 'voice'; r.value = o.id; r.checked = o.id === voiceId;
@@ -619,7 +820,7 @@ function buildVoiceList(){
 }
 function sample(){
   var text = 'Hi! This is my voice.';
-  said.textContent = text;
+  show(text);
   say('_sample', text);
 }
 
@@ -631,11 +832,15 @@ document.getElementById('deviceVoice').addEventListener('change', function(e){
 var sEl = document.getElementById('speed'), sV = document.getElementById('speedVal');
 sEl.value = speed; sV.textContent = speed.toFixed(2);
 sEl.addEventListener('input', function(e){ speed = parseFloat(e.target.value); sV.textContent = speed.toFixed(2); store('tt_speed', speed); });
-sEl.addEventListener('change', function(){ said.textContent = 'This is how fast I talk'; say('_speed', 'This is how fast I talk'); });
+sEl.addEventListener('change', function(){ show('This is how fast I talk'); say('_speed', 'This is how fast I talk'); });
 
 var vEl = document.getElementById('vol'), vV = document.getElementById('volVal');
 vEl.value = vol; vV.textContent = vol.toFixed(1);
 vEl.addEventListener('input', function(e){ vol = parseFloat(e.target.value); vV.textContent = vol.toFixed(1); store('tt_vol', vol); });
+
+var swipeBox = document.getElementById('swipeOn');
+swipeBox.checked = swipeOn;
+swipeBox.addEventListener('change', function(){ swipeOn = swipeBox.checked; store('tt_swipe', swipeOn ? '1' : '0'); });
 
 function buildPageList(){
   var box = document.getElementById('pageList'); box.innerHTML = '';
@@ -669,8 +874,9 @@ function buildPageList(){
 var VOICE_CACHE = 'tt-voices';
 function voiceUrls(){
   if (voiceId === 'device' || !ASSETS.clips[voiceId]) return [];
-  var set = ASSETS.clips[voiceId];
-  return Object.keys(set).map(function(k){ return new URL(set[k], location.href).href; });
+  var set = ASSETS.clips[voiceId], seen = {};
+  return Object.keys(set).map(function(k){ return new URL(set[k], location.href).href; })
+    .filter(function(u){ return seen[u] ? false : (seen[u] = true); });
 }
 /* Download every clip of the chosen voice so it works offline; drop stale ones. */
 var warming = null;
@@ -715,7 +921,7 @@ function refreshOffline(){
 
 /* ============================================================
    UPDATES
-   The tablet checks for a new version when the app opens, when it
+   The phone checks for a new version when the app opens, when it
    comes back on screen, and every 30 minutes. A new version downloads
    in the background; it is only switched on when nobody is using the
    board (no tap for 2 minutes, or the screen is off), so the screen
@@ -741,7 +947,7 @@ function applyUpdate(){
 function maybeApply(){
   if (!updateReady) return;
   if (applyNow){ applyUpdate(); return; }
-  if (panel.classList.contains('open') || picker.classList.contains('open')) return;
+  if (finger || panel.classList.contains('open') || picker.classList.contains('open')) return;
   if (document.hidden || Date.now() - lastTap > IDLE_BEFORE_UPDATE) applyUpdate();
 }
 
@@ -790,6 +996,36 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
   });
 }
 
+/* ============================================================
+   ANDROID "BACK"
+   On most Android phones a swipe in from the left or right edge of
+   the screen means Back, and Back would close Talanoa. So the app
+   keeps one spare step in its history. Back uses that up instead of
+   closing the app (and closes Settings or the page list if one is
+   open). The spare step is put back on the next tap.
+   ============================================================ */
+var spareStep = !!(history.state && history.state.tt);
+function keepSpareStep(){
+  if (spareStep || !/^https?:$/.test(location.protocol)) return;
+  try { history.pushState({tt: 1}, ''); spareStep = true; } catch(e){}
+}
+document.addEventListener('pointerup', keepSpareStep, true);
+document.addEventListener('keydown', keepSpareStep, true);
+window.addEventListener('popstate', function(){
+  spareStep = !!(history.state && history.state.tt);
+  if (panel.classList.contains('open')) panel.classList.remove('open');
+  else if (picker.classList.contains('open')) picker.classList.remove('open');
+});
+
+/* Keep the board upright on a phone, even when it's turned sideways. The
+   manifest asks for this too; this makes it happen straight away in the
+   installed app. It does nothing in a normal browser tab. */
+try {
+  if (screen.orientation && screen.orientation.lock &&
+      matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches)
+    screen.orientation.lock('portrait').catch(function(){});
+} catch(e){}
+
 /* stop pinch-zoom (iOS Safari only event; harmless elsewhere) */
 document.addEventListener('gesturestart', function(e){ e.preventDefault(); });
 
@@ -801,7 +1037,8 @@ document.addEventListener('gesturestart', function(e){ e.preventDefault(); });
    a dead button, that is the worst failure mode this app can have.
    It is also redundant: double-tap zoom is ALREADY disabled by
    `touch-action:manipulation` on body plus `user-scalable=no, maximum-scale=1`
-   in the viewport meta. */
+   in the viewport meta. Tiles now speak from pointer events (see TAPS AND
+   SWIPES), and the same rule holds there: never swallow a touch. */
 </script>
 </body>
 </html>
