@@ -42,10 +42,11 @@ function serve() {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || '/usr/bin/chromium', headless: true });
   const ctx = await browser.newContext({ viewport: PHONE, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const page = await ctx.newPage();
-  const converter = await ctx.newPage();
 
-  async function webp(png, name) {                     // Chromium turns the PNG into a WebP for us
-    const url = await converter.evaluate(async (b64) => {
+  /* Chromium turns the PNG into a WebP for us. This runs in the app's own page (a second page
+     would put the app in the background and freeze its sparkle loop mid-screenshot). */
+  async function webp(png, name) {
+    const url = await page.evaluate(async (b64) => {
       const im = new Image(); im.src = 'data:image/png;base64,' + b64; await im.decode();
       const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
       c.getContext('2d').drawImage(im, 0, 0);
@@ -61,10 +62,12 @@ function serve() {
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     await page.waitForTimeout(700);                   // let the green flash finish
   }
-  const goTo = (name) => page.evaluate((n) => { current = pages.findIndex((p) => p.name === n); render(''); }, name);
+  /* wait for the last tap's sparkles to finish before moving on, so a page picture doesn't show another page's fun */
+  const calm = () => page.waitForFunction(() => !window.FX || FX.count() === 0, null, { timeout: 8000 });
+  const goTo = async (name) => { await calm(); await page.evaluate((n) => { current = pages.findIndex((p) => p.name === n); render(''); }, name); };
   const tileIndex = (label) => page.evaluate((l) => [...document.querySelectorAll('#stage .tile')].findIndex((t) => t.textContent.trim() === l), label);
   const box = (sel) => page.evaluate((s) => { const r = document.querySelector(s).getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; }, sel);
-  const still = () => page.addStyleTag({ content: '*,*::after{animation:none!important;transition:none!important}' });
+  const still = () => page.addStyleTag({ content: '*,*::after,*::before{animation:none!important;transition:none!important}' });
 
   // Open once so it installs for offline use, save the voice, then open again (Settings then shows "Ready")
   await page.goto(URL0);
@@ -93,6 +96,7 @@ function serve() {
   await tap('#stage .tile', await tileIndex('Drink'));
   await webp(await page.screenshot(), 'portrait.webp');
   await page.evaluate(() => { litItem = null; lightUp(); said.textContent = HINT; });
+  await calm();
   // 3. the page list
   await page.evaluate(() => openPicker());
   await webp(await page.screenshot(), 'picker.webp');
@@ -115,6 +119,7 @@ function serve() {
     return {
       s_voice: R(document.getElementById('voiceList')), s_speed: R(document.getElementById('speed')), s_vol: R(document.getElementById('vol')),
       s_pages: R(pagesH3, document.getElementById('pageList')), s_swipe: R(document.getElementById('swipeOn').closest('label')),
+      s_fx: R(document.getElementById('fxList')),
       s_status: R(document.getElementById('offlineStat')), s_update: R(document.getElementById('checkUpdate')),
       s_about: R(document.querySelector('#panel a[href="credits.html"]')), s_done: R(document.getElementById('closePanel')),
     };

@@ -16,6 +16,11 @@
              (a page can have one too, for its picture on the arrows)
      short = optional shorter label for when the full one won't fit
              on a small phone (the tile still says its whole sentence)
+     fx    = what a tap throws, for fun: "sparkle" (the usual),
+             "confetti", "hearts", "stars", "bubbles", "soft" (a few
+             gentle sparkles, for sad or hurt words), or "ring" (no
+             sparkles). A page can set one for all its tiles; a tile
+             can override it. Settings can turn the fun down or off.
 
    The same label can say different things on different pages
    (Drink is "I want a drink" on I want, "I would like a drink" at
@@ -30,23 +35,23 @@
    ============================================================ */
 window.TT_LIBRARY = {
   "core": [
-    {"icon": "👍", "label": "Yes",      "say": "Yes",           "color": "#3F8A34"},
-    {"icon": "👎", "label": "No",       "say": "No",            "color": "#C8342B"},
+    {"icon": "👍", "label": "Yes",      "say": "Yes",           "color": "#3F8A34", "fx": "confetti"},
+    {"icon": "👎", "label": "No",       "say": "No",            "color": "#C8342B", "fx": "soft"},
     {"icon": "➕", "label": "More",     "say": "I want more",   "color": "#3C6E9F"},
-    {"icon": "👋", "label": "Hi, I'm Brenton", "short": "Brenton", "say": "Hi, I'm Brenton", "color": "#8B5A2B"},
+    {"icon": "👋", "label": "Hi, I'm Brenton", "short": "Brenton", "say": "Hi, I'm Brenton", "color": "#8B5A2B", "fx": "confetti"},
     {"icon": "🙋", "label": "Help",     "say": "I need help",   "color": "#7B5AA6"},
-    {"icon": "✋", "label": "Stop",     "say": "Stop please",   "color": "#C8342B"}
+    {"icon": "✋", "label": "Stop",     "say": "Stop please",   "color": "#C8342B", "fx": "soft"}
   ],
 
   "pages": [
     {"name": "I want", "icon": "🤲", "color": "#D89412", "tiles": [
       {"icon": "🥕", "label": "Snack",      "say": "I want a snack"},
-      {"icon": "🥤", "label": "Drink",      "say": "I want a drink"},
+      {"icon": "🥤", "label": "Drink",      "say": "I want a drink", "fx": "bubbles"},
       {"icon": "🚽", "label": "Bathroom",   "say": "I need the bathroom"},
       {"icon": "🛏️", "label": "Rest",       "say": "I want to lie down"},
       {"icon": "🌳", "label": "Outside",    "say": "I want to go outside"},
       {"icon": "🚗", "label": "Go ride",    "say": "I want to go for a ride"},
-      {"icon": "🤗", "label": "Hug",        "say": "I want a hug"},
+      {"icon": "🤗", "label": "Hug",        "say": "I want a hug", "fx": "hearts"},
       {"icon": "🤫", "label": "Quiet",      "say": "I need quiet, please"},
       {"icon": "✅", "label": "All done",   "say": "I am all done"},
       {"icon": "🧘", "label": "Break",      "say": "I need a break, please"},
@@ -55,21 +60,21 @@ window.TT_LIBRARY = {
     ]},
 
     {"name": "I feel", "icon": "😊", "color": "#3C6E9F", "tiles": [
-      {"icon": "😀", "label": "Happy",      "say": "I feel happy"},
-      {"icon": "🤩", "label": "Excited",    "say": "I am excited!"},
-      {"icon": "😢", "label": "Sad",        "say": "I feel sad"},
-      {"icon": "😤", "label": "Frustrated", "say": "I am frustrated"},
-      {"icon": "😠", "label": "Angry",      "say": "I am angry"},
-      {"icon": "😨", "label": "Scared",     "say": "I feel scared"},
-      {"icon": "🤒", "label": "Hurt",       "say": "I do not feel good. It hurts."},
+      {"icon": "😀", "label": "Happy",      "say": "I feel happy", "fx": "confetti"},
+      {"icon": "🤩", "label": "Excited",    "say": "I am excited!", "fx": "confetti"},
+      {"icon": "😢", "label": "Sad",        "say": "I feel sad", "fx": "soft"},
+      {"icon": "😤", "label": "Frustrated", "say": "I am frustrated", "fx": "soft"},
+      {"icon": "😠", "label": "Angry",      "say": "I am angry", "fx": "soft"},
+      {"icon": "😨", "label": "Scared",     "say": "I feel scared", "fx": "soft"},
+      {"icon": "🤒", "label": "Hurt",       "say": "I do not feel good. It hurts.", "fx": "soft"},
       {"icon": "😴", "label": "Tired",      "say": "I am tired"},
       {"icon": "🥱", "label": "Bored",      "say": "I am bored"},
-      {"icon": "😖", "label": "Too loud",   "say": "It is too loud for me"},
+      {"icon": "😖", "label": "Too loud",   "say": "It is too loud for me", "fx": "soft"},
       {"icon": "🥶", "label": "Cold",       "say": "I am cold"},
       {"icon": "🥵", "label": "Hot",        "say": "I am too hot"}
     ]},
 
-    {"name": "Ouch", "icon": "🤕", "color": "#C8342B", "tiles": [
+    {"name": "Ouch", "icon": "🤕", "color": "#C8342B", "fx": "soft", "tiles": [
       {"icon": "🤕", "label": "Head",       "say": "My head hurts"},
       {"icon": "🤢", "label": "Tummy",      "say": "My tummy hurts"},
       {"icon": "🤮", "label": "Throw up",   "say": "I think I am going to throw up"},
@@ -85,7 +90,7 @@ window.TT_LIBRARY = {
     ]},
 
     {"name": "People", "icon": "🧑‍🤝‍🧑", "color": "#7B5AA6", "tiles": [
-      {"icon": "👪", "label": "Family",     "say": "I want my family"},
+      {"icon": "👪", "label": "Family",     "say": "I want my family", "fx": "hearts"},
       {"icon": "🧑‍⚕️", "label": "Staff",    "say": "I need someone to help me"},
       {"icon": "🧑‍🤝‍🧑", "label": "Friend", "say": "I want to see my friend"},
       {"icon": "👋", "label": "Hi",         "say": "Hi!"},
@@ -93,11 +98,11 @@ window.TT_LIBRARY = {
       {"icon": "🙏", "label": "Please",     "say": "Please"},
       {"icon": "💛", "label": "Thanks",     "say": "Thank you"},
       {"icon": "😔", "label": "Sorry",      "say": "I am sorry"},
-      {"icon": "❤️", "label": "Love you",   "say": "I love you"},
+      {"icon": "❤️", "label": "Love you",   "say": "I love you", "fx": "hearts"},
       {"icon": "☝️", "label": "My turn",    "say": "It's my turn"}
     ]},
 
-    {"name": "Mom & Dad", "icon": "👪", "color": "#C2507E", "tiles": [
+    {"name": "Mom & Dad", "icon": "👪", "color": "#C2507E", "fx": "hearts", "tiles": [
       {"icon": "👨", "label": "Dad",        "say": "I want my dad"},
       {"icon": "📞", "label": "Call Dad",   "say": "Can I call my dad, please?"},
       {"icon": "🏡", "label": "Dad's house", "say": "I want to go to Dad's house"},
@@ -112,7 +117,7 @@ window.TT_LIBRARY = {
       {"icon": "👴", "label": "Papa",       "say": "I want my papa"}
     ]},
 
-    {"name": "Fun", "icon": "🎉", "color": "#3F8A34", "tiles": [
+    {"name": "Fun", "icon": "🎉", "color": "#3F8A34", "fx": "confetti", "tiles": [
       {"icon": "🤠", "label": "Toy Story",  "say": "I want to watch Toy Story"},
       {"icon": "📺", "label": "Cartoons",   "say": "I want to watch cartoons"},
       {"icon": "🍿", "label": "Movie",      "say": "Let's watch a movie"},
@@ -127,7 +132,7 @@ window.TT_LIBRARY = {
       {"icon": "🚶", "label": "Walk",       "say": "I want to go for a walk"}
     ]},
 
-    {"name": "Toy Story", "icon": "🤠", "color": "#8B5A2B", "tiles": [
+    {"name": "Toy Story", "icon": "🤠", "color": "#8B5A2B", "fx": "stars", "tiles": [
       {"icon": "🤠", "label": "Howdy",      "say": "Howdy, partner!"},
       {"icon": "🐴", "label": "Bullseye",   "say": "Ride like the wind, Bullseye!"},
       {"icon": "🚀", "label": "Infinity",   "say": "To infinity and beyond!"},
@@ -144,9 +149,9 @@ window.TT_LIBRARY = {
 
     {"name": "Food", "icon": "🍕", "color": "#D2691E", "tiles": [
       {"icon": "😋", "label": "Hungry",     "say": "I am hungry"},
-      {"icon": "💧", "label": "Water",      "say": "I want water, please"},
-      {"icon": "🧃", "label": "Juice",      "say": "I want juice, please"},
-      {"icon": "🥛", "label": "Milk",       "say": "I want milk, please"},
+      {"icon": "💧", "label": "Water",      "say": "I want water, please", "fx": "bubbles"},
+      {"icon": "🧃", "label": "Juice",      "say": "I want juice, please", "fx": "bubbles"},
+      {"icon": "🥛", "label": "Milk",       "say": "I want milk, please", "fx": "bubbles"},
       {"empty": true},
       {"icon": "🍕", "label": "Pizza",      "say": "I want pizza"},
       {"icon": "🍔", "label": "Burger",     "say": "I want a hamburger"},
@@ -158,9 +163,9 @@ window.TT_LIBRARY = {
     ]},
 
     {"name": "Maverik", "icon": "🏪", "color": "#2A5DA8", "tiles": [
-      {"icon": "🥤", "label": "Drink",      "say": "I would like a drink"},
+      {"icon": "🥤", "label": "Drink",      "say": "I would like a drink", "fx": "bubbles"},
       {"icon": "🥨", "label": "Chips",      "say": "I would like some chips"},
-      {"icon": "💧", "label": "Water",      "say": "I would like some water"},
+      {"icon": "💧", "label": "Water",      "say": "I would like some water", "fx": "bubbles"},
       {"icon": "☕", "label": "Hot cocoa",  "say": "I would like a hot cocoa"},
       {"icon": "🙏", "label": "Please",     "say": "Please"},
       {"icon": "💛", "label": "Thank you",  "say": "Thank you"},
@@ -177,8 +182,8 @@ window.TT_LIBRARY = {
       {"icon": "🍳", "label": "Breakfast",  "say": "I am ready for breakfast"},
       {"icon": "🍽️", "label": "Lunch",      "say": "I am ready for lunch"},
       {"icon": "🍝", "label": "Dinner",     "say": "I am ready for dinner"},
-      {"icon": "🚿", "label": "Shower",     "say": "I want to take a shower"},
-      {"icon": "🛁", "label": "Bath",       "say": "I want a bath"},
+      {"icon": "🚿", "label": "Shower",     "say": "I want to take a shower", "fx": "bubbles"},
+      {"icon": "🛁", "label": "Bath",       "say": "I want a bath", "fx": "bubbles"},
       {"icon": "🪥", "label": "Teeth",      "say": "Time to brush my teeth"},
       {"icon": "👕", "label": "Clothes",    "say": "I want to get dressed"},
       {"icon": "👟", "label": "Shoes",      "say": "I need my shoes"},
@@ -194,7 +199,7 @@ window.TT_LIBRARY = {
       {"icon": "🏞️", "label": "Park",       "say": "I want to go to the park"},
       {"icon": "🥡", "label": "Eat out",    "say": "Can we go out to eat?"},
       {"icon": "🎟️", "label": "Movies",     "say": "I want to go to the movies"},
-      {"icon": "🏊", "label": "Swimming",   "say": "I want to go swimming"},
+      {"icon": "🏊", "label": "Swimming",   "say": "I want to go swimming", "fx": "bubbles"},
       {"icon": "🎳", "label": "Bowling",    "say": "Can we go bowling?"},
       {"icon": "📚", "label": "Library",    "say": "I want to go to the library"},
       {"icon": "🦁", "label": "Zoo",        "say": "I want to go to the zoo"},

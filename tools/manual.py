@@ -96,8 +96,8 @@ def main():
     top_badges = ''.join([badge('A', *sat('s_voice', True)), badge('B', *sat('s_speed', True)),
                           badge('C', *sat('s_vol', True))])
     bottom_badges = ''.join([badge('D', *sat('s_pages', False)), badge('E', *sat('s_swipe', False)),
-                             badge('F', *sat('s_status', False)), badge('G', *sat('s_update', False)),
-                             badge('H', *sat('s_about', False))])
+                             badge('F', *sat('s_fx', False)), badge('G', *sat('s_status', False)),
+                             badge('H', *sat('s_update', False)), badge('I', *sat('s_about', False))])
 
     tpl = open(os.path.join(ROOT, 'tools', 'manual-template.html'), encoding='utf-8').read()
     out = (tpl.replace('{{PAGE_CARDS}}', '\n'.join(cards))

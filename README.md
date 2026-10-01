@@ -21,7 +21,8 @@ On an Android phone (or tablet), open the link in Chrome, then **⋮ → Add to 
 - **The last tile tapped glows** (a slow, soft pulse) for 30 seconds, and its words stay in the banner, so he can lift the phone and show someone. Tapping another tile moves the glow straight away.
 - **Every tap counts:** a tile speaks when the finger lifts, even if it slid a little or was held down (the browser's own click would silently drop those). Fast taps all count.
 - **Android's Back gesture** (a swipe in from the screen's edge) doesn't close the app; it closes Settings or the page list if one is open.
-- **Settings:** hold the ⚙ in the top banner for 1 second. Choose the voice (Michael is the default; also Fenrir, Heart, Bella, Sarah, George, Emma, or the phone's built-in voice), speed and volume, pick which pages to show, and turn swiping off if pages turn by accident.
+- **It's fun:** every tap makes the tile bounce, ripples rings out of it and throws sparkles in the page's colour: confetti for happy words, hearts for hugs, stars on the Toy Story page, bubbles for drinks. Tapping the same tile again and again builds up to a shower over the whole screen. Sad and hurt words get a few gentle sparkles instead. Tiles pop in when a page turns and a swipe leaves a streak. It's all drawn on a see-through canvas that ignores touches, so it can never block a tap or delay the voice, and the drawing loop only runs while something is on screen.
+- **Settings:** hold the ⚙ in the top banner for 1 second. Choose the voice (Michael is the default; also Fenrir, Heart, Bella, Sarah, George, Emma, or the phone's built-in voice), speed and volume, pick which pages to show, turn swiping off if pages turn by accident, and set **Fun effects** to Lots, A little (bounces and rings only) or Off. A phone set to "reduce motion" starts on A little.
 
 13 pages: I want, I feel, Ouch, People, Mom & Dad, Fun, Toy Story, Food, Maverik, My day, Places, Questions, Things.
 
@@ -39,6 +40,7 @@ Then run `python3 tools/build.py` to make the 3D picture and natural-voice recor
 
 - The same label can say different things on different pages (Drink is "I want a drink" on I want and "I would like a drink" on Maverik). Every different sentence gets its own recording; tiles that say the same thing share one.
 - To leave a spot empty so the tiles after it don't move, put `{"empty": true}` in its place (Food has one where Cocoa used to be).
+- `"fx"` chooses what a tap throws: `"sparkle"` (the default), `"confetti"`, `"hearts"`, `"stars"`, `"bubbles"`, `"soft"` (a few gentle sparkles, for sad or hurt words) or `"ring"` (no sparkles). Set it on a page for all its tiles, or on a tile.
 - A tile can have a `"short"` label for small screens: `"short": "Brenton"` is shown only if the full label won't fit. It still says the whole sentence.
 - To use a real photo instead of a picture, upload it to a `photos` folder, then add `"img": "photos/dad.jpg"` to the tile (a page can have one too). The build stops with a message if a photo is missing, so upload the photo first.
 

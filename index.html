@@ -155,6 +155,26 @@
   @keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(0,87,255,.55)}50%{box-shadow:0 0 0 6px rgba(0,87,255,.3)}}
   @media (prefers-reduced-motion:reduce){.tile.lit::after,.core-btn.lit::after{animation:none;}}
 
+  /* ---------- Fun: bounces, pop-ins, a twinkle, and the sparkle canvas ---------- */
+  /* The canvas floats over everything and ignores touches: nothing drawn on it can block a tap. */
+  #fx{position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;}   /* a canvas doesn't stretch to inset:0 by itself */
+  body.fx-off #fx{display:none;}
+  @keyframes tilePop{0%{transform:scale(1)}35%{transform:scale(1.07)}70%{transform:scale(.985)}100%{transform:scale(1)}}
+  body:not(.fx-off) .tile.pop,body:not(.fx-off) .core-btn.pop{animation:tilePop .42s cubic-bezier(.2,.8,.3,1);}
+  @keyframes tileIn{from{transform:scale(.7);opacity:0}60%{transform:scale(1.05);opacity:1}to{transform:none;opacity:1}}
+  body:not(.fx-off) .grid.enter-next .tile,body:not(.fx-off) .grid.enter-prev .tile{
+    animation:tileIn .36s cubic-bezier(.2,.8,.3,1) both;animation-delay:calc(var(--i,0) * 24ms);}
+  @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+  body:not(.fx-off) #title.pop{animation:pop .4s cubic-bezier(.2,.8,.3,1);}
+  body:not(.fx-off) #said.pop{animation:pop .4s cubic-bezier(.2,.8,.3,1);}
+  /* a little star twinkles on the corner of the tile that was tapped */
+  body:not(.fx-off) .tile.lit::before,body:not(.fx-off) .core-btn.lit::before{
+    content:"";position:absolute;top:-9px;right:-9px;width:26px;height:26px;pointer-events:none;z-index:2;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1 14.6 9.4 23 12 14.6 14.6 12 23 9.4 14.6 1 12 9.4 9.4Z' fill='%23FFD21F' stroke='%23fff' stroke-width='1.3'/%3E%3C/svg%3E") center/contain no-repeat;
+    animation:twinkle 1.6s ease-in-out infinite;
+  }
+  @keyframes twinkle{0%,100%{transform:scale(.35) rotate(0deg);opacity:.35}50%{transform:scale(1) rotate(40deg);opacity:1}}
+
   /* ---------- Page picker ---------- */
   .overlay{
     position:fixed;inset:0;z-index:30;background:rgba(30,20,10,.78);
@@ -224,6 +244,7 @@
   <button class="arrow" id="next" aria-label="Next page"></button>
 </div>
 <div id="stage"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
 
 <div class="overlay" id="picker"><div id="pickGrid"></div></div>
 
@@ -252,6 +273,13 @@
 
     <h3>Turning pages</h3>
     <label class="choice"><input type="checkbox" id="swipeOn"><span><strong>Swipe to change pages</strong> <small>The ◀ ▶ arrows always work too.</small></span></label>
+
+    <h3>Fun effects</h3>
+    <div id="fxList">
+      <label class="choice"><input type="radio" name="fx" value="lots"><span><strong>Lots</strong> <small>bounces, rings, sparkles, confetti, hearts, stars…</small></span></label>
+      <label class="choice"><input type="radio" name="fx" value="little"><span><strong>A little</strong> <small>bounces and rings, no sparkles</small></span></label>
+      <label class="choice"><input type="radio" name="fx" value="off"><span><strong>Off</strong> <small>just the blue outline</small></span></label>
+    </div>
 
     <h3>Status</h3>
     <div id="offlineStat" class="stat">Checking…</div>
@@ -517,13 +545,14 @@ function lightUp(){
     if (litItem && el._item === litItem){ void el.offsetWidth; el.classList.add('lit'); }   /* restart the glow */
   }
 }
-function announce(item){
+function announce(item, el){
   var text = item.say || item.label;
   show(text, item);
   banner.classList.add('flash');
   clearTimeout(flashT); flashT = setTimeout(function(){ banner.classList.remove('flash'); }, 420);
   say(slug(item.label), text);
   if (navigator.vibrate){ try { navigator.vibrate(28); } catch(e){} }
+  celebrate(el, item);            /* the fun comes last, so it can never delay the voice */
 }
 
 /* ---------------- core bar ---------------- */
@@ -547,7 +576,7 @@ var allPages = [];            /* long pages are split into "Food 2", "Food 3", .
 LIB.pages.forEach(function(p){
   for (var i = 0; i < Math.max(1, p.tiles.length); i += PER_PAGE){
     var part = i / PER_PAGE;
-    allPages.push({key: slug(p.name), name: p.name + (part ? ' ' + (part + 1) : ''), icon: p.icon, img: p.img,
+    allPages.push({key: slug(p.name), name: p.name + (part ? ' ' + (part + 1) : ''), icon: p.icon, img: p.img, fx: p.fx,
                    color: p.color || '#3C6E9F', tiles: p.tiles.slice(i, i + PER_PAGE)});
   }
   p.tiles.forEach(function(t){ if (!blank(t)) probeMine(slug(t.label)); });
@@ -576,11 +605,14 @@ function wrap(i){ return (i % pages.length + pages.length) % pages.length; }
 function buildGrid(page){
   var g = document.createElement('div');
   g.className = 'grid';
+  g._fx = page.fx;
   paint(g, page.color);
   for (var i = 0; i < PER_PAGE; i++){
     var item = page.tiles[i];
     if (blank(item)){ var s = document.createElement('div'); s.className = 'slot'; g.appendChild(s); continue; }
-    g.appendChild(makeTile(item));
+    var t = makeTile(item);
+    t.style.setProperty('--i', i);          /* tiles pop in one after another, in reading order */
+    g.appendChild(t);
   }
   return g;
 }
@@ -593,6 +625,7 @@ function render(dir){
   stage.appendChild(gridEl = g);
   fitLabels(g);
   showPageInfo();
+  if (dir) turned(dir === 'next' ? 1 : -1);
 }
 
 /* The page name, the dots, and the arrows (which show the page they go to). */
@@ -692,7 +725,7 @@ function listenForTaps(root, canSwipe){
     if (!f || f.id !== e.pointerId || f.root !== root) return;
     finger = null; unpress(f); lastLift = Date.now();
     if (f.drag){ letGo(cancelled ? 0 : e.clientX - f.x, cancelled ? 0 : f.v); return; }
-    if (!cancelled && !f.moved && f.el && f.el._item) announce(f.el._item);
+    if (!cancelled && !f.moved && f.el && f.el._item) announce(f.el._item, f.el);
   }
   root.addEventListener('pointerup', function(e){ lift(e, false); });
   root.addEventListener('pointercancel', function(e){ lift(e, true); });
@@ -702,7 +735,7 @@ function listenForTaps(root, canSwipe){
   root.addEventListener('click', function(e){
     if (e.detail > 0 && Date.now() - lastLift < 1000) return;
     var el = tileAt(e.target, root);
-    if (el && el._item) announce(el._item);
+    if (el && el._item) announce(el._item, el);
   });
   /* A long press must stay a tap, not open a menu. */
   root.addEventListener('contextmenu', function(e){ e.preventDefault(); });
@@ -712,7 +745,7 @@ function listenForTaps(root, canSwipe){
 var peekEl = null, peekDir = 0, settling = null;
 
 function place(el, x, animate){
-  el.style.transition = animate ? 'transform .2s ease-out' : 'none';
+  el.style.transition = animate ? 'transform .26s cubic-bezier(.2,.8,.3,1.12)' : 'none';
   el.style.transform = x ? 'translateX(' + x + 'px)' : '';
 }
 function drag(shift){
@@ -737,10 +770,10 @@ function letGo(dist, v){
   var turn = toward && (far || flick);
   place(old, turn ? -dir * w : 0, true);
   place(peek, turn ? 0 : dir * w, true);
-  var t = setTimeout(function(){ settle(); }, 230);
+  var t = setTimeout(function(){ settle(); }, 290);
   settling = function(){
     settling = null; clearTimeout(t);
-    if (turn){ stage.removeChild(old); gridEl = peek; current = wrap(current + dir); showPageInfo(); }
+    if (turn){ stage.removeChild(old); gridEl = peek; current = wrap(current + dir); showPageInfo(); turned(dir); }
     else stage.removeChild(peek);
     peekEl = null; peekDir = 0;
     place(gridEl, 0, false);
@@ -799,7 +832,7 @@ gear.addEventListener('mouseleave', endHold);
 document.getElementById('closePanel').addEventListener('click', function(){ panel.classList.remove('open'); });
 panel.addEventListener('click', function(e){ if (e.target === panel) panel.classList.remove('open'); });
 
-function openSettings(){ settle(); buildVoiceList(); buildPageList(); refreshOffline(); showVersion(); panel.classList.add('open'); }
+function openSettings(){ settle(); buildVoiceList(); buildPageList(); refreshOffline(); showVersion(); showFxLevel(); panel.classList.add('open'); }
 
 function buildVoiceList(){
   var box = document.getElementById('voiceList'); box.innerHTML = '';
@@ -842,6 +875,17 @@ vEl.addEventListener('input', function(e){ vol = parseFloat(e.target.value); vV.
 var swipeBox = document.getElementById('swipeOn');
 swipeBox.checked = swipeOn;
 swipeBox.addEventListener('change', function(){ swipeOn = swipeBox.checked; store('tt_swipe', swipeOn ? '1' : '0'); });
+
+var fxRadios = document.querySelectorAll('#fxList input');
+function showFxLevel(){ for (var i = 0; i < fxRadios.length; i++) fxRadios[i].checked = fxRadios[i].value === FX_LEVEL; }
+for (var fi = 0; fi < fxRadios.length; fi++){
+  fxRadios[fi].addEventListener('change', function(e){
+    setFxLevel(e.target.value); store('tt_fx', FX_LEVEL);
+    var lab = e.target.closest('label');                /* a taste of it, right on the button */
+    if (FX_LEVEL !== 'off'){ bounce(lab); rings(lab, '#3C6E9F'); }
+    if (FX_LEVEL === 'lots') burst(lab, 'confetti', '#3C6E9F', 1);
+  });
+}
 
 function buildPageList(){
   var box = document.getElementById('pageList'); box.innerHTML = '';
@@ -1026,6 +1070,230 @@ try {
       matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches)
     screen.orientation.lock('portrait').catch(function(){});
 } catch(e){}
+
+/* ============================================================
+   FUN
+   Every tap makes its picture bounce, ripples rings out of it and
+   throws sparkles in the page's colour: confetti for happy words,
+   hearts for hugs, stars for Toy Story, bubbles for drinks (set
+   per page or per tile with "fx" in library.js). Tapping the same
+   picture again and again builds up to a shower over the whole
+   screen. Tiles pop in when a page turns, and a swipe leaves a
+   streak behind it.
+   All of it is decoration, drawn on a see-through canvas that
+   ignores touches: nothing here can block a tap, move a tile or
+   delay the voice. The drawing loop only runs while something is
+   on screen, so it costs no battery in between.
+   Settings: Lots / A little (bounces and rings only) / Off.
+   ============================================================ */
+var FX_LEVEL = store('tt_fx') || (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'little' : 'lots');
+if (['lots', 'little', 'off'].indexOf(FX_LEVEL) === -1) FX_LEVEL = 'lots';
+function setFxLevel(v){
+  FX_LEVEL = v;
+  document.body.classList.remove('fx-lots', 'fx-little', 'fx-off');
+  document.body.classList.add('fx-' + v);
+  if (v === 'off'){ parts.length = 0; fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height); }
+}
+
+var fxCanvas = document.getElementById('fx'), fxCtx = fxCanvas.getContext('2d');
+var parts = [], fxOn = false, fxDpr = 1, fxLast = 0, FX_MAX = 420;
+function fxResize(){
+  fxDpr = Math.min(2, window.devicePixelRatio || 1);
+  fxCanvas.width = Math.round(innerWidth * fxDpr); fxCanvas.height = Math.round(innerHeight * fxDpr);
+}
+window.addEventListener('resize', fxResize); fxResize();
+setFxLevel(FX_LEVEL);
+
+var RAINBOW = ['#FF4B4B', '#FFB000', '#FFE600', '#3DD86B', '#2F8CFF', '#B36BFF', '#FF6AD5'];
+var HEARTS = ['#FF2D55', '#FF4F79', '#FF8FA3', '#FFC1CC'];
+function rnd(a, b){ return a + Math.random() * (b - a); }
+function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+function add(p){
+  if (parts.length >= FX_MAX) parts.shift();
+  p.age = 0; p.delay = p.delay || 0; p.t = 0;
+  p.rot = p.rot || 0; p.spin = p.spin || 0; p.g = p.g || 0; p.drag = p.drag == null ? 1 : p.drag;
+  p.phase = Math.random() * 6.2832;
+  parts.push(p);
+  if (!fxOn){ fxOn = true; fxLast = 0; requestAnimationFrame(frame); }
+}
+function frame(now){
+  if (!fxLast) fxLast = now;
+  var dt = Math.min(0.05, (now - fxLast) / 1000); fxLast = now;
+  var c = fxCtx, W = fxCanvas.width, H = fxCanvas.height;
+  c.clearRect(0, 0, W, H);
+  c.save(); c.scale(fxDpr, fxDpr);
+  for (var i = parts.length - 1; i >= 0; i--){
+    var p = parts[i];
+    p.age += dt;
+    if (p.age < p.delay) continue;
+    p.t = p.age - p.delay;
+    if (p.t >= p.life){ parts.splice(i, 1); continue; }
+    if (p.kind !== 'ring'){
+      p.vy += p.g * dt;
+      var k = Math.pow(p.drag, dt * 60);
+      p.vx *= k; p.vy *= k;
+      if (p.sway) p.x += Math.sin(p.t * 6 + p.phase) * p.sway * dt;
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      p.rot += p.spin * dt;
+    }
+    draw(c, p);
+  }
+  c.restore();
+  if (parts.length) requestAnimationFrame(frame);
+  else { fxOn = false; c.clearRect(0, 0, W, H); }
+}
+function spark(c, s){
+  c.beginPath(); c.moveTo(0, -s);
+  c.quadraticCurveTo(0, 0, s, 0); c.quadraticCurveTo(0, 0, 0, s);
+  c.quadraticCurveTo(0, 0, -s, 0); c.quadraticCurveTo(0, 0, 0, -s);
+  c.fill();
+}
+function star(c, r){
+  c.beginPath();
+  for (var i = 0; i < 10; i++){ var a = -1.5708 + i * 0.6283, rr = i % 2 ? r * 0.45 : r; c.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); }
+  c.closePath(); c.fill();
+}
+function heart(c, s){
+  c.beginPath(); c.moveTo(0, s);
+  c.bezierCurveTo(-s * 1.25, 0, -s * 0.65, -s * 0.95, 0, -s * 0.4);
+  c.bezierCurveTo(s * 0.65, -s * 0.95, s * 1.25, 0, 0, s);
+  c.fill();
+}
+function draw(c, p){
+  var u = p.t / p.life;                                  /* 0 → 1 over its life */
+  var fade = u < 0.65 ? 1 : 1 - (u - 0.65) / 0.35;
+  c.save();
+  c.translate(p.x, p.y);
+  c.fillStyle = p.color; c.strokeStyle = p.color;
+  if (p.kind === 'ring'){
+    var grow = 1 - Math.pow(1 - u, 3), d = p.size * grow;
+    c.globalAlpha = (1 - u) * 0.9;
+    c.lineWidth = 4 * (1 - u) + 1;
+    c.beginPath();
+    if (c.roundRect) c.roundRect(-p.w / 2 - d, -p.h / 2 - d, p.w + 2 * d, p.h + 2 * d, p.r + d);
+    else c.rect(-p.w / 2 - d, -p.h / 2 - d, p.w + 2 * d, p.h + 2 * d);
+    c.stroke();
+  } else {
+    c.globalAlpha = Math.max(0, fade * (p.alpha || 1));
+    c.rotate(p.rot);
+    if (p.kind === 'spark'){
+      spark(c, p.size * (0.65 + 0.35 * Math.sin(p.t * 18 + p.phase)));
+    } else if (p.kind === 'confetti'){
+      c.scale(Math.cos(p.t * 9 + p.phase), 1);           /* flutter */
+      c.fillRect(-p.size / 2, -p.size * 0.3, p.size, p.size * 0.6);
+    } else if (p.kind === 'heart'){
+      heart(c, p.size * (u < 0.12 ? u / 0.12 : 1));      /* swells up as it appears */
+    } else if (p.kind === 'star'){
+      star(c, p.size);
+    } else if (p.kind === 'bubble'){
+      var r = p.size * (u > 0.9 ? 1 + (u - 0.9) * 4 : 1);  /* pops at the end */
+      c.lineWidth = 1.5; c.beginPath(); c.arc(0, 0, r, 0, 6.2832); c.stroke();
+      c.fillStyle = '#fff'; c.beginPath(); c.arc(-r * 0.35, -r * 0.35, r * 0.2, 0, 6.2832); c.fill();
+    }
+  }
+  c.restore();
+}
+
+/* ---- where and what to throw ---- */
+function rectOf(el){
+  var r = el.getBoundingClientRect();
+  return {x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height, r: parseFloat(getComputedStyle(el).borderRadius) || 16};
+}
+function colorOf(el){
+  var cs = getComputedStyle(el);
+  return (cs.getPropertyValue('--pc') || cs.getPropertyValue('--c') || '').trim() || '#3C6E9F';
+}
+function fxKind(el, item){
+  var g = el && el.closest ? el.closest('.grid') : null;
+  return item.fx || (g && g._fx) || 'sparkle';
+}
+function palette(kind, color){
+  if (kind === 'confetti') return RAINBOW;
+  if (kind === 'hearts') return HEARTS;
+  if (kind === 'bubbles') return ['#7CC6FF', '#BFE4FF', '#FFFFFF'];
+  if (kind === 'stars') return ['#FFD21F', '#FFF4B0', '#FFFFFF', mix(color, '#FFFFFF', .3)];
+  return [color, mix(color, '#FFFFFF', .45), '#FFD21F', '#FFFFFF'];
+}
+function bounce(el){
+  if (!el) return;
+  el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+  clearTimeout(el._popT); el._popT = setTimeout(function(){ el.classList.remove('pop'); }, 450);
+}
+function rings(el, color){
+  var b = rectOf(el);
+  for (var i = 0; i < 3; i++)
+    add({kind: 'ring', x: b.x, y: b.y, w: b.w, h: b.h, r: b.r, size: 24 + i * 6,
+         color: i === 1 ? '#FFFFFF' : color, life: 0.55 + i * 0.1, delay: i * 0.09});
+}
+function burst(el, kind, color, mult){
+  var b = rectOf(el), pal = palette(kind, color), i, n, a, s;
+  if (kind === 'ring') return;
+  if (kind === 'soft'){
+    for (i = 0, n = 10 * mult; i < n; i++){ a = rnd(0, 6.2832); s = rnd(20, 70);
+      add({kind: 'spark', x: b.x + rnd(-b.w, b.w) * 0.4, y: b.y + rnd(-b.h, b.h) * 0.4, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 25,
+           size: rnd(2.5, 5), color: pick(pal), life: rnd(0.6, 1.1), drag: 0.97, spin: rnd(-1, 1)}); }
+  } else if (kind === 'hearts'){
+    for (i = 0, n = 14 * mult; i < n; i++)
+      add({kind: 'heart', x: b.x + rnd(-b.w, b.w) * 0.35, y: b.y + rnd(-b.h, b.h) * 0.3, vx: rnd(-40, 40), vy: rnd(-170, -70),
+           size: rnd(5, 11), color: pick(pal), life: rnd(1.0, 1.6), g: -10, drag: 0.985, sway: rnd(20, 50), rot: rnd(-0.3, 0.3)});
+  } else if (kind === 'bubbles'){
+    for (i = 0, n = 14 * mult; i < n; i++)
+      add({kind: 'bubble', x: b.x + rnd(-b.w, b.w) * 0.4, y: b.y + rnd(-b.h, b.h) * 0.4, vx: rnd(-25, 25), vy: rnd(-150, -50),
+           size: rnd(3, 9), color: pick(pal), life: rnd(1.0, 1.8), g: -25, drag: 0.99, sway: rnd(15, 45), alpha: 0.9});
+  } else if (kind === 'stars'){
+    for (i = 0, n = 16 * mult; i < n; i++){ a = rnd(0, 6.2832); s = rnd(120, 320);
+      add({kind: 'star', x: b.x + rnd(-b.w, b.w) * 0.3, y: b.y + rnd(-b.h, b.h) * 0.3, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 60,
+           size: rnd(4, 9), color: pick(pal), life: rnd(0.9, 1.4), g: 160, drag: 0.985, spin: rnd(-4, 4), rot: rnd(0, 6.28)}); }
+  } else if (kind === 'confetti'){
+    for (i = 0, n = 28 * mult; i < n; i++){ a = rnd(-3.1416, 0); s = rnd(140, 420);
+      add({kind: 'confetti', x: b.x + rnd(-b.w, b.w) * 0.3, y: b.y + rnd(-b.h, b.h) * 0.3, vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+           size: rnd(5, 10), color: pick(pal), life: rnd(1.2, 1.9), g: 420, drag: 0.985, spin: rnd(-8, 8), rot: rnd(0, 6.28)}); }
+  } else {                                               /* sparkle */
+    for (i = 0, n = 22 * mult; i < n; i++){ a = rnd(0, 6.2832); s = rnd(80, 300);
+      add({kind: 'spark', x: b.x + rnd(-b.w, b.w) * 0.35, y: b.y + rnd(-b.h, b.h) * 0.35, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 40,
+           size: rnd(3, 7), color: pick(pal), life: rnd(0.7, 1.3), g: 140, drag: 0.98, spin: rnd(-3, 3)}); }
+  }
+}
+/* The shower: the whole screen joins in after a few taps on the same picture. */
+function shower(kind, color){
+  var w = innerWidth, h = innerHeight, i, k = kind === 'hearts' ? 'heart' : kind === 'stars' ? 'star' : kind === 'bubbles' ? 'bubble' : 'confetti';
+  var pal = palette(k === 'confetti' ? 'confetti' : kind, color);
+  for (i = 0; i < 60; i++){
+    if (k === 'bubble')
+      add({kind: k, x: rnd(0, w), y: h + rnd(5, 40), vx: rnd(-30, 30), vy: rnd(-260, -120), size: rnd(4, 11), color: pick(pal),
+           life: rnd(1.6, 2.6), g: -20, drag: 0.995, sway: rnd(20, 60), alpha: 0.9, delay: rnd(0, 0.6)});
+    else
+      add({kind: k, x: rnd(0, w), y: rnd(-40, -5), vx: rnd(-40, 40), vy: rnd(120, 300), size: rnd(5, 11), color: pick(pal),
+           life: rnd(1.6, 2.6), g: k === 'heart' ? 60 : 160, drag: 0.99, spin: rnd(-6, 6), rot: rnd(0, 6.28), sway: rnd(10, 40), delay: rnd(0, 0.6)});
+  }
+}
+var comboItem = null, comboN = 0, comboT = 0;
+function celebrate(el, item){
+  if (FX_LEVEL === 'off' || !el) return;
+  var now = Date.now();
+  comboN = (item === comboItem && now - comboT < 1800) ? comboN + 1 : 1;
+  comboItem = item; comboT = now;
+  bounce(el); bounce(said);
+  var color = colorOf(el), kind = fxKind(el, item);
+  rings(el, color);
+  if (FX_LEVEL !== 'lots') return;
+  burst(el, kind, color, kind === 'soft' ? 1 : Math.min(comboN, 3));   /* gentle words stay gentle */
+  if (comboN >= 4 && kind !== 'soft' && kind !== 'ring') shower(kind, color);
+}
+/* A page turned: the name bounces and, for a swipe or an arrow, a streak flies past. */
+function turned(dir){
+  if (FX_LEVEL === 'off') return;
+  bounce(titleBtn);
+  if (FX_LEVEL !== 'lots') return;
+  var st = stage.getBoundingClientRect(), pal = palette('sparkle', pages[current].color);
+  for (var i = 0; i < 18; i++){
+    var s = rnd(600, 1100);
+    add({kind: 'spark', x: dir > 0 ? innerWidth + 10 : -10, y: rnd(st.top + 10, st.bottom - 10), vx: -dir * s, vy: rnd(-20, 20),
+         size: rnd(3, 6), color: pick(pal), life: rnd(0.35, 0.6), drag: 0.9, delay: rnd(0, 0.12)});
+  }
+}
+window.FX = {count: function(){ return parts.length; }, running: function(){ return fxOn; }};   /* for the tests */
 
 /* stop pinch-zoom (iOS Safari only event; harmless elsewhere) */
 document.addEventListener('gesturestart', function(e){ e.preventDefault(); });
