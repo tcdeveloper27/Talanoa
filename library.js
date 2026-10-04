@@ -28,7 +28,9 @@
              answer is more fun to pick than another. Off, they keep
              their own fx, just as before.
      show  = true: also shows the words full screen, big enough to
-             hand the phone to someone (About me)
+             hand the phone to someone
+     card  = true: printed as the cut-out "About me" card on the
+             cover of the paper board (print.html)
      means = a translation, shown small under the label and in the
              banner (the Tongan page)
      sound = how the computer voice should pronounce it, if the
@@ -60,7 +62,8 @@ window.TT_LIBRARY = {
     {"icon": "👍", "label": "Yes",      "say": "Yes",           "color": "#3F8A34", "fx": "confetti", "answer": true},
     {"icon": "👎", "label": "No",       "say": "No",            "color": "#C8342B", "fx": "soft", "answer": true},
     {"icon": "➕", "label": "More",     "say": "I want more",   "color": "#3C6E9F"},
-    {"icon": "👋", "label": "Hi, I'm Brenton", "short": "Brenton", "say": "Hi, I'm Brenton", "color": "#8B5A2B", "fx": "confetti"},
+    {"icon": "👋", "label": "Hi, I'm Brenton", "short": "Brenton", "color": "#8B5A2B", "fx": "confetti", "card": true,
+     "say": "Hi, I'm Brenton. I can't talk with my mouth, so I talk with this phone. Please be patient and give me time. My emergency contacts are in this phone's Emergency information."},
     {"icon": "🙋", "label": "Help",     "say": "I need help",   "color": "#7B5AA6"},
     {"icon": "✋", "label": "Stop",     "say": "Stop please",   "color": "#C8342B", "fx": "soft"}
   ],
@@ -122,8 +125,8 @@ window.TT_LIBRARY = {
       {"icon": "😔", "label": "Sorry",      "say": "I am sorry"},
       {"icon": "❤️", "label": "Love you",   "say": "I love you", "fx": "hearts"},
       {"icon": "☝️", "label": "My turn",    "say": "It's my turn"},
-      {"icon": "🪪", "label": "About me",   "show": true,
-       "say": "Hi, I'm Brenton. I can't talk with my mouth, so I talk with this phone. Please be patient and give me time. My emergency contacts are in this phone's Emergency information."}
+      {"icon": "💻", "label": "GCB Computers", "say": "I want to go to GCB Computers"},
+      {"icon": "👋", "label": "Hi, I'm Brenton", "short": "Brenton", "say": "Hi, I'm Brenton", "fx": "confetti"}
     ]},
 
     {"name": "Mom & Dad", "icon": "👪", "color": "#C2507E", "fx": "hearts", "tiles": [

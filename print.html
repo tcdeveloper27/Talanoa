@@ -193,11 +193,12 @@ function cover(total){
   var ol = el('ol', 'list');
   LIB.pages.forEach(function(p){ ol.appendChild(el('li', '', p.name)); });
   s.appendChild(ol);
-  var me = null;
-  LIB.pages.forEach(function(p){ p.tiles.forEach(function(t){ if (!blank(t) && t.show) me = t; }); });
+  var me = null;                          /* the tile marked "card": true (the top row's "Hi, I'm Brenton") */
+  LIB.core.concat.apply(LIB.core.slice(), LIB.pages.map(function(p){ return p.tiles; }))
+    .forEach(function(t){ if (!blank(t) && t.card && !me) me = t; });
   if (me){
     var c = el('div', 'card'), b = el('b');
-    b.appendChild(icon(me)); b.appendChild(document.createTextNode(me.label));
+    b.appendChild(icon(me)); b.appendChild(document.createTextNode('About me'));
     c.appendChild(b); c.appendChild(el('p', '', me.say)); c.appendChild(el('small', '', '✂ cut out and keep in a wallet or bag'));
     s.appendChild(c);
   }

@@ -123,10 +123,11 @@ function serve() {
   await page.evaluate(() => { typed = 'HI MOM'; showTyped(); show('HI MOM', null); });
   await webp(await page.screenshot(), 'abc.webp');
   await page.evaluate(() => { typed = ''; showTyped(); });
-  // 7. About me, shown big
+  // 7. the about-me message ("Hi, I'm Brenton" on the top row), shown big by tapping the words at the top
   await goTo('People');
   await page.evaluate(() => { speechSynthesis.speak = () => {}; });
-  await tap('#stage .tile', await tileIndex('About me'));
+  await tap('#core .core-btn', await page.evaluate(() => [...document.querySelectorAll('#core .core-btn')].findIndex((b) => b._item.card)));
+  await page.evaluate(() => openShow(said.textContent));
   await webp(await page.screenshot(), 'show-big.webp');
   await page.evaluate(() => { closeShow(); litItem = null; lightUp(); said.textContent = HINT; });
   await calm();

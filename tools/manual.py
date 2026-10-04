@@ -123,7 +123,7 @@ def main():
     talk = next((p for p in lib['pages'] if p['name'] == 'Talk'), {'tiles': []})
     talk_rows = '\n'.join(f'<tr><td><b>{pic(t["icon"])}{html.escape(t["label"])}</b></td><td>“{html.escape(t.get("say") or t["label"])}”</td></tr>'
                           for t in tiles(talk))
-    about = next((t for p in lib['pages'] for t in tiles(p) if t.get('show')), None)
+    about = next((t for t in lib['core'] + [t for p in lib['pages'] for t in tiles(p)] if t.get('card')), None)
     tongan = next((p for p in lib['pages'] if p['name'] == 'Tongan'), {'tiles': []})
     tongan_list = ', '.join(f'<b>{html.escape(t["label"])}</b> ({html.escape(t.get("means", ""))})' for t in tiles(tongan))
 
