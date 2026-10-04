@@ -18,16 +18,36 @@
              on a small phone (the tile still says its whole sentence)
      fx    = what a tap throws, for fun: "sparkle" (the usual),
              "confetti", "hearts", "stars", "bubbles", "soft" (a few
-             gentle sparkles, for sad or hurt words), or "ring" (no
-             sparkles). A page can set one for all its tiles; a tile
-             can override it. Settings can turn the fun down or off.
+             gentle sparkles), or "ring" (no sparkles). A page can set
+             one for all its tiles; a tile can override it. Settings
+             can turn the fun down or off.
+     answer = true: a word he answers with (Yes, No, feelings, the
+             Talk page; a page can set it for all its tiles). Only
+             matters when Settings → "Calm answers" is switched on:
+             then every answer gets the same gentle "soft", so no
+             answer is more fun to pick than another. Off, they keep
+             their own fx, just as before.
+     show  = true: also shows the words full screen, big enough to
+             hand the phone to someone (About me)
+     means = a translation, shown small under the label and in the
+             banner (the Tongan page)
+     sound = how the computer voice should pronounce it, if the
+             spelling would trip it up ("Mah-loh" for Mālō). Between
+             slashes it's the exact sounds, in IPA ("/mˈɑːloʊ/").
+             Only the computer voice uses it; a recording made in
+             Settings (Photos and voices) always wins.
 
    The same label can say different things on different pages
    (Drink is "I want a drink" on I want, "I would like a drink" at
    Maverik). Each different sentence gets its own recording.
 
    To leave a spot empty so the tiles after it don't move, put
-   {"empty": true} in its place.
+   {"empty": true} in its place. New pages go at the END, so the
+   pages he already knows stay the same number of swipes away.
+
+   A page with "keyboard": true and no tiles is an alphabet board:
+   tap letters to spell, then Speak. It uses the phone's own voice
+   for the letters and the words, so it's all one voice.
 
    After changing words, run  python3 tools/build.py  so the natural
    voices and pictures are regenerated for the new tiles. Until then
@@ -35,8 +55,8 @@
    ============================================================ */
 window.TT_LIBRARY = {
   "core": [
-    {"icon": "👍", "label": "Yes",      "say": "Yes",           "color": "#3F8A34", "fx": "confetti"},
-    {"icon": "👎", "label": "No",       "say": "No",            "color": "#C8342B", "fx": "soft"},
+    {"icon": "👍", "label": "Yes",      "say": "Yes",           "color": "#3F8A34", "fx": "confetti", "answer": true},
+    {"icon": "👎", "label": "No",       "say": "No",            "color": "#C8342B", "fx": "soft", "answer": true},
     {"icon": "➕", "label": "More",     "say": "I want more",   "color": "#3C6E9F"},
     {"icon": "👋", "label": "Hi, I'm Brenton", "short": "Brenton", "say": "Hi, I'm Brenton", "color": "#8B5A2B", "fx": "confetti"},
     {"icon": "🙋", "label": "Help",     "say": "I need help",   "color": "#7B5AA6"},
@@ -59,7 +79,7 @@ window.TT_LIBRARY = {
       {"icon": "🔄", "label": "Something else", "say": "I want something else"}
     ]},
 
-    {"name": "I feel", "icon": "😊", "color": "#3C6E9F", "tiles": [
+    {"name": "I feel", "icon": "😊", "color": "#3C6E9F", "answer": true, "tiles": [
       {"icon": "😀", "label": "Happy",      "say": "I feel happy", "fx": "confetti"},
       {"icon": "🤩", "label": "Excited",    "say": "I am excited!", "fx": "confetti"},
       {"icon": "😢", "label": "Sad",        "say": "I feel sad", "fx": "soft"},
@@ -99,7 +119,9 @@ window.TT_LIBRARY = {
       {"icon": "💛", "label": "Thanks",     "say": "Thank you"},
       {"icon": "😔", "label": "Sorry",      "say": "I am sorry"},
       {"icon": "❤️", "label": "Love you",   "say": "I love you", "fx": "hearts"},
-      {"icon": "☝️", "label": "My turn",    "say": "It's my turn"}
+      {"icon": "☝️", "label": "My turn",    "say": "It's my turn"},
+      {"icon": "🪪", "label": "About me",   "show": true,
+       "say": "Hi, I'm Brenton. I can't talk with my mouth, so I talk with this phone. Please be patient and give me time. My emergency contacts are in this phone's Emergency information."}
     ]},
 
     {"name": "Mom & Dad", "icon": "👪", "color": "#C2507E", "fx": "hearts", "tiles": [
@@ -152,7 +174,7 @@ window.TT_LIBRARY = {
       {"icon": "💧", "label": "Water",      "say": "I want water, please", "fx": "bubbles"},
       {"icon": "🧃", "label": "Juice",      "say": "I want juice, please", "fx": "bubbles"},
       {"icon": "🥛", "label": "Milk",       "say": "I want milk, please", "fx": "bubbles"},
-      {"empty": true},
+      {"icon": "🥗", "label": "Salad",      "say": "I want a salad"},
       {"icon": "🍕", "label": "Pizza",      "say": "I want pizza"},
       {"icon": "🍔", "label": "Burger",     "say": "I want a hamburger"},
       {"icon": "🍗", "label": "Chicken",    "say": "I want chicken"},
@@ -234,6 +256,32 @@ window.TT_LIBRARY = {
       {"icon": "🖼️", "label": "Photos",     "say": "I want to look at my photos"},
       {"icon": "📷", "label": "Picture",    "say": "Take a picture!"},
       {"icon": "🌀", "label": "Fan",        "say": "Turn on the fan, please"}
-    ]}
+    ]},
+
+    {"name": "Talk", "icon": "💬", "color": "#4A3B9E", "answer": true, "tiles": [
+      {"icon": "😍", "label": "I like it",  "say": "I like it!"},
+      {"icon": "😒", "label": "Don't like", "say": "I don't like it"},
+      {"icon": "🔁", "label": "Again",      "say": "Again! One more time"},
+      {"icon": "⏸️", "label": "Wait",       "say": "Wait, please"},
+      {"icon": "😂", "label": "Funny",      "say": "That's funny!"},
+      {"icon": "😮", "label": "Wow",        "say": "Wow!"},
+      {"icon": "😬", "label": "Oh no",      "say": "Oh no!"},
+      {"icon": "🏷️", "label": "Mine",       "say": "That's mine"},
+      {"icon": "🫵", "label": "Your turn",  "say": "Your turn"},
+      {"icon": "🫴", "label": "Come here",  "say": "Come here, please"},
+      {"icon": "⌚", "label": "Not now",    "say": "Not now. Maybe later"},
+      {"icon": "🫷", "label": "Leave me alone", "say": "Please leave me alone"}
+    ]},
+
+    {"name": "Tongan", "icon": "🇹🇴", "color": "#8E1B3A", "tiles": [
+      {"icon": "👋", "label": "Mālō e lelei", "means": "Hello",      "say": "Mālō e lelei", "sound": "Mah-loh, eh leh-lay"},
+      {"icon": "💛", "label": "Mālō",         "means": "Thank you",  "say": "Mālō",         "sound": "Mah-loh"},
+      {"icon": "💖", "label": "Mālō ʻaupito", "means": "Thank you very much", "say": "Mālō ʻaupito", "sound": "Mah-loh, ow-pee-toh"},
+      {"icon": "❤️", "label": "ʻOfa atu",     "means": "Love you",   "say": "ʻOfa atu",     "sound": "Oh-fah, ah-too", "fx": "hearts"},
+      {"icon": "👍", "label": "ʻIo",          "means": "Yes",        "say": "ʻIo",          "sound": "Ee-oh", "fx": "soft", "answer": true},
+      {"icon": "👎", "label": "ʻIkai",        "means": "No",         "say": "ʻIkai",        "sound": "Ee-kai", "fx": "soft", "answer": true}
+    ]},
+
+    {"name": "ABC", "icon": "🔤", "color": "#3A3A3A", "keyboard": true, "tiles": []}
   ]
 };

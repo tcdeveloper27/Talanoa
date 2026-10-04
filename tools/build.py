@@ -88,17 +88,20 @@ def all_tiles(lib):
 
 
 def recordings(lib):
-    """Every different sentence on the board and the file its recording is saved as.
+    """Every different sentence on the board and the file its recording is saved as,
+    plus how the voice should say it (a tile's "sound", if it has one).
 
     The app finds a recording by the sentence itself, so tiles that say the same
     thing share one, and one label can say different things on different pages.
     A file is named after its tile's label; if another tile with that label says
     something else, the later one is named after its sentence instead."""
-    jobs, taken = {SAMPLE_TEXT: '_sample', SPEED_TEXT: '_speed'}, {}
+    jobs, taken, spoken = {SAMPLE_TEXT: '_sample', SPEED_TEXT: '_speed'}, {}, {}
     for t in all_tiles(lib):
         text = t.get('say') or t['label']
         if text in jobs:
             continue
+        if t.get('sound'):
+            spoken[text] = t['sound']
         name = file_slug(t['label'])
         if not name or taken.get(name, text) != text:
             base = name = file_slug(text) or 'tile'
@@ -107,7 +110,7 @@ def recordings(lib):
                 name, n = f'{base}-{n}', n + 1
         taken[name] = text
         jobs[text] = name
-    return jobs
+    return jobs, spoken
 
 
 def photos(lib):
@@ -227,7 +230,7 @@ def finish(s, sr):
     return np.concatenate([np.zeros(int(sr * 0.02), dtype=s.dtype), s])
 
 
-def build_voices(jobs):
+def build_voices(jobs, spoken):
     import numpy as np, soundfile as sf, imageio_ffmpeg
     from kokoro_onnx import Kokoro
     model = [download(KOKORO_BASE + f, os.path.join(CACHE, 'kokoro', f)) for f in KOKORO_FILES]
@@ -242,13 +245,16 @@ def build_voices(jobs):
         made = 0
         clips = {}
         for text, tid in jobs.items():
-            key = hashlib.sha1(f'{v["kokoro"]}|{SPEED}|{PROCESS}|{text}'.encode()).hexdigest()[:10]
+            words = spoken.get(text, text)        # what the voice actually reads out
+            key = hashlib.sha1(f'{v["kokoro"]}|{SPEED}|{PROCESS}|{words}'.encode()).hexdigest()[:10]
             dest = os.path.join(vdir, tid + '.mp3')
             if manifest.get(tid) != key or not os.path.exists(dest):
                 if kokoro is None:
                     kokoro = Kokoro(*model)
-                samples, sr = kokoro.create(text, voice=v['kokoro'], speed=SPEED,
-                                            lang='en-gb' if v['kokoro'].startswith('b') else 'en-us')
+                ipa = len(words) > 2 and words[0] == '/' and words[-1] == '/'     # "/ˈʌʔoʊ/": exact sounds
+                samples, sr = kokoro.create(words[1:-1] if ipa else words, voice=v['kokoro'], speed=SPEED,
+                                            lang='en-gb' if v['kokoro'].startswith('b') else 'en-us',
+                                            **({'is_phonemes': True} if ipa else {}))
                 audio = finish(np.asarray(samples, dtype=np.float32), sr)
                 buf = io.BytesIO()
                 sf.write(buf, audio, sr, format='WAV', subtype='PCM_16')
@@ -292,7 +298,7 @@ def write_outputs(pictures, clips, photo_files):
           'window.TT_ASSETS = ' + json.dumps(assets, ensure_ascii=False, indent=0) + ';\n')
     open(os.path.join(ROOT, 'assets.js'), 'w', encoding='utf-8').write(js)
 
-    shell = ['index.html', 'credits.html', 'library.js', 'assets.js', 'manifest.webmanifest',
+    shell = ['index.html', 'credits.html', 'print.html', 'library.js', 'assets.js', 'manifest.webmanifest',
              'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-512-maskable.png']
     precache = shell + sorted(set(pictures.values())) + photo_files
     version = file_hash(precache + ['tools/sw-template.js'])
@@ -306,11 +312,11 @@ def main():
     lib = load_library()
     check_mom_under_dad(lib)
     photo_files = photos(lib)
-    jobs = recordings(lib)
+    jobs, spoken = recordings(lib)
     print(f'{len(lib["pages"])} pages, {len(all_tiles(lib))} tiles, {len(jobs) - 2} different sentences')
     pictures = build_pictures(lib)
     build_app_icons()
-    clips = build_voices(jobs)
+    clips = build_voices(jobs, spoken)
     write_outputs(pictures, clips, photo_files)
     import manual
     manual.main()

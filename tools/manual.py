@@ -21,6 +21,22 @@ def badge(n, x, y):
     return f'<span class="badge" style="left:{x};top:{y}">{n}</span>'
 
 
+def readable(hexc):
+    """The page colour darkened just enough for white writing (4.6 : 1), as the app does."""
+    def lum(h):
+        c = [int(h[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+        c = [v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4 for v in c]
+        return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+    a = 0.0
+    while a <= 0.6:
+        rgb = [round(int(hexc[i:i + 2], 16) * (1 - a)) for i in (1, 3, 5)]
+        out = '#' + ''.join(f'{v:02x}' for v in rgb)
+        if 1.05 / (lum(out) + 0.05) >= 4.6:
+            return out
+        a += 0.02
+    return out
+
+
 def qr_svg(url):
     try:
         import qrcode, qrcode.image.svg
@@ -50,11 +66,15 @@ def main():
     # page gallery
     cards = []
     for i, p in enumerate(lib['pages'], 1):
-        sample = ', '.join(html.escape(t['label']) for t in tiles(p)[:4])
+        if p.get('keyboard'):
+            body = 'The alphabet: spell a word, then Speak'
+        else:
+            sample = ', '.join(html.escape(t['label']) for t in tiles(p)[:4])
+            body = f'{len(tiles(p))} tiles: {sample}…'
         cards.append(
-            f'<div class="pagecard" style="--pc:{p["color"]}"><div class="pc-top">{pic(p["icon"], p.get("img"))}'
+            f'<div class="pagecard" style="--pc:{p["color"]};--pcs:{readable(p["color"])}"><div class="pc-top">{pic(p["icon"], p.get("img"))}'
             f'<b>{html.escape(p["name"])}</b><span class="n">{i}</span></div>'
-            f'<div class="pc-body">{len(tiles(p))} tiles: {sample}…</div></div>')
+            f'<div class="pc-body">{body}</div></div>')
 
     # voices
     rows = []
@@ -64,7 +84,7 @@ def main():
     rows.append('<tr><td><b>Built-in voice</b></td><td>the voice built into the phone or tablet (sound depends on the device)</td></tr>')
 
     # core row
-    core = ''.join(f'<span class="corechip" style="--c:{c["color"]}">{pic(c["icon"])}{html.escape(c["label"])}</span>'
+    core = ''.join(f'<span class="corechip" style="--c:{readable(c["color"])}">{pic(c["icon"])}{html.escape(c["label"])}</span>'
                    for c in lib['core'])
 
     # callouts on the main screenshot (its size in CSS pixels is in boxes.json)
@@ -84,20 +104,27 @@ def main():
         badge(8, *at('lit', 1, 0, -14, 14)),
     ])
 
-    # callouts on the two settings crops (cut 44 CSS px above "Pages to show")
+    # callouts on the three settings crops (each cut 44 CSS px above "Pages to show" and "Photos and voices")
     sw = boxes['s_voice']['sheetW']
-    cut = boxes['s_pages']['y'] - 44
-    total = boxes['s_pages']['sheetH']
-    def sat(name, top):
+    cuts = [0, boxes['s_pages']['y'] - 44, boxes['s_own']['y'] - 44, boxes['s_pages']['sheetH']]
+    def sat(name, part):
         r = boxes[name]
-        h = cut if top else total - cut
-        y = r['y'] + min(r['height'] / 2, 22) - (0 if top else cut)
-        return pct(sw - 16, sw), pct(y, h)
-    top_badges = ''.join([badge('A', *sat('s_voice', True)), badge('B', *sat('s_speed', True)),
-                          badge('C', *sat('s_vol', True))])
-    bottom_badges = ''.join([badge('D', *sat('s_pages', False)), badge('E', *sat('s_swipe', False)),
-                             badge('F', *sat('s_fx', False)), badge('G', *sat('s_status', False)),
-                             badge('H', *sat('s_update', False)), badge('I', *sat('s_about', False))])
+        y = r['y'] + min(r['height'] / 2, 22) - cuts[part]
+        return pct(sw - 16, sw), pct(y, cuts[part + 1] - cuts[part])
+    def row(part, *pairs):
+        return ''.join(badge(letter, *sat(name, part)) for letter, name in pairs)
+    top_badges = row(0, ('A', 's_voice'), ('B', 's_speed'), ('C', 's_vol'))
+    mid_badges = row(1, ('D', 's_pages'), ('E', 's_swipe'), ('F', 's_fx'), ('G', 's_calm'), ('H', 's_big'), ('I', 's_strong'))
+    bottom_badges = row(2, ('J', 's_ownbtn'), ('K', 's_backup'), ('L', 's_counts'), ('M', 's_counton'),
+                        ('N', 's_status'), ('O', 's_update'), ('P', 's_links'))
+
+    # the Talk page, About me and the Tongan words, straight from library.js
+    talk = next((p for p in lib['pages'] if p['name'] == 'Talk'), {'tiles': []})
+    talk_rows = '\n'.join(f'<tr><td><b>{pic(t["icon"])}{html.escape(t["label"])}</b></td><td>“{html.escape(t.get("say") or t["label"])}”</td></tr>'
+                          for t in tiles(talk))
+    about = next((t for p in lib['pages'] for t in tiles(p) if t.get('show')), None)
+    tongan = next((p for p in lib['pages'] if p['name'] == 'Tongan'), {'tiles': []})
+    tongan_list = ', '.join(f'<b>{html.escape(t["label"])}</b> ({html.escape(t.get("means", ""))})' for t in tiles(tongan))
 
     tpl = open(os.path.join(ROOT, 'tools', 'manual-template.html'), encoding='utf-8').read()
     out = (tpl.replace('{{PAGE_CARDS}}', '\n'.join(cards))
@@ -108,7 +135,11 @@ def main():
               .replace('{{CORE_CHIPS}}', core)
               .replace('{{MAIN_BADGES}}', main_badges)
               .replace('{{SET_TOP_BADGES}}', top_badges)
+              .replace('{{SET_MID_BADGES}}', mid_badges)
               .replace('{{SET_BOTTOM_BADGES}}', bottom_badges)
+              .replace('{{TALK_ROWS}}', talk_rows)
+              .replace('{{ABOUT_ME}}', html.escape(about['say']) if about else '')
+              .replace('{{TONGAN_LIST}}', tongan_list)
               .replace('{{QR}}', qr_svg(APP_URL))
               .replace('{{APP_URL}}', APP_URL))
     left = re.findall(r'\{\{[A-Z_]+\}\}', out)

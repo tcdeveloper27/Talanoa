@@ -93,7 +93,7 @@
   /* page gallery */
   .pages{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin:12px 0;}
   .pagecard{background:var(--paper);border:3px solid var(--pc);border-radius:16px;overflow:hidden;}
-  .pc-top{display:flex;align-items:center;gap:10px;background:var(--pc);color:#fff;padding:8px 12px;font-size:18px;}
+  .pc-top{display:flex;align-items:center;gap:10px;background:var(--pcs,var(--pc));color:#fff;padding:8px 12px;font-size:18px;}
   .pc-top img{width:36px;height:36px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));}
   .pc-top b{flex:1;}
   .pc-top .n{font-size:13px;background:rgba(255,255,255,.25);border-radius:20px;padding:1px 9px;}
@@ -131,6 +131,8 @@
   th{background:#F4ECDC;font-size:15px;}
   .tag{display:inline-block;background:var(--green);color:#fff;font-size:12px;font-weight:800;border-radius:20px;padding:1px 8px;margin-left:6px;vertical-align:2px;}
   .trouble td:first-child{font-weight:800;width:36%;}
+  table.voices td img{width:28px;height:28px;vertical-align:middle;margin-right:8px;}
+  table.voices td b .em{font-size:22px;margin-right:8px;}
 
   /* flow diagram for updates */
   .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;}
@@ -168,9 +170,11 @@
     .qrbox .qr{width:150px;height:150px;}
     .toc{margin:10px 0 0;padding:10px 16px;}
     .device{max-width:82%;margin:10px auto;padding:10px;border-radius:20px;}
-    .device.portrait{max-width:250px;}
+    .device.portrait{max-width:215px;padding:8px;border-radius:18px;}
     .two .device{max-width:100%;}
-    .sheetshot{max-width:300px;}
+    .two .device.portrait{max-width:215px;}
+    .sheetshot{max-width:260px;}
+    .legend li{padding:7px 10px;font-size:11pt;}
     .phone{max-width:250px;}
     .phone .scr{min-height:280px;}
     .phone .scr.home{min-height:230px;}
@@ -226,14 +230,19 @@
   <a href="#talking"><span>4</span>Talking with it</a>
   <a href="#pages"><span>5</span>Moving between pages</a>
   <a href="#family"><span>6</span>The Mom &amp; Dad page</a>
-  <a href="#settings"><span>7</span>Settings</a>
-  <a href="#updates"><span>8</span>Updates</a>
-  <a href="#offline"><span>9</span>Without Wi-Fi</a>
-  <a href="#tips"><span>10</span>Tips for helping residents</a>
-  <a href="#trouble"><span>11</span>If something goes wrong</a>
-  <a href="#care"><span>12</span>Looking after the phone</a>
-  <a href="#changes"><span>13</span>Asking for changes</a>
-  <a href="#credits"><span>14</span>Credits &amp; contact</a>
+  <a href="#talk"><span>7</span>The Talk page</a>
+  <a href="#big"><span>8</span>Show it big · About me</a>
+  <a href="#own"><span>9</span>Tongan words · your own photos and voices</a>
+  <a href="#abc"><span>10</span>The ABC page</a>
+  <a href="#settings"><span>11</span>Settings</a>
+  <a href="#updates"><span>12</span>Updates</a>
+  <a href="#offline"><span>13</span>Without Wi-Fi</a>
+  <a href="#tips"><span>14</span>Helping someone talk</a>
+  <a href="#paper"><span>15</span>The paper board</a>
+  <a href="#trouble"><span>16</span>If something goes wrong</a>
+  <a href="#care"><span>17</span>Looking after the phone</a>
+  <a href="#changes"><span>18</span>Asking for changes</a>
+  <a href="#credits"><span>19</span>Credits &amp; contact</a>
 </nav>
 
 <!-- ================= 1 ================= -->
@@ -241,12 +250,13 @@
   <h2 class="sec"><span class="num">1</span>What Talanoa is</h2>
   <p class="intro">Talanoa helps a person who can't speak tell you what they want, how they feel, and who they want to see. It was made for the residents of Faleofaz.</p>
   <p>It works like a set of talking picture cards on a phone (or a tablet). Every picture says a short sentence out loud in a natural voice, for example the carrot picture says <i>"I want a snack."</i> The words also appear in big letters at the top, so you can read them from across the room, and the picture that said them glows for 30 seconds.</p>
-  <p>There are 13 pages with 152 pictures in total, plus six important buttons that are always on screen.</p>
+  <p>There are 16 pages with 172 pictures in total, plus six important buttons that are always on screen.</p>
   <div class="note good"><b>Three promises the app keeps</b>
     <ul style="margin:6px 0 0;padding-left:20px">
       <li><b>It never stays silent.</b> If a voice recording can't play, the phone's own voice says it instead.</li>
       <li><b>The top row never moves.</b> Its six buttons are always in the same place, so they can be found without looking.</li>
       <li><b>It works without internet</b> once it has been set up.</li>
+      <li><b>Nothing a resident knows ever moves.</b> New words only fill empty spots, and new pages go at the end.</li>
     </ul>
   </div>
 </section>
@@ -277,7 +287,7 @@
       <p class="caption">Step 4 (illustration). The Talanoa icon on the home screen.</p>
     </div>
   </div>
-  <div class="note tip"><b>Tip</b>Turn the media volume up with the side buttons, and set the screen to stay on longer (see <a href="#care">section 12</a>).</div>
+  <div class="note tip"><b>Tip</b>Turn the media volume up with the side buttons, and set the screen to stay on longer (see <a href="#care">section 17</a>).</div>
 </section>
 
 <!-- ================= 3 ================= -->
@@ -287,8 +297,8 @@
   <div class="two">
   <div class="device portrait"><div class="screen"><img src="img/main.webp" alt="The main Talanoa screen, just after tapping Hug"><span class="badge" style="left:6.31%;top:3.50%">1</span><span class="badge" style="left:4.37%;top:8.75%">2</span><span class="badge" style="left:5.34%;top:21.64%">3</span><span class="badge" style="left:28.24%;top:21.64%">4</span><span class="badge" style="left:94.66%;top:21.64%">5</span><span class="badge" style="left:5.83%;top:31.80%">6</span><span class="badge" style="left:85.44%;top:3.50%">7</span><span class="badge" style="left:70.15%;top:54.90%">8</span></div></div>
   <ol class="legend">
-    <li><span class="badge">1</span><div><b>Spoken words.</b> Shows what was just said, in big letters, so staff can read it too. It flashes green on every tap, and goes back to "Tap a picture to talk" after 30 seconds.</div></li>
-    <li><span class="badge">2</span><div><b>The six "always" buttons.</b> On every page, never moving: <span class="core"><span class="corechip" style="--c:#3F8A34"><img src="../img/1f44d.webp" alt="">Yes</span><span class="corechip" style="--c:#C8342B"><img src="../img/1f44e.webp" alt="">No</span><span class="corechip" style="--c:#3C6E9F"><img src="../img/2795.webp" alt="">More</span><span class="corechip" style="--c:#8B5A2B"><img src="../img/1f44b.webp" alt="">Hi, I&#x27;m Brenton</span><span class="corechip" style="--c:#7B5AA6"><img src="../img/1f64b.webp" alt="">Help</span><span class="corechip" style="--c:#C8342B"><img src="../img/270b.webp" alt="">Stop</span></span></div></li>
+    <li><span class="badge">1</span><div><b>Spoken words.</b> Shows what was just said, in big letters, so staff can read it too. It flashes green on every tap, and goes back to "Tap a picture to talk" after 30 seconds. <b>Tap the words to show them full screen</b> (<a href="#big">section 8</a>).</div></li>
+    <li><span class="badge">2</span><div><b>The six "always" buttons.</b> On every page, never moving: <span class="core"><span class="corechip" style="--c:#3c8432"><img src="../img/1f44d.webp" alt="">Yes</span><span class="corechip" style="--c:#c8342b"><img src="../img/1f44e.webp" alt="">No</span><span class="corechip" style="--c:#3c6e9f"><img src="../img/2795.webp" alt="">More</span><span class="corechip" style="--c:#8b5a2b"><img src="../img/1f44b.webp" alt="">Hi, I&#x27;m Brenton</span><span class="corechip" style="--c:#7b5aa6"><img src="../img/1f64b.webp" alt="">Help</span><span class="corechip" style="--c:#c8342b"><img src="../img/270b.webp" alt="">Stop</span></span></div></li>
     <li><span class="badge">3</span><div><b>Back arrow ◀.</b> Goes to the previous page. The small picture shows which page it goes to.</div></li>
     <li><span class="badge">4</span><div><b>Page name.</b> Shows which page you're on; the dots show where you are in the pages. <b>Tap it to see all pages at once.</b></div></li>
     <li><span class="badge">5</span><div><b>Next arrow ▶.</b> Goes to the next page. After the last page it goes back to the first.</div></li>
@@ -312,7 +322,7 @@
         <li><span class="n">⚡</span><div><b>Quick taps are fine</b><p>A new tap stops the last sentence and says the new one. Nothing gets stuck.</p></div></li>
         <li><span class="n">📳</span><div><b>A little buzz</b><p>The phone vibrates slightly on each tap, if it can.</p></div></li>
         <li><span class="n">✨</span><div><b>Show someone</b><p>The picture glows for 30 seconds, long enough to lift the phone and show a person what was said.</p></div></li>
-        <li><span class="n">🎉</span><div><b>It's fun on purpose</b><p>Every tap makes the picture bounce and throws sparkles: confetti for happy words, hearts for hugs, stars on the Toy Story page, bubbles for drinks. Tapping the same picture a few times in a row sets off a shower. Sad or hurt words get just a few gentle sparkles. It's only decoration and never gets in the way of a tap. It can be turned down or off in <a href="#settings">Settings</a>.</p></div></li>
+        <li><span class="n">🎉</span><div><b>It's fun on purpose</b><p>Every tap makes the picture bounce and throws sparkles: confetti for happy words, hearts for hugs, stars on the Toy Story page, bubbles for drinks. Tapping the same picture a few times in a row sets off a shower. Sad or hurt words get just a few gentle sparkles. It's only decoration and never gets in the way of a tap. It can be turned down or off in <a href="#settings">Settings</a>, and <b>Calm answers</b> there gives Yes, No and every feeling the same gentle sparkles, so nobody picks an answer just for the show.</p></div></li>
       </ul>
     </div>
     <div><div class="device portrait"><div class="screen"><img src="img/portrait.webp" alt="The Maverik page, after tapping Drink"></div></div>
@@ -336,27 +346,30 @@
     <div><div class="device portrait"><div class="screen"><img src="img/picker.webp" alt="All pages shown as buttons"></div></div>
     <p class="caption">Tapping the page name shows every page.</p></div>
   </div>
-  <h3>The 13 pages, in order</h3>
+  <h3>The 16 pages, in order</h3>
   <div class="pages">
-<div class="pagecard" style="--pc:#D89412"><div class="pc-top"><img src="../img/1f932.webp" alt=""><b>I want</b><span class="n">1</span></div><div class="pc-body">12 tiles: Snack, Drink, Bathroom, Rest…</div></div>
-<div class="pagecard" style="--pc:#3C6E9F"><div class="pc-top"><img src="../img/1f60a.webp" alt=""><b>I feel</b><span class="n">2</span></div><div class="pc-body">12 tiles: Happy, Excited, Sad, Frustrated…</div></div>
-<div class="pagecard" style="--pc:#C8342B"><div class="pc-top"><img src="../img/1f915.webp" alt=""><b>Ouch</b><span class="n">3</span></div><div class="pc-body">12 tiles: Head, Tummy, Throw up, Tooth…</div></div>
-<div class="pagecard" style="--pc:#7B5AA6"><div class="pc-top"><img src="../img/1f9d1-200d-1f91d-200d-1f9d1.webp" alt=""><b>People</b><span class="n">4</span></div><div class="pc-body">10 tiles: Family, Staff, Friend, Hi…</div></div>
-<div class="pagecard" style="--pc:#C2507E"><div class="pc-top"><img src="../img/1f46a.webp" alt=""><b>Mom &amp; Dad</b><span class="n">5</span></div><div class="pc-body">12 tiles: Dad, Call Dad, Dad&#x27;s house, Dad coming?…</div></div>
-<div class="pagecard" style="--pc:#3F8A34"><div class="pc-top"><img src="../img/1f389.webp" alt=""><b>Fun</b><span class="n">6</span></div><div class="pc-body">12 tiles: Toy Story, Cartoons, Movie, Costume…</div></div>
-<div class="pagecard" style="--pc:#8B5A2B"><div class="pc-top"><img src="../img/1f920.webp" alt=""><b>Toy Story</b><span class="n">7</span></div><div class="pc-body">12 tiles: Howdy, Bullseye, Infinity, Sky…</div></div>
-<div class="pagecard" style="--pc:#D2691E"><div class="pc-top"><img src="../img/1f355.webp" alt=""><b>Food</b><span class="n">8</span></div><div class="pc-body">11 tiles: Hungry, Water, Juice, Milk…</div></div>
-<div class="pagecard" style="--pc:#2A5DA8"><div class="pc-top"><img src="../img/1f3ea.webp" alt=""><b>Maverik</b><span class="n">9</span></div><div class="pc-body">12 tiles: Drink, Chips, Water, Hot cocoa…</div></div>
-<div class="pagecard" style="--pc:#1F7F86"><div class="pc-top"><img src="../img/2600-fe0f.webp" alt=""><b>My day</b><span class="n">10</span></div><div class="pc-body">12 tiles: Wake up, Breakfast, Lunch, Dinner…</div></div>
-<div class="pagecard" style="--pc:#2E7D5B"><div class="pc-top"><img src="../img/1f5fa-fe0f.webp" alt=""><b>Places</b><span class="n">11</span></div><div class="pc-body">12 tiles: Home, My room, Store, Park…</div></div>
-<div class="pagecard" style="--pc:#A23B72"><div class="pc-top"><img src="../img/2753.webp" alt=""><b>Questions</b><span class="n">12</span></div><div class="pc-body">11 tiles: What now?, What&#x27;s next?, Where to?, Who?…</div></div>
-<div class="pagecard" style="--pc:#56657A"><div class="pc-top"><img src="../img/1f392.webp" alt=""><b>Things</b><span class="n">13</span></div><div class="pc-body">12 tiles: Headphones, Hat, Jacket, Sunglasses…</div></div>
+<div class="pagecard" style="--pc:#D89412;--pcs:#9c6b0d"><div class="pc-top"><img src="../img/1f932.webp" alt=""><b>I want</b><span class="n">1</span></div><div class="pc-body">12 tiles: Snack, Drink, Bathroom, Rest…</div></div>
+<div class="pagecard" style="--pc:#3C6E9F;--pcs:#3c6e9f"><div class="pc-top"><img src="../img/1f60a.webp" alt=""><b>I feel</b><span class="n">2</span></div><div class="pc-body">12 tiles: Happy, Excited, Sad, Frustrated…</div></div>
+<div class="pagecard" style="--pc:#C8342B;--pcs:#c8342b"><div class="pc-top"><img src="../img/1f915.webp" alt=""><b>Ouch</b><span class="n">3</span></div><div class="pc-body">12 tiles: Head, Tummy, Throw up, Tooth…</div></div>
+<div class="pagecard" style="--pc:#7B5AA6;--pcs:#7b5aa6"><div class="pc-top"><img src="../img/1f9d1-200d-1f91d-200d-1f9d1.webp" alt=""><b>People</b><span class="n">4</span></div><div class="pc-body">11 tiles: Family, Staff, Friend, Hi…</div></div>
+<div class="pagecard" style="--pc:#C2507E;--pcs:#be4e7b"><div class="pc-top"><img src="../img/1f46a.webp" alt=""><b>Mom &amp; Dad</b><span class="n">5</span></div><div class="pc-body">12 tiles: Dad, Call Dad, Dad&#x27;s house, Dad coming?…</div></div>
+<div class="pagecard" style="--pc:#3F8A34;--pcs:#3c8432"><div class="pc-top"><img src="../img/1f389.webp" alt=""><b>Fun</b><span class="n">6</span></div><div class="pc-body">12 tiles: Toy Story, Cartoons, Movie, Costume…</div></div>
+<div class="pagecard" style="--pc:#8B5A2B;--pcs:#8b5a2b"><div class="pc-top"><img src="../img/1f920.webp" alt=""><b>Toy Story</b><span class="n">7</span></div><div class="pc-body">12 tiles: Howdy, Bullseye, Infinity, Sky…</div></div>
+<div class="pagecard" style="--pc:#D2691E;--pcs:#b55a1a"><div class="pc-top"><img src="../img/1f355.webp" alt=""><b>Food</b><span class="n">8</span></div><div class="pc-body">12 tiles: Hungry, Water, Juice, Milk…</div></div>
+<div class="pagecard" style="--pc:#2A5DA8;--pcs:#2a5da8"><div class="pc-top"><img src="../img/1f3ea.webp" alt=""><b>Maverik</b><span class="n">9</span></div><div class="pc-body">12 tiles: Drink, Chips, Water, Hot cocoa…</div></div>
+<div class="pagecard" style="--pc:#1F7F86;--pcs:#1f7f86"><div class="pc-top"><img src="../img/2600-fe0f.webp" alt=""><b>My day</b><span class="n">10</span></div><div class="pc-body">12 tiles: Wake up, Breakfast, Lunch, Dinner…</div></div>
+<div class="pagecard" style="--pc:#2E7D5B;--pcs:#2e7d5b"><div class="pc-top"><img src="../img/1f5fa-fe0f.webp" alt=""><b>Places</b><span class="n">11</span></div><div class="pc-body">12 tiles: Home, My room, Store, Park…</div></div>
+<div class="pagecard" style="--pc:#A23B72;--pcs:#a23b72"><div class="pc-top"><img src="../img/2753.webp" alt=""><b>Questions</b><span class="n">12</span></div><div class="pc-body">11 tiles: What now?, What&#x27;s next?, Where to?, Who?…</div></div>
+<div class="pagecard" style="--pc:#56657A;--pcs:#56657a"><div class="pc-top"><img src="../img/1f392.webp" alt=""><b>Things</b><span class="n">13</span></div><div class="pc-body">12 tiles: Headphones, Hat, Jacket, Sunglasses…</div></div>
+<div class="pagecard" style="--pc:#4A3B9E;--pcs:#4a3b9e"><div class="pc-top"><img src="../img/1f4ac.webp" alt=""><b>Talk</b><span class="n">14</span></div><div class="pc-body">12 tiles: I like it, Don&#x27;t like, Again, Wait…</div></div>
+<div class="pagecard" style="--pc:#8E1B3A;--pcs:#8e1b3a"><div class="pc-top"><img src="../img/1f1f9-1f1f4.webp" alt=""><b>Tongan</b><span class="n">15</span></div><div class="pc-body">6 tiles: Mālō e lelei, Mālō, Mālō ʻaupito, ʻOfa atu…</div></div>
+<div class="pagecard" style="--pc:#3A3A3A;--pcs:#3a3a3a"><div class="pc-top"><img src="../img/1f524.webp" alt=""><b>ABC</b><span class="n">16</span></div><div class="pc-body">The alphabet: spell a word, then Speak</div></div>
   </div>
   <div class="two">
     <div><div class="device"><div class="screen"><img src="img/page-ouch.webp" alt="The Ouch page"></div></div><p class="caption"><b>Ouch</b>: point to where it hurts.</p></div>
     <div><div class="device"><div class="screen"><img src="img/page-questions.webp" alt="The Questions page"></div></div><p class="caption"><b>Questions</b>: what's next, where, who, how long.</p></div>
   </div>
-  <div class="note tip"><b>Pages can be hidden</b>If a resident doesn't need a page, it can be turned off on that phone in <a href="#settings">Settings</a>.</div>
+  <div class="note tip"><b>Pages can be hidden</b>If a resident doesn't need a page, it can be turned off on that phone in <a href="#settings">Settings</a>. New pages are always added at the end, so the pages a resident already knows stay the same number of swipes away.</div>
 </section>
 
 <!-- ================= 6 ================= -->
@@ -374,8 +387,104 @@
 </section>
 
 <!-- ================= 7 ================= -->
+<section id="talk" class="newpage">
+  <h2 class="sec"><span class="num">7</span>The Talk page</h2>
+  <p class="intro">Words for saying what they think, not just what they want.</p>
+  <div class="two">
+    <div>
+      <p>Most of what people say isn't asking for things. It's commenting ("That's funny!"), giving an opinion ("I don't like it"), and steering the conversation ("Wait", "Your turn"). The Talk page gives residents those words too.</p>
+      <table class="voices"><tr><th>Picture</th><th>Says</th></tr>
+<tr><td><b><img src="../img/1f60d.webp" alt="">I like it</b></td><td>“I like it!”</td></tr>
+<tr><td><b><img src="../img/1f612.webp" alt="">Don&#x27;t like</b></td><td>“I don&#x27;t like it”</td></tr>
+<tr><td><b><img src="../img/1f501.webp" alt="">Again</b></td><td>“Again! One more time”</td></tr>
+<tr><td><b><img src="../img/23f8-fe0f.webp" alt="">Wait</b></td><td>“Wait, please”</td></tr>
+<tr><td><b><img src="../img/1f602.webp" alt="">Funny</b></td><td>“That&#x27;s funny!”</td></tr>
+<tr><td><b><img src="../img/1f62e.webp" alt="">Wow</b></td><td>“Wow!”</td></tr>
+<tr><td><b><img src="../img/1f62c.webp" alt="">Oh no</b></td><td>“Oh no!”</td></tr>
+<tr><td><b><img src="../img/1f3f7-fe0f.webp" alt="">Mine</b></td><td>“That&#x27;s mine”</td></tr>
+<tr><td><b><img src="../img/1faf5.webp" alt="">Your turn</b></td><td>“Your turn”</td></tr>
+<tr><td><b><img src="../img/1faf4.webp" alt="">Come here</b></td><td>“Come here, please”</td></tr>
+<tr><td><b><img src="../img/231a.webp" alt="">Not now</b></td><td>“Not now. Maybe later”</td></tr>
+<tr><td><b><img src="../img/1faf7.webp" alt="">Leave me alone</b></td><td>“Please leave me alone”</td></tr>
+      </table>
+    </div>
+    <div><div class="device portrait"><div class="screen"><img src="img/page-talk.webp" alt="The Talk page"></div></div>
+    <p class="caption">The <b>Talk</b> page.</p></div>
+  </div>
+  <div class="note warn"><b>"I don't like it", "Not now" and "Leave me alone" are real messages</b>Honour them whenever you safely can, or say why not: <i>"Not now? OK. We do have to see the doctor first, then we'll get a drink."</i> Someone who can say no with words has less need to say it with behaviour.</div>
+</section>
+
+<!-- ================= 8 ================= -->
+<section id="big">
+  <h2 class="sec"><span class="num">8</span>Show it big · About me</h2>
+  <p class="intro">For a cashier, a noisy room, someone across the table, or someone new.</p>
+  <div class="two">
+    <div>
+      <ul class="steps">
+        <li><span class="n">🔎</span><div><b>Tap the words at the top</b><p>The last thing said fills the screen in giant letters: hold the phone up, or hand it over. <b>🔊 Say it again</b> repeats it. <b>✕ Close</b> (or Back) goes back to the board, and it closes by itself after a minute.</p></div></li>
+        <li><span class="n">🪪</span><div><b>About me</b> (on the People page)<p>Says, and shows big: <i>"Hi, I&#x27;m Brenton. I can&#x27;t talk with my mouth, so I talk with this phone. Please be patient and give me time. My emergency contacts are in this phone&#x27;s Emergency information."</i> Use it with anyone new: a driver, a cashier, a doctor, a police officer or a paramedic.</p></div></li>
+      </ul>
+      <div class="note tip"><b>Opening by accident?</b>Settings → <b>Reading</b> → untick <b>Tap the words to show them big</b>. About me still works.</div>
+    </div>
+    <div><div class="device portrait"><div class="screen"><img src="img/show-big.webp" alt="About me, shown big"></div></div>
+    <p class="caption">After tapping <b>About me</b>.</p></div>
+  </div>
+  <h3>Set up the phone's Emergency information</h3>
+  <p>About me points to the phone's own <b>Emergency information</b>. Paramedics and police know to look there, and they can see it from the lock screen without unlocking the phone. Phone numbers and medical details belong there, not in Talanoa, because the Talanoa website is public.</p>
+  <ol class="steps">
+    <li><span class="n">1</span><div><b>Open the phone's Settings app</b><p>The phone's own settings (the gear icon among the apps), not Talanoa's ⚙.</p></div></li>
+    <li><span class="n">2</span><div><b>Search for "Emergency"</b><p>Open <b>Emergency information</b>. On some phones it's called <b>Medical info</b>, or it's inside <b>Safety &amp; emergency</b> or the <b>Personal Safety</b> app.</p></div></li>
+    <li><span class="n">3</span><div><b>Add medical details and emergency contacts</b><p>Conditions, allergies, medicines, and who to call (family, and Faleofaz).</p></div></li>
+    <li><span class="n">4</span><div><b>Turn on "Show on lock screen"</b><p>To check it: lock the phone, swipe up, tap <b>Emergency</b>, then <b>Emergency information</b>.</p></div></li>
+  </ol>
+</section>
+
+<!-- ================= 9 ================= -->
+<section id="own" class="newpage">
+  <h2 class="sec"><span class="num">9</span>Tongan words · your own photos and voices</h2>
+  <p class="intro">Any picture can show a real photo, and speak in a real person's voice.</p>
+  <div class="two">
+    <div>
+      <h3 style="margin-top:0">The Tongan page</h3>
+      <p><b>Mālō e lelei</b> (Hello), <b>Mālō</b> (Thank you), <b>Mālō ʻaupito</b> (Thank you very much), <b>ʻOfa atu</b> (Love you), <b>ʻIo</b> (Yes), <b>ʻIkai</b> (No). Each tile shows what it means underneath, and the top of the screen shows both.</p>
+      <div class="note tip"><b>Please record them in your own voice</b>The computer voice can't speak Tongan, so for now it only gets close. A recording by someone from Faleofaz will sound right, and mean much more. It takes about a minute per word (steps below). To add more Tongan words, tell Tim (<a href="#changes">section 18</a>).</div>
+    </div>
+    <div><div class="device portrait"><div class="screen"><img src="img/page-tongan.webp" alt="The Tongan page"></div></div><p class="caption">The <b>Tongan</b> page.</p></div>
+  </div>
+  <h3>Record a voice, or add a photo</h3>
+  <div class="two">
+    <ol class="steps">
+      <li><span class="n">1</span><div><b>Hold ⚙ → Photos and voices</b><p>Tap <b>📷 🎙️ Change a picture or voice…</b></p></div></li>
+      <li><span class="n">2</span><div><b>Choose the page, then tap the picture</b><p>📷 marks pictures that already have a photo, 🎙️ ones that have a recording.</p></div></li>
+      <li><span class="n">3</span><div><b>🎙️ Record, say the words, then ⏹ Stop</b><p>Find a quiet spot and hold the phone about a hand's width from your mouth. The first time, allow the microphone.</p></div></li>
+      <li><span class="n">4</span><div><b>Listen, then ✔ Keep this recording</b><p>Or <b>✖ Throw it away</b> and try again. From then on, that picture speaks in your voice.</p></div></li>
+      <li><span class="n">5</span><div><b>For a photo: 📷 Take a photo or 🖼️ Choose a photo</b><p>Good for family, staff, a favourite cup, their room, a store they love. <b>Use the original picture again</b> undoes it.</p></div></li>
+    </ol>
+    <div><div class="sheetshot"><img src="img/editor.webp" alt="Changing the photo and voice of one picture"></div><p class="caption">Changing one picture's photo and voice.</p></div>
+  </div>
+  <div class="note warn"><b>They're kept on this phone only, so save a backup</b>Photos and recordings are never put on the website, so photos of people stay private. It also means a new phone, or removing the app, loses them. Now and then, hold ⚙ → <b>Save a backup</b> and email the file to yourself or to Tim. <b>Restore a backup</b> puts everything back, on any phone.</div>
+</section>
+
+<!-- ================= 10 ================= -->
+<section id="abc">
+  <h2 class="sec"><span class="num">10</span>The ABC page</h2>
+  <p class="intro">The alphabet, for spelling anything that isn't on a picture.</p>
+  <div class="two">
+    <div>
+      <ul class="steps">
+        <li><span class="n">🔤</span><div><b>Tap letters</b><p>Each letter says its name. <b>Space</b> goes between words, <b>⌫</b> takes back one letter, <b>Clear</b> starts again.</p></div></li>
+        <li><span class="n">🔊</span><div><b>Speak</b><p>Says the whole word or sentence, and puts it at the top, where it can be shown big.</p></div></li>
+        <li><span class="n">🗣️</span><div><b>One voice: the phone's own</b><p>The natural voices can only say sentences recorded ahead of time, so this page uses the phone's built-in voice for the letters and the words. Choose it in Settings → <b>Built-in voice</b>.</p></div></li>
+      </ul>
+      <div class="note tip"><b>Not spelling yet? That's fine</b>Let them explore the letters, and read back what they type. Playing with letters is how spelling starts.</div>
+    </div>
+    <div><div class="device portrait"><div class="screen"><img src="img/abc.webp" alt="The ABC page with HI MOM typed"></div></div><p class="caption"><b>HI MOM</b>, typed on the ABC page.</p></div>
+  </div>
+</section>
+
+<!-- ================= 11 ================= -->
 <section id="settings" class="newpage">
-  <h2 class="sec"><span class="num">7</span>Settings</h2>
+  <h2 class="sec"><span class="num">11</span>Settings</h2>
   <p class="intro">Settings belong to each phone. Changing them on one phone doesn't change any other.</p>
   <div class="hold"><span class="g">⚙</span><div>Press and <u>hold</u> the ⚙ in the top-right corner<div class="timer">Keep your finger on it for 1 second, then let go</div></div></div>
   <div class="two">
@@ -403,25 +512,41 @@
   </table>
   <div class="two">
     <div>
-      <div class="sheetshot"><img src="img/settings-bottom.webp" alt="Settings: pages, status and updates"><span class="badge" style="left:97.33%;top:5.70%">D</span><span class="badge" style="left:97.33%;top:36.93%">E</span><span class="badge" style="left:97.33%;top:45.74%">F</span><span class="badge" style="left:97.33%;top:63.73%">G</span><span class="badge" style="left:97.33%;top:71.45%">H</span><span class="badge" style="left:97.33%;top:90.77%">I</span></div>
+      <div class="sheetshot"><img src="img/settings-mid.webp" alt="Settings: pages, swiping, fun effects and reading"><span class="badge" style="left:97.33%;top:6.75%">D</span><span class="badge" style="left:97.33%;top:49.69%">E</span><span class="badge" style="left:97.33%;top:60.12%">F</span><span class="badge" style="left:97.33%;top:77.61%">G</span><span class="badge" style="left:97.33%;top:91.00%">H</span><span class="badge" style="left:97.33%;top:98.16%">I</span></div>
     </div>
     <div>
       <ol class="legend">
         <li><span class="badge">D</span><div><b>Pages to show.</b> Untick a page to hide it on this phone; tick it to bring it back. At least one page always stays on.</div></li>
         <li><span class="badge">E</span><div><b>Swipe to change pages.</b> On to start with. Untick it if pages turn by accident; the ◀ ▶ arrows always work.</div></li>
         <li><span class="badge">F</span><div><b>Fun effects.</b> <b>Lots</b> (bounces, rings and sparkles), <b>A little</b> (bounces and rings only) or <b>Off</b>. Turn it down if the sparkles distract a resident or the phone feels slow.</div></li>
-        <li><span class="badge">G</span><div><b>Status.</b> "✓ Ready to use with no internet" means everything is saved. Below it you'll see the version and when it last checked for updates.</div></li>
-        <li><span class="badge">H</span><div><b>Check for updates now.</b> Gets the newest version straight away (see <a href="#updates">section 8</a>).</div></li>
-        <li><span class="badge">I</span><div><b>About &amp; credits.</b> Who made Talanoa and how to contact Faleofaz.</div></li>
+        <li><span class="badge">G</span><div><b>Calm answers.</b> Off to start with. On, Yes, No, every feeling and the Talk page all get the same few gentle sparkles, so nobody picks an answer just for the show.</div></li>
+        <li><span class="badge">H</span><div><b>Tap the words to show them big.</b> On to start with (<a href="#big">section 8</a>). Untick it if the big words keep opening by accident.</div></li>
+        <li><span class="badge">I</span><div><b>Darker page names.</b> Off to start with. Darkens the lighter page colours a little so the white writing is easier to read.</div></li>
+      </ol>
+    </div>
+  </div>
+  <div class="two">
+    <div>
+      <div class="sheetshot"><img src="img/settings-bottom.webp" alt="Settings: photos and voices, most-used pictures, status and updates"><span class="badge" style="left:97.33%;top:9.99%">J</span><span class="badge" style="left:97.33%;top:15.90%">K</span><span class="badge" style="left:97.33%;top:24.78%">L</span><span class="badge" style="left:97.33%;top:54.04%">M</span><span class="badge" style="left:97.33%;top:65.78%">N</span><span class="badge" style="left:97.33%;top:72.09%">O</span><span class="badge" style="left:97.33%;top:83.29%">P</span></div>
+    </div>
+    <div>
+      <ol class="legend">
+        <li><span class="badge">J</span><div><b>Photos and voices.</b> Give a picture a photo, or record a voice for it (<a href="#own">section 9</a>).</div></li>
+        <li><span class="badge">K</span><div><b>Save a backup · Restore a backup.</b> Keeps this phone's photos and recordings safe in one file, and puts them back.</div></li>
+        <li><span class="badge">L</span><div><b>Most-used pictures.</b> Which pictures were used most in the last 7, 30 or 90 days; tap the line underneath to see which weren't used at all. Counted on this phone only and never sent anywhere. Use it to see which words matter, and to tell the family what's missing.</div></li>
+        <li><span class="badge">M</span><div><b>Count taps on this phone · Clear the counts.</b> Counting can be switched off, and the counts cleared.</div></li>
+        <li><span class="badge">N</span><div><b>Status.</b> "✓ Ready to use with no internet" means everything is saved. Below it you'll see the version and when it last checked for updates.</div></li>
+        <li><span class="badge">O</span><div><b>Check for updates now.</b> Gets the newest version straight away (see <a href="#updates">section 12</a>).</div></li>
+        <li><span class="badge">P</span><div><b>Staff guide · Paper board to print · About &amp; credits.</b> This guide, the paper board (<a href="#paper">section 15</a>), and who made Talanoa.</div></li>
       </ol>
       <p style="margin-top:12px">Tap <b>Done</b> at the bottom to close Settings.</p>
     </div>
   </div>
 </section>
 
-<!-- ================= 8 ================= -->
+<!-- ================= 12 ================= -->
 <section id="updates">
-  <h2 class="sec"><span class="num">8</span>Updates</h2>
+  <h2 class="sec"><span class="num">12</span>Updates</h2>
   <p class="intro">You don't have to do anything. New words and fixes arrive by themselves.</p>
   <div class="flow">
     <div><b>✏️</b>The family changes the words</div>
@@ -443,30 +568,53 @@
   </table>
 </section>
 
-<!-- ================= 9 ================= -->
+<!-- ================= 13 ================= -->
 <section id="offline">
-  <h2 class="sec"><span class="num">9</span>Without Wi-Fi</h2>
+  <h2 class="sec"><span class="num">13</span>Without Wi-Fi</h2>
   <p>Once the phone shows <b>✓ Ready to use with no internet</b>, Talanoa works anywhere: on outings, in the car, at the store, or when the Wi-Fi is down. Pictures, words and the chosen voice are all saved on the phone.</p>
   <div class="note tip"><b>After choosing a new voice</b>Keep the phone on Wi-Fi for a minute so the new voice can be saved. Until then, any sentence that isn't saved yet uses the phone's own voice. It's never silent.</div>
 </section>
 
-<!-- ================= 10 ================= -->
+<!-- ================= 14 ================= -->
 <section id="tips" class="newpage">
-  <h2 class="sec"><span class="num">10</span>Tips for helping residents</h2>
-  <p class="intro">A talking board works best when the people around it use it too.</p>
+  <h2 class="sec"><span class="num">14</span>Helping someone talk</h2>
+  <p class="intro">The most helpful thing staff can do costs nothing: use the board yourself, every day.</p>
   <ol class="steps">
-    <li><span class="n">🗣️</span><div><b>Show, don't test</b><p>While you talk, tap the pictures yourself ("Let's have <i>lunch</i>", tapping Lunch). This is how people learn where things are. Never quiz them.</p></div></li>
-    <li><span class="n">⏳</span><div><b>Give time</b><p>Wait after asking a question. Finding the right picture can take a while.</p></div></li>
-    <li><span class="n">💬</span><div><b>Every tap counts</b><p>Answer what was said, even if you think it was an accident. That's how they learn their words have power.</p></div></li>
-    <li><span class="n">📍</span><div><b>Keep it close and charged</b><p>The board only helps if it's within reach, all day, in every room.</p></div></li>
-    <li><span class="n">🤝</span><div><b>Tell the family</b><p>Let the family know which pictures get used, and which words are missing.</p></div></li>
+    <li><span class="n">🗣️</span><div><b>Use the board when you talk to them</b><p>As you speak, tap the main word on their board: "Let's go to <i>Maverik</i>", "Do you want <i>more</i>?" Children hear thousands of hours of talk before they say a word; someone learning a talker needs to see it used the same way. Ask first ("Can I show you on your phone?"), or point to the paper board instead.</p></div></li>
+    <li><span class="n">🚫</span><div><b>Show, don't test</b><p>No quizzing ("Show me Drink!"). Just use the words naturally while you talk.</p></div></li>
+    <li><span class="n">⏳</span><div><b>Wait</b><p>After a question, count to ten in your head before helping. Finding the right page and picture takes time.</p></div></li>
+    <li><span class="n">💬</span><div><b>Answer every message, even when the answer is no</b><p>"I hear you, you want a drink. We'll get one after lunch." That's how people learn their words work.</p></div></li>
+    <li><span class="n">🙅</span><div><b>No means no</b><p>"No", "Stop", "Not now" and "Leave me alone" are real. Respect them whenever you safely can, or explain why not.</p></div></li>
+    <li><span class="n">🎈</span><div><b>Playing with it is learning</b><p>Tapping lots of pictures, or the same one again and again, is how people explore their words, the way a baby babbles. Don't stop it: say the words back, and join in.</p></div></li>
+    <li><span class="n">📍</span><div><b>It's their voice: keep it with them</b><p>All day, charged, in every room. <b>Never take the board away</b> as a punishment or to get someone to behave.</p></div></li>
+    <li><span class="n">📈</span><div><b>Notice what's missing</b><p>Settings → <b>Most-used pictures</b> shows which words get used. When someone seems to want a word that isn't there, tell the family.</p></div></li>
   </ol>
-  <div class="note info"><b>Talanoa supports, it doesn't replace</b>Talanoa is a simple, friendly board, not a full professional speech system. A speech-language pathologist can suggest what each resident needs.</div>
+  <div class="note info"><b>Everyone has the right to communicate</b>The Communication Bill of Rights (ASHA, 3rd edition, 2024) lists twelve rights. They include: to be treated with dignity and respect; to communicate in a way that fits their culture and language; to be spoken to directly, not talked about; to get a response to every message, even when the answer is no; to ask for things and to refuse them; to share feelings, comments and opinions; to make real choices; and to have a working talker with them at all times. <a href="https://www.asha.org/njc/communication-bill-of-rights/">asha.org/njc/communication-bill-of-rights</a></div>
+  <div class="note tip"><b>Free training</b><a href="https://project-core.com/">Project Core</a> has 12 short, free training modules on teaching with a talker. They're made for schools, but the ideas work at any age.</div>
+  <div class="note info"><b>Talanoa supports, it doesn't replace</b>Talanoa is a simple, friendly board, not a full professional speech system. A speech-language pathologist who specializes in AAC can suggest what each resident needs.</div>
 </section>
 
-<!-- ================= 11 ================= -->
+<!-- ================= 15 ================= -->
+<section id="paper">
+  <h2 class="sec"><span class="num">15</span>The paper board</h2>
+  <p class="intro">Every page on paper, in the same colours and places as on the phone.</p>
+  <div class="two">
+    <div>
+      <p>For when the phone is charging, lost or broken; for the shower, the bath, the pool or the rain; and to point to words while you talk.</p>
+      <ol class="steps">
+        <li><span class="n">1</span><div><b>Print it</b><p>Hold ⚙ → <b>🖨 Paper board to print</b>, then <b>🖨 Print</b>. Or print the ready-made PDF: <a href="Talanoa-Paper-Board.pdf">Talanoa-Paper-Board.pdf</a>. Card stock is best.</p></div></li>
+        <li><span class="n">2</span><div><b>Laminate the sheets</b><p>Keep them on a ring, in the same order as the phone's pages: one set in their bag, one at home.</p></div></li>
+        <li><span class="n">3</span><div><b>Cut out the About me card</b><p>It's on the cover. Keep it in a wallet or bag.</p></div></li>
+      </ol>
+      <div class="note tip"><b>Photos too</b>Opened on the resident's own phone, the paper board uses the photos saved on that phone.</div>
+    </div>
+    <div><div class="sheetshot"><img src="img/paper.webp" alt="One sheet of the paper board"></div><p class="caption">One sheet: the top row, then the page, with each picture's words underneath.</p></div>
+  </div>
+</section>
+
+<!-- ================= 16 ================= -->
 <section id="trouble">
-  <h2 class="sec"><span class="num">11</span>If something goes wrong</h2>
+  <h2 class="sec"><span class="num">16</span>If something goes wrong</h2>
   <table class="trouble">
     <tr><th>What you notice</th><th>What to do</th></tr>
     <tr><td>No sound at all</td><td>Turn the volume up with the phone's side buttons. Check the phone isn't on silent. In Settings, check <b>Volume</b> isn't low.</td></tr>
@@ -480,14 +628,19 @@
     <tr><td>Pages keep turning by accident</td><td>Settings → untick <b>Swipe to change pages</b>. The ◀ ▶ arrows still work.</td></tr>
     <tr><td>A picture is glowing</td><td>That's the last picture tapped. It stops glowing by itself after 30 seconds, or as soon as another picture is tapped.</td></tr>
     <tr><td>Too many sparkles, or the phone feels slow</td><td>Settings → <b>Fun effects</b> → <b>A little</b> or <b>Off</b>.</td></tr>
-    <tr><td>The screen keeps turning off</td><td>See "Screen timeout" in <a href="#care">section 12</a>.</td></tr>
+    <tr><td>The words suddenly filled the whole screen</td><td>That's <b>Show it big</b> (<a href="#big">section 8</a>). Tap <b>✕ Close</b> or Back; it also closes by itself after a minute. To stop it opening by accident: Settings → <b>Reading</b> → untick <b>Tap the words to show them big</b>.</td></tr>
+    <tr><td>"The microphone is blocked" when recording</td><td>Long-press the Talanoa icon → <b>App info</b> → <b>Permissions</b> → <b>Microphone</b> → <b>Allow</b>, then try again.</td></tr>
+    <tr><td>A photo or recording has disappeared</td><td>They're kept on the phone only. Hold ⚙ → <b>Restore a backup</b> and pick the backup file.</td></tr>
+    <tr><td>The Tongan words don't sound right</td><td>The computer voice can't speak Tongan. Record them in a real voice (<a href="#own">section 9</a>).</td></tr>
+    <tr><td>The ABC page sounds different from the pictures</td><td>On purpose: it uses the phone's built-in voice, which can say anything typed. Choose a voice that matches in Settings → <b>Built-in voice</b>.</td></tr>
+    <tr><td>The screen keeps turning off</td><td>See "Screen timeout" in <a href="#care">section 17</a>.</td></tr>
     <tr><td>Something else looks wrong</td><td>Close Talanoa completely and open it again from its icon. If it still happens, take a photo of the screen and email it to Tim Broussard at <a href="mailto:tcdeveloper@gmail.com?subject=Talanoa">tcdeveloper@gmail.com</a>.</td></tr>
   </table>
 </section>
 
-<!-- ================= 12 ================= -->
+<!-- ================= 17 ================= -->
 <section id="care">
-  <h2 class="sec"><span class="num">12</span>Looking after the phone</h2>
+  <h2 class="sec"><span class="num">17</span>Looking after the phone</h2>
   <div class="two">
     <ul class="steps">
       <li><span class="n">🔋</span><div><b>Charge every night</b><p>A flat battery means a resident with no voice.</p></div></li>
@@ -496,20 +649,22 @@
     <ul class="steps">
       <li><span class="n">🔊</span><div><b>Volume</b><p>Use the side buttons while Talanoa is talking to set how loud it is.</p></div></li>
       <li><span class="n">🧽</span><div><b>Clean and protect</b><p>Wipe the screen with a slightly damp cloth. A sturdy case is a good idea.</p></div></li>
+      <li><span class="n">🔈</span><div><b>Loud places</b><p>A small clip-on Bluetooth speaker makes the voice easier to hear in shops and cars. Show it big helps too (<a href="#big">section 8</a>).</p></div></li>
+      <li><span class="n">🆘</span><div><b>Emergency information</b><p>Set it up once, so first responders can see it on the lock screen (<a href="#big">section 8</a>).</p></div></li>
     </ul>
   </div>
 </section>
 
-<!-- ================= 13 ================= -->
+<!-- ================= 18 ================= -->
 <section id="changes">
-  <h2 class="sec"><span class="num">13</span>Asking for changes</h2>
-  <p>New words, different wording, a real photo of someone instead of a picture: the family can add these. Write down what's needed (for example <i>"add Swing, 'I want to go on the swing'"</i>) and pass it to <b>Tim Broussard</b>. The change reaches the phone automatically, usually the same day.</p>
+  <h2 class="sec"><span class="num">18</span>Asking for changes</h2>
+  <p>New words, different wording, a real photo of someone instead of a picture: the family can add these. Write down what's needed (for example <i>"add Swing, 'I want to go on the swing'"</i>) and pass it to <b>Tim Broussard</b>. The change reaches the phone automatically, usually the same day. Settings → <b>Most-used pictures</b> can help decide what to add.</p>
   <div class="contact"><b>Tim Broussard</b><div>✉️ <a href="mailto:tcdeveloper@gmail.com?subject=Talanoa">tcdeveloper@gmail.com</a></div></div>
 </section>
 
-<!-- ================= 14 ================= -->
+<!-- ================= 19 ================= -->
 <section id="credits">
-  <h2 class="sec"><span class="num">14</span>Credits &amp; contact</h2>
+  <h2 class="sec"><span class="num">19</span>Credits &amp; contact</h2>
   <p class="intro">Talanoa was made with love for the residents of Faleofaz, by:</p>
   <div class="people"><div>Tim Broussard<br><a style="font-size:14px;font-weight:600" href="mailto:tcdeveloper@gmail.com?subject=Talanoa">tcdeveloper@gmail.com</a></div><div>Brenton Broussard</div><div>Legion</div><div>Faleofaz</div></div>
   <div class="contact">

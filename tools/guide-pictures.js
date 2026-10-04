@@ -7,7 +7,7 @@
    It takes the pictures in manual/img/ on a 412 x 915 phone screen
    (Settings at its full 600 px width), measures where the numbered callouts go (manual/boxes.json), rebuilds
    manual/index.html with tools/manual.py, then prints
-   manual/Talanoa-Staff-Guide.pdf.
+   manual/Talanoa-Staff-Guide.pdf and the paper board, manual/Talanoa-Paper-Board.pdf.
 
    Needs Chromium and Node's playwright-core. If they aren't found, say where:
        CHROMIUM=/usr/bin/chromium  PLAYWRIGHT_CORE=/path/to/node_modules/playwright-core
@@ -69,13 +69,19 @@ function serve() {
   const box = (sel) => page.evaluate((s) => { const r = document.querySelector(s).getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; }, sel);
   const still = () => page.addStyleTag({ content: '*,*::after,*::before{animation:none!important;transition:none!important}' });
 
-  // Open once so it installs for offline use, save the voice, then open again (Settings then shows "Ready")
+  // Open once so it installs for offline use, save the voice, then open again (Settings then shows "Ready").
+  // (waitForFunction doesn't wait for an async check, so this polls by hand.)
   await page.goto(URL0);
   await page.waitForFunction(() => navigator.serviceWorker.controller, null, { timeout: 30000 });
-  await page.waitForFunction(async () => {
-    const want = voiceUrls(), have = new Set((await (await caches.open('tt-voices')).keys()).map((r) => r.url));
-    return want.every((u) => have.has(u));
-  }, null, { timeout: 120000, polling: 500 });
+  for (const end = Date.now() + 120000; ;) {
+    const done = await page.evaluate(async () => {
+      const want = voiceUrls(), have = new Set((await (await caches.open('tt-voices')).keys()).map((r) => r.url));
+      return want.every((u) => have.has(u));
+    });
+    if (done) break;
+    if (Date.now() > end) throw new Error('the voice did not finish saving for offline use');
+    await page.waitForTimeout(500);
+  }
   await page.reload();
   await page.waitForSelector('#stage .tile');
   await still();
@@ -105,9 +111,36 @@ function serve() {
   for (const [name, file] of [['Ouch', 'page-ouch.webp'], ['Questions', 'page-questions.webp'], ['Mom & Dad', 'momdad.webp']]) {
     await goTo(name); await webp(await page.screenshot(), file);
   }
-  // 5. Settings at its full width (600 px, as on a tablet: it prints better), tall enough to
-  //    show the whole sheet, cut into two pictures
-  await page.setViewportSize({ width: 632, height: 2600 });
+  // 5. the Talk and Tongan pages, each just after a tap
+  for (const [name, label, file] of [['Talk', 'I like it', 'page-talk.webp'], ['Tongan', 'Mālō', 'page-tongan.webp']]) {
+    await goTo(name);
+    await tap('#stage .tile', await page.evaluate((l) => [...document.querySelectorAll('#stage .tile')].findIndex((t) => t._item.label === l), label));
+    await calm();
+    await webp(await page.screenshot(), file);
+  }
+  // 6. the ABC page with a word typed and spoken
+  await goTo('ABC');
+  await page.evaluate(() => { typed = 'HI MOM'; showTyped(); show('HI MOM', null); });
+  await webp(await page.screenshot(), 'abc.webp');
+  await page.evaluate(() => { typed = ''; showTyped(); });
+  // 7. About me, shown big
+  await goTo('People');
+  await page.evaluate(() => { speechSynthesis.speak = () => {}; });
+  await tap('#stage .tile', await tileIndex('About me'));
+  await webp(await page.screenshot(), 'show-big.webp');
+  await page.evaluate(() => { closeShow(); litItem = null; lightUp(); said.textContent = HINT; });
+  await calm();
+  // 8. Settings at its full width (600 px, as on a tablet: it prints better), tall enough to
+  //    show the whole sheet, cut into three pictures. A week of example counts, so "Most-used
+  //    pictures" has something to show.
+  await page.evaluate(() => {
+    const d = (n) => dayStr(new Date(Date.now() - n * 864e5));
+    localStorage.setItem('tt_counts', JSON.stringify({ since: d(6), days: {
+      [d(0)]: { 'I want|Drink': 4, 'I feel|Happy': 3, 'core|Yes': 3, 'Maverik|Drink': 2 },
+      [d(2)]: { 'I want|Drink': 3, 'I feel|Happy': 2, 'Fun|Toy Story': 3 },
+      [d(5)]: { 'Maverik|Drink': 3, 'core|Yes': 2, "core|Hi, I'm Brenton": 3 } } }));
+  });
+  await page.setViewportSize({ width: 632, height: 3600 });
   await page.evaluate(() => openSettings());
   await page.waitForFunction(() => /Ready to use/.test(document.getElementById('offlineStat').textContent) && /Version \w/.test(document.getElementById('updateStat').textContent), null, { timeout: 15000 });
   const sheet = await box('#panel .sheet');
@@ -115,19 +148,34 @@ function serve() {
     const s = document.querySelector('#panel .sheet').getBoundingClientRect();
     const R = (a, b) => { const r = a.getBoundingClientRect(), q = (b || a).getBoundingClientRect();
       return { x: r.x - s.x, y: r.y - s.y, width: r.width, height: q.bottom - r.top, sheetW: s.width, sheetH: s.height }; };
-    const pagesH3 = [...document.querySelectorAll('#panel h3')].find((h) => h.textContent === 'Pages to show');
+    const h3 = (t) => [...document.querySelectorAll('#panel h3')].find((h) => h.textContent === t);
+    const lab = (id) => document.getElementById(id).closest('label');
     return {
       s_voice: R(document.getElementById('voiceList')), s_speed: R(document.getElementById('speed')), s_vol: R(document.getElementById('vol')),
-      s_pages: R(pagesH3, document.getElementById('pageList')), s_swipe: R(document.getElementById('swipeOn').closest('label')),
-      s_fx: R(document.getElementById('fxList')),
+      s_pages: R(h3('Pages to show'), document.getElementById('pageList')), s_swipe: R(lab('swipeOn')),
+      s_fx: R(document.getElementById('fxList')), s_calm: R(lab('calmOn')), s_big: R(lab('bigOn')), s_strong: R(lab('strongOn')),
+      s_own: R(h3('Photos and voices')), s_ownbtn: R(document.getElementById('ownOpen')), s_backup: R(document.getElementById('ownSave').parentNode),
+      s_counts: R(document.getElementById('countSpan'), document.getElementById('unusedBox')), s_counton: R(lab('countOn'), document.getElementById('countClear')),
       s_status: R(document.getElementById('offlineStat')), s_update: R(document.getElementById('checkUpdate')),
-      s_about: R(document.querySelector('#panel a[href="credits.html"]')), s_done: R(document.getElementById('closePanel')),
+      s_links: R(document.querySelector('#panel a[href="manual/"]'), document.querySelector('#panel a[href="credits.html"]')),
+      s_done: R(document.getElementById('closePanel')),
     };
   });
   Object.assign(boxes, S);
-  const cut = S.s_pages.y - 44;                        // tools/manual.py cuts in the same place
-  await webp(await page.screenshot({ clip: { x: sheet.x, y: sheet.y, width: sheet.width, height: cut } }), 'settings-top.webp');
-  await webp(await page.screenshot({ clip: { x: sheet.x, y: sheet.y + cut, width: sheet.width, height: sheet.height - cut } }), 'settings-bottom.webp');
+  const cuts = [0, S.s_pages.y - 44, S.s_own.y - 44, sheet.height];   // tools/manual.py cuts in the same places
+  for (const [i, name] of [[0, 'settings-top.webp'], [1, 'settings-mid.webp'], [2, 'settings-bottom.webp']])
+    await webp(await page.screenshot({ clip: { x: sheet.x, y: sheet.y + cuts[i], width: sheet.width, height: cuts[i + 1] - cuts[i] } }), name);
+
+  // 9. changing one picture's photo and voice: the Mālō tile on the Tongan page
+  await page.evaluate(() => {
+    panel.classList.remove('open');
+    chooserAt = chooserLists().findIndex((p) => p.name === 'Tongan'); openChooser();
+    [...document.querySelectorAll('#chooserGrid .tile')].find((t) => t._item.label === 'Mālō').click();
+  });
+  await page.waitForTimeout(300);
+  const ed = await box('#editor .sheet');
+  await webp(await page.screenshot({ clip: { x: ed.x, y: ed.y, width: ed.width, height: ed.height } }), 'editor.webp');
+  await page.evaluate(() => { closeEditor(); closeChooser(); });
 
   fs.writeFileSync(path.join(ROOT, 'manual', 'boxes.json'), JSON.stringify(boxes, null, 1) + '\n');
   console.log('  manual/boxes.json');
@@ -139,6 +187,21 @@ function serve() {
   await doc.emulateMedia({ media: 'print' });
   await doc.pdf({ path: path.join(ROOT, 'manual', 'Talanoa-Staff-Guide.pdf'), preferCSSPageSize: true, printBackground: true });
   console.log('  manual/Talanoa-Staff-Guide.pdf');
+
+  // The paper board: a picture of one sheet for the guide, and the ready-to-print PDF
+  const paper = await ctx.newPage();
+  await paper.setViewportSize({ width: 820, height: 1100 });
+  await paper.goto(URL0 + 'print.html', { waitUntil: 'networkidle' });
+  await paper.waitForFunction(() => window.TT_PRINT_READY && [...document.images].every((i) => i.complete), null, { timeout: 20000 });
+  const talkSheet = await paper.evaluate(() => {
+    const s = [...document.querySelectorAll('.sheet')].find((x) => /Talk/.test((x.querySelector('.head b') || {}).textContent || ''));
+    s.scrollIntoView(); const r = s.getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height };
+  });
+  const shot = await paper.screenshot({ clip: talkSheet });
+  await webp(shot, 'paper.webp');
+  await paper.emulateMedia({ media: 'print' });
+  await paper.pdf({ path: path.join(ROOT, 'manual', 'Talanoa-Paper-Board.pdf'), preferCSSPageSize: true, printBackground: true });
+  console.log('  manual/Talanoa-Paper-Board.pdf');
 
   await browser.close();
   server.close();
