@@ -114,9 +114,10 @@ def main():
     def row(part, *pairs):
         return ''.join(badge(letter, *sat(name, part)) for letter, name in pairs)
     top_badges = row(0, ('A', 's_voice'), ('B', 's_speed'), ('C', 's_vol'))
-    mid_badges = row(1, ('D', 's_pages'), ('E', 's_swipe'), ('F', 's_fx'), ('G', 's_calm'), ('H', 's_big'), ('I', 's_strong'))
-    bottom_badges = row(2, ('J', 's_ownbtn'), ('K', 's_backup'), ('L', 's_counts'), ('M', 's_counton'),
-                        ('N', 's_status'), ('O', 's_update'), ('P', 's_links'))
+    mid_badges = row(1, ('D', 's_pages'), ('E', 's_swipe'), ('F', 's_fx'), ('G', 's_calm'), ('H', 's_big'), ('I', 's_strong'),
+                     ('J', 's_screen'))
+    bottom_badges = row(2, ('K', 's_ownbtn'), ('L', 's_backup'), ('M', 's_counts'), ('N', 's_counton'),
+                        ('O', 's_status'), ('P', 's_update'), ('Q', 's_links'))
 
     # the Talk page, About me and the Tongan words, straight from library.js
     talk = next((p for p in lib['pages'] if p['name'] == 'Talk'), {'tiles': []})

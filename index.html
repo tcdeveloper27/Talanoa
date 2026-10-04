@@ -3,6 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<script>
+/* Fitting above Android's navigation bar: see "ANDROID'S NAVIGATION BAR" below.
+   If this phone was found to need it, ask for it before anything is drawn. */
+try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('meta[name=viewport]').content += ', viewport-fit=cover'; } catch(e){}
+</script>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#6B4423">
@@ -181,6 +186,7 @@
   .overlay{
     position:fixed;inset:0;z-index:30;background:rgba(30,20,10,.78);
     display:none;align-items:center;justify-content:center;padding:16px;
+    padding-top:max(16px,env(safe-area-inset-top));padding-bottom:max(16px,env(safe-area-inset-bottom));
   }
   .overlay.open{display:flex;}
   #pickGrid{
@@ -234,6 +240,7 @@
               background:#fff;color:#3C6E9F;font-size:16px;font-weight:800;cursor:pointer;}
   .about-link{display:block;text-align:center;padding:13px;margin-top:14px;border:2px solid #E5DCC8;border-radius:12px;
               color:#6B4423;font-weight:800;font-size:17px;text-decoration:none;}
+  #insetProbe{position:fixed;left:0;bottom:0;width:1px;height:0;padding-bottom:env(safe-area-inset-bottom,0px);visibility:hidden;pointer-events:none;}
   .sheet .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
   .sheet .btnrow button.plain{margin:0;}
   .sheet button.plain:disabled{opacity:.45;cursor:default;}
@@ -242,12 +249,13 @@
   /* ---------- Darker page names (Settings, off unless chosen) ---------- */
   /* The same colours, darkened just enough for the white writing to be easy to read. */
   body.strong #title,body.strong .pick{background:var(--pc-strong);}
+  body.room{padding-bottom:max(env(safe-area-inset-bottom),48px);}
   body.strong .core-btn{background:var(--c-strong);}
 
   /* ---------- Show it big: the words fill the screen ---------- */
   #said{cursor:pointer;}
   #showView{position:fixed;inset:0;z-index:60;background:#fff;display:none;flex-direction:column;
-            border:10px solid #0057FF;}
+            border:10px solid #0057FF;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);}
   #showView.open{display:flex;}
   #showText{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:16px 18px;overflow:hidden;}
   #showWords{max-width:100%;text-align:center;font-weight:900;line-height:1.12;color:#111;user-select:text;}
@@ -307,6 +315,7 @@
 </div>
 <div id="stage"></div>
 <canvas id="fx" aria-hidden="true"></canvas>
+<div id="insetProbe" aria-hidden="true"></div>
 
 <div class="overlay" id="picker"><div id="pickGrid"></div></div>
 
@@ -347,6 +356,10 @@
     <h3>Reading</h3>
     <label class="choice"><input type="checkbox" id="bigOn"><span><strong>Tap the words to show them big</strong> <small>Tapping the words at the top fills the screen with them, for a cashier, a noisy room, or someone across the table.</small></span></label>
     <label class="choice"><input type="checkbox" id="strongOn"><span><strong>Darker page names</strong> <small>Darkens the lighter colours a little (I want, Food, Fun, Mom &amp; Dad, Yes) so the white writing is easier to read.</small></span></label>
+
+    <h3>Screen</h3>
+    <div id="screenStat" class="sub" style="margin:0 0 8px"></div>
+    <label class="choice"><input type="checkbox" id="roomOn"><span><strong>Bottom row hidden behind the ◀ ● ■ buttons?</strong> <small>Tick this to move the board up above them. Usually it fits by itself.</small></span></label>
 
     <h3>Photos and voices</h3>
     <p class="sub" style="margin:0 0 10px">Give any picture a photo from this phone's camera, or record a voice for it (a family member saying the Tongan words, for example). They're kept on this phone only, never put on the website.</p>
@@ -433,6 +446,7 @@
    ============================================================ */
 var LIB = window.TT_LIBRARY || {core: [], pages: []};
 var ASSETS = window.TT_ASSETS || {voices: [], img: {}, clips: {}};
+if (!ASSETS.abc) ASSETS.abc = {letters: {}, words: {}};
 
 function slug(s){ return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
 function store(k, v){ try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch(e){ return null; } }
@@ -616,6 +630,7 @@ function getAudio(src){
 /* The natural-voice recording is found by the sentence itself, so tiles that
    say the same thing share one (see assets.js). */
 function clipFor(id, text, item){
+  if (item && item._clip) return item._clip;              /* an ABC letter */
   var o = item && item._key && own[item._key];
   if (o && o.voice) return o.voice;
   if (mine[id]) return mine[id];
@@ -727,13 +742,15 @@ LIB.core.forEach(function(item){
 
 /* ============================================================
    THE ABC PAGE ("keyboard": true in library.js)
-   Letters to spell with. Each letter says its name as it's tapped,
-   and Speak says the whole word or sentence. The natural voices can
-   only say what was recorded ahead of time, so this page uses the
-   phone's own voice (Settings → Built-in voice) for the letters AND
-   the words: one voice, not two. The words go up in the banner too,
-   so they can be shown big. What's typed stays until Clear, even
-   after turning the page.
+   Letters to spell with. It talks in the same voice as the rest of
+   the board: every letter's name, and every word that's on the board,
+   is recorded in each natural voice (tools/abc-voices.py). Speak says
+   the words it has in that voice and spells out any other word,
+   letter by letter, in that same voice, so it's always one voice.
+   (With "Built-in voice" chosen in Settings, the phone's voice says
+   it all instead.) The words go up in the banner too, so they can be
+   shown big. What's typed stays until Clear, even after turning the
+   page.
    ============================================================ */
 var typed = '';
 var KEYS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(function(ch){ return {label: ch, kb: 'letter'}; })
@@ -772,7 +789,7 @@ function showTyped(root){
   }
 }
 function keyPress(k, el){
-  if (k.kb === 'letter'){ typed += k.label; stopTalking(); speakDevice(k.label); }
+  if (k.kb === 'letter'){ typed += k.label; say('abc-' + k.label, k.label, {_clip: abcClip('letters', k.label)}); }
   else if (k.kb === 'space'){ if (typed && typed.slice(-1) !== ' ') typed += ' '; }
   else if (k.kb === 'back'){ typed = typed.slice(0, -1); }
   else if (k.kb === 'clear'){ typed = ''; }
@@ -781,7 +798,7 @@ function keyPress(k, el){
     if (words){
       show(words, null);
       lastSaid = {text: words, typed: true};
-      stopTalking(); speakDevice(words.toLowerCase());   /* lower case, so CAT is read as a word, not C-A-T */
+      sayTyped(words);
       flashBanner();
       countTap(SPELLED);
     }
@@ -789,6 +806,46 @@ function keyPress(k, el){
   if (k.kb !== 'speak' && navigator.vibrate){ try { navigator.vibrate(20); } catch(e){} }
   showTyped();
   celebrate(el, k);
+}
+
+function abcClip(kind, k){
+  var set = voiceId !== 'device' && ASSETS.abc[kind] && ASSETS.abc[kind][voiceId];
+  return set ? set[k] || null : null;
+}
+/* Speak: each word the board knows, in the board's voice; any other word spelled out. */
+var abcQueue = [];                 /* the clips Speak is playing (the tests read it) */
+function sayTyped(text){
+  var parts = [];
+  text.trim().split(/\s+/).forEach(function(w, wi){
+    var k = w.toLowerCase().replace(/[^a-z]/g, ''), clip = k && abcClip('words', k);
+    if (!k) return;
+    if (clip) parts.push({src: clip, gap: wi ? 160 : 0});
+    else k.toUpperCase().split('').forEach(function(ch, ci){ parts.push({src: abcClip('letters', ch), gap: ci ? 70 : (wi ? 160 : 0)}); });
+  });
+  stopTalking();
+  if (!parts.length || parts.some(function(p){ return !p.src; })){ abcQueue = []; speakDevice(text.toLowerCase()); return; }   /* lower case, so CAT is read as a word */
+  abcQueue = parts.map(function(p){ return p.src; });
+  var my = token, i = 0;
+  function next(){
+    if (my !== token || i >= parts.length) return;
+    var p = parts[i++];
+    setTimeout(function(){
+      if (my !== token) return;
+      var a = getAudio(p.src), done = false;
+      function finish(ok){
+        if (done) return; done = true;
+        a.removeEventListener('ended', ended); a.removeEventListener('error', failed);
+        if (ok) next(); else if (my === token){ stopTalking(); speakDevice(text.toLowerCase()); }   /* never silent */
+      }
+      function ended(){ finish(true); }
+      function failed(){ finish(false); }
+      a.addEventListener('ended', ended); a.addEventListener('error', failed);
+      try { a.currentTime = 0; } catch(e){}
+      a.playbackRate = speed; a.volume = vol; nowPlaying = a;
+      var pr = a.play(); if (pr && pr.catch) pr.catch(failed);
+    }, p.gap);
+  }
+  next();
 }
 
 /* ---------------- pages ---------------- */
@@ -870,7 +927,10 @@ function showPageInfo(){
   nextBtn.setAttribute('aria-label', 'Next page: ' + next.name);
 
   preload(page.tiles);
-  if (page.keyboard) showTyped();
+  if (page.keyboard){
+    showTyped();
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(ch){ var c = abcClip('letters', ch); if (c) getAudio(c); });
+  }
 }
 
 function makeTile(item){
@@ -1047,8 +1107,9 @@ picker.addEventListener('click', function(e){ if (e.target === picker) picker.cl
 render('');
 fitLabels(coreEl);
 window.addEventListener('resize', function(){ fitLabels(coreEl); if (gridEl) fitLabels(gridEl); });
-var STRONG = store('tt_strong') === '1', BIG = store('tt_big') !== '0';
+var STRONG = store('tt_strong') === '1', BIG = store('tt_big') !== '0', ROOM = store('tt_room') === '1';
 document.body.classList.toggle('strong', STRONG);
+document.body.classList.toggle('room', ROOM);
 
 /* ---------------- settings (hold the gear) ---------------- */
 var gear = document.getElementById('gear'), panel = document.getElementById('panel'), holdT = null;
@@ -1065,12 +1126,18 @@ panel.addEventListener('click', function(e){ if (e.target === panel) panel.class
 
 function openSettings(){
   settle(); buildVoiceList(); buildPageList(); refreshOffline(); showVersion(); showFxLevel();
-  calmBox.checked = CALM; bigBox.checked = BIG; strongBox.checked = STRONG; countBox.checked = countOn;
+  calmBox.checked = CALM; bigBox.checked = BIG; strongBox.checked = STRONG; countBox.checked = countOn; roomBox.checked = ROOM;
+  showScreen();
   buildCounts(); showOwnStat();
   panel.classList.add('open');
 }
 var calmBox = document.getElementById('calmOn'), bigBox = document.getElementById('bigOn');
-var strongBox = document.getElementById('strongOn'), countBox = document.getElementById('countOn');
+var strongBox = document.getElementById('strongOn'), countBox = document.getElementById('countOn'), roomBox = document.getElementById('roomOn');
+roomBox.addEventListener('change', function(){
+  ROOM = roomBox.checked; store('tt_room', ROOM ? '1' : '0');
+  document.body.classList.toggle('room', ROOM);
+  fitLabels(coreEl); if (gridEl) fitLabels(gridEl); showScreen();
+});
 calmBox.addEventListener('change', function(){ CALM = calmBox.checked; store('tt_calm', CALM ? '1' : '0'); });
 bigBox.addEventListener('change', function(){ BIG = bigBox.checked; store('tt_big', BIG ? '1' : '0'); });
 strongBox.addEventListener('change', function(){
@@ -1192,7 +1259,7 @@ banner.addEventListener('click', function(e){
 });
 document.getElementById('showClose').addEventListener('click', closeShow);
 document.getElementById('showAgain').addEventListener('click', function(){
-  if (lastSaid){ if (lastSaid.typed){ stopTalking(); speakDevice(lastSaid.text.toLowerCase()); } else say(lastSaid.id, lastSaid.text, lastSaid.item); }
+  if (lastSaid){ if (lastSaid.typed) sayTyped(lastSaid.text); else say(lastSaid.id, lastSaid.text, lastSaid.item); }
   clearTimeout(showCloseT); showCloseT = setTimeout(closeShow, SHOW_BIG_FOR);
 });
 window.addEventListener('resize', function(){ if (showView.classList.contains('open')) fitShow(); });
@@ -1570,9 +1637,11 @@ document.getElementById('ownFile').addEventListener('change', function(e){
 var VOICE_CACHE = 'tt-voices';
 function voiceUrls(){
   if (voiceId === 'device' || !ASSETS.clips[voiceId]) return [];
-  var set = ASSETS.clips[voiceId], seen = {};
-  return Object.keys(set).map(function(k){ return new URL(set[k], location.href).href; })
-    .filter(function(u){ return seen[u] ? false : (seen[u] = true); });
+  var abc = ASSETS.abc || {}, seen = {}, out = [];
+  [ASSETS.clips[voiceId], (abc.letters || {})[voiceId] || {}, (abc.words || {})[voiceId] || {}].forEach(function(set){
+    Object.keys(set).forEach(function(k){ var u = new URL(set[k], location.href).href; if (!seen[u]){ seen[u] = 1; out.push(u); } });
+  });
+  return out;
 }
 /* Download every clip of the chosen voice so it works offline; drop stale ones. */
 var warming = null;
@@ -1715,6 +1784,52 @@ window.addEventListener('popstate', function(){
   else if (panel.classList.contains('open')) panel.classList.remove('open');
   else if (picker.classList.contains('open')) picker.classList.remove('open');
 });
+
+/* ============================================================
+   ANDROID'S NAVIGATION BAR (◀ ● ■)
+   Newer Android (a Pixel on Android 16, 2026-10-05) draws an installed
+   web app all the way down behind the navigation bar, so the bottom row
+   disappears under it. Chrome only says how tall the bar is
+   (env(safe-area-inset-bottom), which the body is padded by) to a page
+   that asks with viewport-fit=cover. But on Brenton's phone the opposite
+   happened (2026-09-26): with viewport-fit=cover Chrome drew under the
+   bar AND said it was 0 px tall. So the installed app tries it: it
+   switches viewport-fit=cover on and keeps it only if Chrome then
+   reports a real bar; if Chrome says 0, it switches straight back to
+   the way it was. The answer is remembered on this phone, and checked
+   again only if the screen size changes (a new Chrome, say).
+   ============================================================ */
+var viewportMeta = document.querySelector('meta[name=viewport]');
+var PLAIN_VIEWPORT = viewportMeta.content.replace(/,\s*viewport-fit=cover/, '');
+function setCover(on){ viewportMeta.content = PLAIN_VIEWPORT + (on ? ', viewport-fit=cover' : ''); }
+function coverOn(){ return /viewport-fit=cover/.test(viewportMeta.content); }
+function bottomInset(){ return parseFloat(getComputedStyle(document.getElementById('insetProbe')).paddingBottom) || 0; }
+function afterFrames(n, fn){ requestAnimationFrame(function(){ if (n > 1) afterFrames(n - 1, fn); else fn(); }); }
+function fitDone(mode){
+  try { localStorage.setItem('tt_fit', mode); localStorage.setItem('tt_fit_size', innerWidth + 'x' + innerHeight); } catch(e){}
+  fitLabels(coreEl); if (gridEl) fitLabels(gridEl);
+}
+function fitNavBar(){
+  var installed = matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches;
+  if (!installed || !/Android/i.test(navigator.userAgent)) return;
+  var mode = store('tt_fit'), size = store('tt_fit_size');
+  if (mode === 'none' && size === innerWidth + 'x' + innerHeight) return;      /* checked before: nothing to do */
+  if (mode === 'cover' && coverOn()){                                         /* set before drawing: is it still right? */
+    setTimeout(function(){ if (bottomInset() > 0) fitDone('cover'); else { setCover(false); fitDone('none'); } }, 400);
+    return;
+  }
+  setCover(true);
+  afterFrames(3, function(){ setTimeout(function(){
+    if (bottomInset() > 0) fitDone('cover');
+    else { setCover(false); fitDone('none'); }
+  }, 150); });
+}
+if (document.readyState === 'complete') fitNavBar(); else window.addEventListener('load', fitNavBar);
+function showScreen(){
+  var el = document.getElementById('screenStat');
+  el.textContent = 'Screen ' + innerWidth + ' × ' + innerHeight + ', navigation bar ' + Math.round(bottomInset()) + ' px' +
+                   (coverOn() ? ' (fitted above it)' : '') + (ROOM ? '; board moved up by hand' : '');
+}
 
 /* Keep the board upright on a phone, even when it's turned sideways. The
    manifest asks for this too; this makes it happen straight away in the

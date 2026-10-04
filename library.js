@@ -46,8 +46,10 @@
    pages he already knows stay the same number of swipes away.
 
    A page with "keyboard": true and no tiles is an alphabet board:
-   tap letters to spell, then Speak. It uses the phone's own voice
-   for the letters and the words, so it's all one voice.
+   tap letters to spell, then Speak. It talks in the board's own
+   voice: the letters and every word on the board are recorded by
+   tools/abc-voices.py (run it after changing words); any other word
+   is spelled out, letter by letter, in that same voice.
 
    After changing words, run  python3 tools/build.py  so the natural
    voices and pictures are regenerated for the new tiles. Until then
