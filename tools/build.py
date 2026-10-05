@@ -272,6 +272,11 @@ def build_voices(jobs, spoken):
                 p = os.path.join(vdir, tid + '.mp3')
                 if os.path.exists(p):
                     os.remove(p)
+        # ... and any recording with no entry at all: a build run on another computer (NORMANDY's GPU) deletes
+        # it there but can't delete it here (2026-10-05: the old About me clips were left behind that way)
+        for f in os.listdir(vdir):
+            if f.endswith('.mp3') and f[:-4] not in manifest:
+                os.remove(os.path.join(vdir, f))
         json.dump(manifest, open(man_path, 'w'), indent=0, sort_keys=True)
         result[v['id']] = clips
         print(f'  voice {v["name"]}: {len(clips)} clips ({made} new)')
