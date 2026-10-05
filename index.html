@@ -447,6 +447,7 @@ try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('me
 var LIB = window.TT_LIBRARY || {core: [], pages: []};
 var ASSETS = window.TT_ASSETS || {voices: [], img: {}, clips: {}};
 if (!ASSETS.abc) ASSETS.abc = {letters: {}, words: {}};
+if (!ASSETS.abc.lists) ASSETS.abc.lists = {};
 
 function slug(s){ return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
 function store(k, v){ try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch(e){ return null; } }
@@ -618,8 +619,18 @@ function speakDevice(text){
 /* ---------------- audio clips ---------------- */
 var audioCache = {}, audioOrder = [], nowPlaying = null, token = 0;
 
+/* A sound player that failed (or was made before the offline helper took over) can stay broken:
+   throw it away so the next tap makes a fresh one. (2026-10-05: on Tim's phone a whole page fell
+   back to the phone's own voice this way.) broken() tells a real failure from a play() that was
+   only interrupted. */
+function broken(e){ return !!e && (e.type === 'error' || e.name === 'NotSupportedError'); }
+function dropAudio(src){
+  if (src){ delete audioCache[src]; audioOrder = audioOrder.filter(function(s){ return s !== src; }); }
+  else { audioCache = {}; audioOrder = []; }
+}
 function getAudio(src){
   var a = audioCache[src];
+  if (a && a.error){ dropAudio(src); a = null; }            /* broken: make a fresh one */
   if (!a){
     a = new Audio(); a.preload = 'auto'; a.src = src;
     audioCache[src] = a; audioOrder.push(src);
@@ -651,7 +662,7 @@ function stopTalking(){
 /* Play the clip; if it errors, is refused, or hasn't started within 1.5 s,
    say it with the built-in voice instead. Never silent. (The built-in voice
    reads a tile's "sound" if it has one: "Mah-loh" for Mālō.) */
-function say(id, text, item){
+function say(id, text, item, again){
   stopTalking();
   var my = token, src = clipFor(id, text, item);
   var words = item && item.sound && item.sound.charAt(0) !== '/' ? item.sound : text;   /* "/…/" is for the natural voice only */
@@ -661,11 +672,12 @@ function say(id, text, item){
   function onPlaying(){ started = true; tidy(); }
   /* Runs at most once per tap: the timer, an error and a refused play() can
      all fire for the same stalled clip, but the phrase must only be said once. */
-  function fallback(){
+  function fallback(e){
     if (done || my !== token || started) return;
     done = true; tidy();
-    try { a.pause(); } catch(e){}
+    try { a.pause(); } catch(err){}
     if (nowPlaying === a) nowPlaying = null;
+    if (broken(e)){ dropAudio(src); if (!again){ say(id, text, item, true); return; } }   /* a fresh player, once */
     speakDevice(words);
   }
   a.addEventListener('playing', onPlaying);
@@ -743,10 +755,13 @@ LIB.core.forEach(function(item){
 /* ============================================================
    THE ABC PAGE ("keyboard": true in library.js)
    Letters to spell with. It talks in the same voice as the rest of
-   the board: every letter's name, and every word that's on the board,
-   is recorded in each natural voice (tools/abc-voices.py). Speak says
-   the words it has in that voice and spells out any other word,
-   letter by letter, in that same voice, so it's always one voice.
+   the board: every letter's name, every word that's on the board and
+   a few thousand everyday words are recorded in each natural voice
+   (tools/abc-voices.py). Speak says the words it has in that voice and
+   spells out any other word, letter by letter, in that same voice, so
+   it's always one voice. The board's words come with the app
+   (assets.js); the long list is loaded for the chosen voice only
+   (voices/<voice>/abc/words.json).
    (With "Built-in voice" chosen in Settings, the phone's voice says
    it all instead.) The words go up in the banner too, so they can be
    shown big. What's typed stays until Clear, even after turning the
@@ -810,9 +825,28 @@ function keyPress(k, el){
 
 function abcClip(kind, k){
   var set = voiceId !== 'device' && ASSETS.abc[kind] && ASSETS.abc[kind][voiceId];
-  return set ? set[k] || null : null;
+  var hit = set ? set[k] || null : null;
+  if (!hit && kind === 'words' && abcList.voice === voiceId && abcList.words && abcList.words[k])
+    hit = abcListClip(k);
+  return hit;
 }
-/* Speak: each word the board knows, in the board's voice; any other word spelled out. */
+/* Every word the chosen voice can say (word -> version), loaded once per voice. Until it
+   arrives (or with no internet before it was ever saved) the board's own words still work. */
+var abcList = {voice: null, words: null, loading: null};
+function abcListClip(k){ return 'voices/' + abcList.voice + '/abc/w-' + k + '.mp3?v=' + abcList.words[k]; }
+function loadAbcList(){
+  var v = voiceId, url = ASSETS.abc.lists[v];
+  if (v === 'device' || !url) return Promise.resolve(null);
+  if (abcList.voice === v && abcList.url === url && (abcList.words || abcList.loading)) return abcList.loading || Promise.resolve(abcList.words);
+  var me = abcList = {voice: v, url: url, words: null, loading: null};
+  me.loading = fetch(url).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }).then(function(m){
+    me.loading = null;
+    if (m && typeof m === 'object') me.words = m;
+    return me.words;
+  });
+  return me.loading;
+}
+/* Speak: each word it has in the board's voice; any other word spelled out. */
 var abcQueue = [];                 /* the clips Speak is playing (the tests read it) */
 function sayTyped(text){
   var parts = [];
@@ -829,21 +863,27 @@ function sayTyped(text){
   function next(){
     if (my !== token || i >= parts.length) return;
     var p = parts[i++];
-    setTimeout(function(){
-      if (my !== token) return;
-      var a = getAudio(p.src), done = false;
-      function finish(ok){
-        if (done) return; done = true;
-        a.removeEventListener('ended', ended); a.removeEventListener('error', failed);
-        if (ok) next(); else if (my === token){ stopTalking(); speakDevice(text.toLowerCase()); }   /* never silent */
+    setTimeout(function(){ if (my === token) play(p.src, false); }, p.gap);
+  }
+  function play(src, again){
+    var a = getAudio(src), done = false;
+    function finish(ok){
+      if (done) return; done = true;
+      a.removeEventListener('ended', ended); a.removeEventListener('error', failed);
+      if (ok) next(); else if (my === token){ stopTalking(); speakDevice(text.toLowerCase()); }   /* never silent */
+    }
+    function ended(){ finish(true); }
+    function failed(e){
+      if (!done && broken(e) && my === token){
+        dropAudio(src);
+        if (!again){ done = true; a.removeEventListener('ended', ended); a.removeEventListener('error', failed); play(src, true); return; }   /* a fresh player, once */
       }
-      function ended(){ finish(true); }
-      function failed(){ finish(false); }
-      a.addEventListener('ended', ended); a.addEventListener('error', failed);
-      try { a.currentTime = 0; } catch(e){}
-      a.playbackRate = speed; a.volume = vol; nowPlaying = a;
-      var pr = a.play(); if (pr && pr.catch) pr.catch(failed);
-    }, p.gap);
+      finish(false);
+    }
+    a.addEventListener('ended', ended); a.addEventListener('error', failed);
+    try { a.currentTime = 0; } catch(e){}
+    a.playbackRate = speed; a.volume = vol; nowPlaying = a;
+    var pr = a.play(); if (pr && pr.catch) pr.catch(failed);
   }
   next();
 }
@@ -929,6 +969,7 @@ function showPageInfo(){
   preload(page.tiles);
   if (page.keyboard){
     showTyped();
+    loadAbcList();                         /* (again, if it couldn't be fetched before) */
     'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(ch){ var c = abcClip('letters', ch); if (c) getAudio(c); });
   }
 }
@@ -1106,6 +1147,7 @@ picker.addEventListener('click', function(e){ if (e.target === picker) picker.cl
 
 render('');
 fitLabels(coreEl);
+loadAbcList();                             /* the ABC page's long word list for this voice */
 window.addEventListener('resize', function(){ fitLabels(coreEl); if (gridEl) fitLabels(gridEl); });
 var STRONG = store('tt_strong') === '1', BIG = store('tt_big') !== '0', ROOM = store('tt_room') === '1';
 document.body.classList.toggle('strong', STRONG);
@@ -1159,6 +1201,7 @@ function buildVoiceList(){
     r.addEventListener('change', function(){
       voiceId = o.id; store('tt_voice', voiceId);
       sample();
+      loadAbcList();
       warmVoice();
     });
     box.appendChild(lab);
@@ -1638,28 +1681,38 @@ var VOICE_CACHE = 'tt-voices';
 function voiceUrls(){
   if (voiceId === 'device' || !ASSETS.clips[voiceId]) return [];
   var abc = ASSETS.abc || {}, seen = {}, out = [];
+  function add(src){ var u = new URL(src, location.href).href; if (!seen[u]){ seen[u] = 1; out.push(u); } }
   [ASSETS.clips[voiceId], (abc.letters || {})[voiceId] || {}, (abc.words || {})[voiceId] || {}].forEach(function(set){
-    Object.keys(set).forEach(function(k){ var u = new URL(set[k], location.href).href; if (!seen[u]){ seen[u] = 1; out.push(u); } });
+    Object.keys(set).forEach(function(k){ add(set[k]); });
   });
+  if (abc.lists[voiceId]) add(abc.lists[voiceId]);                /* the ABC page's long word list, then its words */
+  if (abcListReady()) Object.keys(abcList.words).forEach(function(k){ add(abcListClip(k)); });
   return out;
 }
+function abcListReady(){ return abcList.voice === voiceId && abcList.url === ASSETS.abc.lists[voiceId] && !!abcList.words; }
 /* Download every clip of the chosen voice so it works offline; drop stale ones. */
 var warming = null;
 function warmVoice(){
   if (!('caches' in window) || !navigator.serviceWorker || !navigator.serviceWorker.controller) return Promise.resolve();
-  var urls = voiceUrls(), want = {};
-  urls.forEach(function(u){ want[u] = 1; });
-  var job = caches.open(VOICE_CACHE).then(function(c){
+  var urls, want = {}, whole, v;
+  var job = loadAbcList().then(function(){
+    v = voiceId; urls = voiceUrls();
+    urls.forEach(function(u){ want[u] = 1; });
+    whole = !ASSETS.abc.lists[v] || abcListReady();   /* without the word list we can't tell which saved words are old */
+    return caches.open(VOICE_CACHE);
+  }).then(function(c){
     return c.keys().then(function(keys){
       var have = {};
       keys.forEach(function(r){
         var u = r.url;
         if (want[u]) have[u] = 1;
-        else if (u.indexOf('/voices/' + voiceId + '/') !== -1) c.delete(r);   /* an older recording of a changed phrase */
+        else if (whole && u.indexOf('/voices/' + v + '/') !== -1) c.delete(r);   /* an older recording of a changed phrase */
       });
       var todo = urls.filter(function(u){ return !have[u]; });
       function next(){
-        var u = todo.shift(); if (!u) return Promise.resolve();
+        if (voiceId === v && todo.length && Date.now() - lastTap < 8000)    /* someone's using the board: wait */
+          return new Promise(function(ok){ setTimeout(ok, 3000); }).then(next);
+        var u = voiceId === v && todo.shift(); if (!u) return Promise.resolve();   /* stops if the voice is changed */
         return fetch(u).then(function(r){ return r.ok ? r.arrayBuffer() : null; }).catch(function(){}).then(next);
       }
       return Promise.all([next(), next(), next(), next()]);
@@ -1674,10 +1727,10 @@ function refreshOffline(){
   if (!navigator.serviceWorker.controller){ el.textContent = 'Getting ready for offline use… (reopen the app once)'; return; }
   var urls = voiceUrls();
   if (!urls.length || !('caches' in window)){ el.textContent = '✓ Ready to use with no internet.'; return; }
-  caches.open(VOICE_CACHE).then(function(c){
-    return Promise.all(urls.map(function(u){ return c.match(u).then(function(r){ return !!r; }); }));
-  }).then(function(hits){
-    var n = hits.filter(Boolean).length;
+  caches.open(VOICE_CACHE).then(function(c){ return c.keys(); }).then(function(keys){
+    var saved = {}, n = 0;
+    keys.forEach(function(r){ saved[r.url] = 1; });
+    urls.forEach(function(u){ if (saved[u]) n++; });
     el.textContent = n === urls.length
       ? '✓ Ready to use with no internet (pictures and voice saved on this device).'
       : 'Saving the voice for offline use: ' + n + ' of ' + urls.length + '…';
@@ -1742,6 +1795,8 @@ document.getElementById('checkUpdate').addEventListener('click', function(){
 
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
   navigator.serviceWorker.addEventListener('controllerchange', function(){
+    dropAudio();                           /* players made before this helper took over can fail later */
+    if (pages[current]) preload(pages[current].tiles);
     if (!hadController){ hadController = true; warmVoice(); return; }   /* first install, nothing to switch */
     updateReady = true;
     maybeApply();

@@ -3644,6 +3644,15 @@ window.TT_ASSETS = {
 "youve": "voices/sarah/abc/w-youve.mp3?v=83c66ad160",
 "zoo": "voices/sarah/abc/w-zoo.mp3?v=ba220682ee"
 }
+},
+"lists": {
+"bella": "voices/bella/abc/words.json?v=1c3601dfe0",
+"emma": "voices/emma/abc/words.json?v=3d23723609",
+"fenrir": "voices/fenrir/abc/words.json?v=a18802d90b",
+"george": "voices/george/abc/words.json?v=af35682b33",
+"heart": "voices/heart/abc/words.json?v=83ad40c345",
+"michael": "voices/michael/abc/words.json?v=ad14ca9824",
+"sarah": "voices/sarah/abc/words.json?v=87d3a86325"
 }
 }
 };
