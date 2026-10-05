@@ -63,7 +63,7 @@
   "width": 560,
   "height": 448,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  },
  "s_speed": {
   "x": 22,
@@ -71,7 +71,7 @@
   "width": 560,
   "height": 32,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  },
  "s_vol": {
   "x": 22,
@@ -79,7 +79,7 @@
   "width": 560,
   "height": 32,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  },
  "s_pages": {
   "x": 20,
@@ -87,7 +87,7 @@
   "width": 560,
   "height": 370,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  },
  "s_swipe": {
   "x": 20,
@@ -95,7 +95,7 @@
   "width": 560,
   "height": 52,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  },
  "s_fx": {
   "x": 20,
@@ -103,7 +103,7 @@
   "width": 560,
   "height": 163,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  },
  "s_calm": {
   "x": 20,
@@ -111,7 +111,7 @@
   "width": 560,
   "height": 81,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  },
  "s_big": {
   "x": 20,
@@ -119,7 +119,7 @@
   "width": 560,
   "height": 62,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  },
  "s_strong": {
   "x": 20,
@@ -127,7 +127,7 @@
   "width": 560,
   "height": 62,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  },
  "s_screen": {
   "x": 20,
@@ -135,7 +135,7 @@
   "width": 560,
   "height": 117.84375,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  },
  "s_own": {
   "x": 20,
@@ -143,7 +143,7 @@
   "width": 560,
   "height": 20,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  },
  "s_ownbtn": {
   "x": 20,
@@ -151,7 +151,7 @@
   "width": 560,
   "height": 47,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  },
  "s_backup": {
   "x": 20,
@@ -159,7 +159,7 @@
   "width": 560,
   "height": 47,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  },
  "s_counts": {
   "x": 20,
@@ -167,7 +167,7 @@
   "width": 560,
   "height": 403,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  },
  "s_counton": {
   "x": 20,
@@ -175,7 +175,7 @@
   "width": 560,
   "height": 107,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  },
  "s_status": {
   "x": 20,
@@ -183,7 +183,7 @@
   "width": 560,
   "height": 35,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  },
  "s_update": {
   "x": 20,
@@ -191,22 +191,22 @@
   "width": 560,
   "height": 47,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  },
  "s_links": {
   "x": 20,
   "y": 3040.0625,
   "width": 560,
-  "height": 180,
+  "height": 245,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  },
  "s_done": {
   "x": 20,
-  "y": 3230.0625,
+  "y": 3295.0625,
   "width": 560,
   "height": 49,
   "sheetW": 600,
-  "sheetH": 3299.0625
+  "sheetH": 3312
  }
 }

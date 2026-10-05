@@ -287,6 +287,36 @@ window.TT_LIBRARY = {
       {"icon": "👎", "label": "ʻIkai",        "means": "No",         "say": "ʻIkai",        "sound": "Ee-kai", "fx": "soft", "answer": true}
     ]},
 
-    {"name": "ABC", "icon": "🔤", "color": "#3A3A3A", "keyboard": true, "tiles": []}
+    {"name": "ABC", "icon": "🔤", "color": "#3A3A3A", "keyboard": true, "tiles": []},
+
+    {"name": "Body", "icon": "🧍", "img": "pictures/body.webp", "color": "#B03050", "fx": "soft", "tiles": [
+      {"icon": "🧍", "img": "pictures/back.webp",     "label": "Back",       "say": "My back hurts"},
+      {"icon": "🧍", "img": "pictures/chest.webp",    "label": "Chest",      "say": "My chest hurts"},
+      {"icon": "🧍", "img": "pictures/throat.webp",   "label": "Throat",     "say": "My throat hurts"},
+      {"icon": "🧍", "img": "pictures/neck.webp",     "label": "Neck",       "say": "My neck hurts"},
+      {"icon": "🧍", "img": "pictures/shoulder.webp", "label": "Shoulder",   "say": "My shoulder hurts"},
+      {"icon": "🧍", "img": "pictures/hand.webp",     "label": "Hand",       "say": "My hand hurts"},
+      {"icon": "🧍", "img": "pictures/knee.webp",     "label": "Knee",       "say": "My knee hurts"},
+      {"icon": "🧍", "img": "pictures/bottom.webp",   "label": "Bottom",     "say": "My bottom hurts"},
+      {"icon": "🧍", "img": "pictures/privates.webp", "label": "Privates",   "say": "My private parts hurt"},
+      {"icon": "🙁", "label": "A little",   "say": "It hurts a little"},
+      {"icon": "😣", "label": "A lot",      "say": "It hurts a lot"},
+      {"icon": "😭", "label": "Really bad", "say": "It hurts really bad"}
+    ]},
+
+    {"name": "Sick", "icon": "😷", "color": "#4E7A2E", "fx": "soft", "tiles": [
+      {"icon": "😵‍💫", "label": "Dizzy",         "say": "I feel dizzy"},
+      {"icon": "🫁", "label": "Can't breathe", "say": "I can't breathe well"},
+      {"icon": "🩸", "label": "Bleeding",      "say": "I am bleeding"},
+      {"icon": "🧍", "img": "pictures/fell.webp",      "label": "Fell",       "say": "I fell down"},
+      {"icon": "🌡️", "label": "Fever",         "say": "I have a fever"},
+      {"icon": "🤧", "label": "Cough",         "say": "I have a cough"},
+      {"icon": "🧍", "img": "pictures/itchy.webp",     "label": "Itchy",      "say": "My skin is itchy"},
+      {"icon": "🚽", "img": "pictures/pee-hurts.webp", "label": "Pee hurts",  "say": "It hurts to pee"},
+      {"icon": "🚽", "img": "pictures/cant-poop.webp", "label": "Can't poop", "say": "I can't poop"},
+      {"icon": "⏱️", "label": "Just now",      "say": "It just started"},
+      {"icon": "🗓️", "label": "Yesterday",     "say": "It started yesterday"},
+      {"icon": "😌", "label": "Better",        "say": "I feel better now"}
+    ]}
   ]
 };

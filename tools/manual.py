@@ -127,6 +127,15 @@ def main():
     tongan = next((p for p in lib['pages'] if p['name'] == 'Tongan'), {'tiles': []})
     tongan_list = ', '.join(f'<b>{html.escape(t["label"])}</b> ({html.escape(t.get("means", ""))})' for t in tiles(tongan))
 
+    # the Body and Sick pages, side by side
+    def health_cell(t):
+        if not t:
+            return '<td></td><td></td>'
+        return f'<td><b>{pic(t["icon"], t.get("img"))}{html.escape(t["label"])}</b></td><td>“{html.escape(t.get("say") or t["label"])}”</td>'
+    body, sick = (tiles(next((p for p in lib['pages'] if p['name'] == n), {'tiles': []})) for n in ('Body', 'Sick'))
+    health_rows = '\n'.join(f'<tr>{health_cell(body[i] if i < len(body) else None)}{health_cell(sick[i] if i < len(sick) else None)}</tr>'
+                            for i in range(max(len(body), len(sick))))
+
     tpl = open(os.path.join(ROOT, 'tools', 'manual-template.html'), encoding='utf-8').read()
     out = (tpl.replace('{{PAGE_CARDS}}', '\n'.join(cards))
               .replace('{{PAGE_COUNT}}', str(len(lib['pages'])))
@@ -139,6 +148,7 @@ def main():
               .replace('{{SET_MID_BADGES}}', mid_badges)
               .replace('{{SET_BOTTOM_BADGES}}', bottom_badges)
               .replace('{{TALK_ROWS}}', talk_rows)
+              .replace('{{HEALTH_ROWS}}', health_rows)
               .replace('{{ABOUT_ME}}', html.escape(about['say']) if about else '')
               .replace('{{TONGAN_LIST}}', tongan_list)
               .replace('{{QR}}', qr_svg(APP_URL))

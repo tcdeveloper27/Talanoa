@@ -111,12 +111,12 @@ function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.cla
 var own = {};
 function pic(item, key){
   var box = el('div', 'pic'), photo = (own[key] && own[key].photo) || item.img, src = photo || ASSETS.img[item.icon];
-  if (src){ var im = el('img'); im.alt = ''; im.src = src; if (photo) im.className = 'photo'; box.appendChild(im); }
+  if (src){ var im = el('img'); im.alt = ''; im.src = src; if (photo && !/^pictures\//.test(photo)) im.className = 'photo'; box.appendChild(im); }
   else box.appendChild(el('span', 'em', item.icon || ''));
   return box;
 }
 function icon(item){
-  var src = ASSETS.img[item.icon];
+  var src = (/^pictures\//.test(item.img || '') && item.img) || ASSETS.img[item.icon];     /* a drawn page picture, as on the phone */
   if (src){ var im = el('img'); im.alt = ''; im.src = src; return im; }
   return el('span', 'em', item.icon || '');
 }
@@ -204,10 +204,22 @@ function cover(total){
   }
   return s;
 }
+/* print.html?pages=Ouch,Body,Sick prints just those pages, no cover (Settings → Health pages to print) */
+var ONLY = (new URLSearchParams(location.search).get('pages') || '').split(',').filter(Boolean);
 function build(){
   var box = document.getElementById('sheets'), total = LIB.pages.length + 1;
-  box.appendChild(cover(total));
-  LIB.pages.forEach(function(p, i){ box.appendChild(p.keyboard ? abcSheet(p, i + 2, total) : pageSheet(p, i + 2, total)); });
+  var some = LIB.pages.filter(function(p){ return ONLY.indexOf(p.name) >= 0; });
+  if (some.length){
+    var names = some.map(function(p){ return p.name; }), list = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
+    document.title = 'Talanoa: ' + names.join(', ');
+    var tip = document.querySelector('.tip'), b = el('b', '', 'Just the ' + list + ' pages,');
+    tip.textContent = ''; tip.appendChild(b);
+    tip.appendChild(document.createTextNode(' in the same colours and spots as on the phone. Print them for doctor and hospital visits, and keep a set in his bag.'));
+    some.forEach(function(p, i){ box.appendChild(p.keyboard ? abcSheet(p, i + 1, some.length) : pageSheet(p, i + 1, some.length)); });
+  } else {
+    box.appendChild(cover(total));
+    LIB.pages.forEach(function(p, i){ box.appendChild(p.keyboard ? abcSheet(p, i + 2, total) : pageSheet(p, i + 2, total)); });
+  }
   window.TT_PRINT_READY = true;
 }
 /* Photos made on this phone live in its own storage; use them if there are any. */

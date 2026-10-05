@@ -390,6 +390,7 @@ try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('me
 
     <a class="about-link" href="manual/">📖 Staff guide ›</a>
     <a class="about-link" href="print.html">🖨 Paper board to print ›</a>
+    <a class="about-link" href="print.html?pages=Ouch,Body,Sick">🩺 Health pages to print ›</a>
     <a class="about-link" href="credits.html">About &amp; credits ›</a>
     <button class="close" id="closePanel">Done</button>
   </div>
@@ -494,7 +495,7 @@ function picture(item, cls){
   if (src){
     var im = document.createElement('img');
     im.alt = ''; im.src = src; im.draggable = false;
-    if (photo) im.className = 'photo';
+    if (photo && !/^pictures\//.test(photo)) im.className = 'photo';     /* pictures/: drawn, shown like an emoji */
     im.onerror = function(){ box.innerHTML = ''; box.appendChild(emoji(item.icon)); };
     box.appendChild(im);
   } else {

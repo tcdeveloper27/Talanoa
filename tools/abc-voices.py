@@ -17,7 +17,8 @@ the recogniser kept loaded:
 
 What it makes, for each voice in tools/build.py:
   voices/<voice>/abc/letter-a.mp3 ... letter-z.mp3   each letter's name ("ay", "bee", ...)
-  voices/<voice>/abc/w-<word>.mp3                    every word on the board, in tools/abc-common-words.txt
+  voices/<voice>/abc/w-<word>.mp3                    every word on the board; for the voices in LIST_VOICES
+                                                     (Michael) also every word in tools/abc-common-words.txt
                                                      (everyday words, made by tools/abc-vocab.py) and in
                                                      tools/abc-added-words.txt (names and words of your own)
   voices/abc.json                                    the list tools/build.py turns into what the app reads
@@ -72,6 +73,9 @@ def norm(s):
 
 key = build.abc_key
 WORD_LISTS = ['tools/abc-common-words.txt', 'tools/abc-added-words.txt']
+# Voices that also say the lists' ~9,000 everyday words; the others say the board's words and spell the rest.
+# Each list voice is ~45 min on NORMANDY's GPU and ~54 MB on the website, so Tim keeps it to Michael (2026-10-05).
+LIST_VOICES = ['michael']
 
 
 def list_words():
@@ -283,7 +287,7 @@ def main():
     import soundfile as sf
     from kokoro_onnx import Kokoro
     lib = build.load_library()
-    words = all_words(lib)
+    words, board = all_words(lib), build.abc_board_words(lib)
     model = [build.download(build.KOKORO_BASE + f, os.path.join(build.CACHE, 'kokoro', f)) for f in build.KOKORO_FILES]
     if os.environ.get('ONNX_PROVIDER') == 'CUDAExecutionProvider':
         # on the GPU, take memory only as needed: by default each run grabs several GB, and a few voices
@@ -300,13 +304,16 @@ def main():
     todo_voices = [v for v in build.VOICES if not only or v['id'] in only]
     out = {'method': METHOD, 'letters': dict(old.get('letters', {})), 'words': dict(old.get('words', {})),
            'unsure': dict(old.get('unsure', {})), 'stamps': dict(old.get('stamps', {}))}
-    print(f'ABC page: 26 letters and {len(words)} words in {", ".join(v["name"] for v in todo_voices)}', flush=True)
+    print(f'ABC page: 26 letters and {len(board)} board words in {", ".join(v["name"] for v in todo_voices)}; '
+          f'{len(words)} words in all for {", ".join(v["name"] for v in todo_voices if v["id"] in LIST_VOICES) or "none of them"}',
+          flush=True)
     for v in todo_voices:
         lang = 'en-gb' if v['kokoro'].startswith('b') else 'en-us'
         vdir = os.path.join(ROOT, 'voices', v['id'], 'abc')
         os.makedirs(vdir, exist_ok=True)
         items = [('letter', c, 'letter-' + c.lower(), tok.phonemize(c, 'en-us')) for c in LETTER_OK]
-        items += [('word', k, 'w-' + k, tok.phonemize(spoken, lang)) for k, spoken in words.items()]
+        vwords = words if v['id'] in LIST_VOICES else board
+        items += [('word', k, 'w-' + k, tok.phonemize(spoken, lang)) for k, spoken in vwords.items()]
         letters, wmap, unsure = {}, {}, []
         with tempfile.TemporaryDirectory() as tmp:
             todo = []

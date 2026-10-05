@@ -25,14 +25,15 @@ On an Android phone (or tablet), open the link in Chrome, then **⋮ → Add to 
 - **Show it big:** tap the words in the banner and they fill the screen, for a cashier, a noisy room or someone across the table ("Say it again", Close, or Back; it closes itself after a minute). The top row's **Hi, I'm Brenton** says who he is and that he talks with this phone (the People page keeps a short "Hi, I'm Brenton"). It points to the phone's own Emergency information for contacts and medical details, which are deliberately kept off this public site.
 - **Talk page:** comments and opinions, not just requests: I like it, Don't like, Again, Wait, Funny, Wow, Oh no, Mine, Your turn, Come here, Not now, Leave me alone.
 - **Tongan page:** Mālō e lelei, Mālō, Mālō ʻaupito, ʻOfa atu, ʻIo, ʻIkai, each with its meaning underneath. The computer voice only approximates Tongan, so the Faleofaz families can record them in their own voices (below).
-- **ABC page:** an alphabet board: tap letters, then Speak, all in the board's own voice. Every letter, every word on the board and a few thousand everyday words (`tools/abc-common-words.txt`, picked by `tools/abc-vocab.py`; names and words of your own go in `tools/abc-added-words.txt`) are pre-recorded in each voice by `tools/abc-voices.py` (it picks clean versions with a speech recognizer, because Kokoro garbles very short words that start with a vowel); any other word is spelled out in that same voice. Re-run it after changing words; until then a new word is spelled out.
+- **ABC page:** an alphabet board: tap letters, then Speak, all in the board's own voice. Every letter and every word on the board are pre-recorded in each voice by `tools/abc-voices.py`, and Michael (the default voice) also says about 9,000 everyday words (`tools/abc-common-words.txt`, picked by `tools/abc-vocab.py`; names and words of your own go in `tools/abc-added-words.txt`; `LIST_VOICES` in `tools/abc-voices.py` says which voices get them, about 45 minutes and 54 MB each). It picks clean versions with a speech recognizer, because Kokoro garbles very short words that start with a vowel. Any other word is spelled out in that same voice. Re-run it after changing words; until then a new word is spelled out.
 - **Fits above the navigation bar:** newer Android (e.g. a Pixel on Android 16) draws installed web apps behind the ◀ ● ■ bar. The installed app switches `viewport-fit=cover` on, keeps it only if Chrome then reports the bar's height (and pads by it), and otherwise switches straight back (on Brenton's phone Chrome reports 0). Settings → Screen shows what it found and has a manual "move up" switch.
 - **Photos and voices (Settings):** give any tile a photo from the phone's camera, or record a voice for it. They're kept only on that phone (IndexedDB), never on the website, so photos of people stay private; **Save a backup** / **Restore a backup** move them as one file.
 - **Most-used pictures (Settings):** per-tile tap counts for the last 7, 30 or 90 days, plus which tiles weren't used. Counted on the phone only, never sent anywhere; repeated taps within 3 seconds count once; can be turned off and cleared.
-- **Paper board:** `print.html` (Settings → Paper board to print) lays every page out on US Letter, same colours and spots, with each tile's words underneath and an About me card on the cover. Ready-made PDF: [manual/Talanoa-Paper-Board.pdf](manual/Talanoa-Paper-Board.pdf).
+- **Body and Sick pages (health):** where it hurts (back, chest, throat, neck, shoulder, hand, knee, bottom, privates), then A little / A lot / Really bad; and dizzy, can't breathe, bleeding, fell, fever, cough, itchy, pee hurts, can't poop, just now, yesterday, better. Body parts with no emoji use drawn pictures: one figure, the same on every tile, with the sore spot glowing red (`pictures/`, drawn by `tools/body-pictures.py`). The Ouch page is unchanged.
+- **Paper board:** `print.html` (Settings → Paper board to print) lays every page out on US Letter, same colours and spots, with each tile's words underneath and an About me card on the cover. Ready-made PDF: [manual/Talanoa-Paper-Board.pdf](manual/Talanoa-Paper-Board.pdf). **Health pages to print** (Settings) prints just Ouch, Body and Sick for doctor visits (`print.html?pages=Ouch,Body,Sick`; PDF: [manual/Talanoa-Health-Pages.pdf](manual/Talanoa-Health-Pages.pdf)).
 - **Settings:** hold the ⚙ in the top banner for 1 second. Choose the voice (Michael is the default; also Fenrir, Heart, Bella, Sarah, George, Emma, or the phone's built-in voice), speed and volume, pick which pages to show, turn swiping off if pages turn by accident, and set **Fun effects** to Lots, A little (bounces and rings only) or Off. A phone set to "reduce motion" starts on A little. Options that change something he already knows start **off**: **Calm answers** (Yes, No, feelings and the Talk page all get the same gentle sparkles, so no answer is more fun to pick) and **Darker page names** (the lighter page colours darkened just enough for white text to reach 4.5 : 1). **Tap the words to show them big** starts on.
 
-16 pages: I want, I feel, Ouch, People, Mom & Dad, Fun, Toy Story, Food, Maverik, My day, Places, Questions, Things, Talk, Tongan, ABC. New pages always go at the end, so the pages he knows stay the same number of swipes away.
+18 pages: I want, I feel, Ouch, People, Mom & Dad, Fun, Toy Story, Food, Maverik, My day, Places, Questions, Things, Talk, Tongan, ABC, Body, Sick. New pages always go at the end, so the pages he knows stay the same number of swipes away.
 
 ## Changing the words
 
@@ -54,7 +55,7 @@ Then run `python3 tools/build.py` to make the 3D picture and natural-voice recor
 - `"sound"` tells the computer voice how to pronounce a tricky word (`"Mah-loh"` for Mālō); between slashes it's exact IPA sounds (`"/mˈɑːloʊ/"`). A recording made on the phone always wins.
 - A page with `"keyboard": true` and no tiles is the ABC page.
 - A tile can have a `"short"` label for small screens: `"short": "Brenton"` is shown only if the full label won't fit. It still says the whole sentence.
-- To use a real photo instead of a picture, upload it to a `photos` folder, then add `"img": "photos/dad.jpg"` to the tile (a page can have one too). The build stops with a message if a photo is missing, so upload the photo first.
+- To use a real photo instead of a picture, upload it to a `photos` folder, then add `"img": "photos/dad.jpg"` to the tile (a page can have one too). The build stops with a message if a photo is missing, so upload the photo first. Drawn pictures go in `pictures/` (`"img": "pictures/knee.webp"`); they show like the emoji pictures instead of being cropped like a photo.
 
 ## Updating the board
 
@@ -75,10 +76,11 @@ If there's a mistake in `library.js` (a missing comma or quote, a Dad tile witho
 | `library.js` | Every page, tile and phrase |
 | `assets.js`, `sw.js` | Made by the build: picture/voice lists and the offline cache |
 | `img/` | 3D pictures |
+| `pictures/` | Drawn pictures for the Body and Sick pages (made by `tools/body-pictures.py`: `python3 tools/body-pictures.py`, needs rsvg-convert and Pillow) |
 | `voices/<name>/` | Natural-voice recordings, one MP3 per tile |
 | `tools/build.py` | Makes the pictures, voices and offline cache |
 | `manual/` | Staff guide (made by `tools/manual.py` from `tools/manual-template.html`; screenshots in `manual/img/`) |
-| `print.html` | The paper board (every page as a printable sheet, made from `library.js`) |
+| `print.html` | The paper board (every page as a printable sheet, made from `library.js`; `?pages=Ouch,Body,Sick` prints just those) |
 | `tools/guide-pictures.js` | Retakes the guide's screenshots on a phone screen and prints its PDF and the paper-board PDF (`node tools/guide-pictures.js`, needs Chromium + playwright-core) |
 | `.github/workflows/build.yml` | Runs `tools/build.py` on GitHub whenever the words change |
 

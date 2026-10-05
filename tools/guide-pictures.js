@@ -7,7 +7,8 @@
    It takes the pictures in manual/img/ on a 412 x 915 phone screen
    (Settings at its full 600 px width), measures where the numbered callouts go (manual/boxes.json), rebuilds
    manual/index.html with tools/manual.py, then prints
-   manual/Talanoa-Staff-Guide.pdf and the paper board, manual/Talanoa-Paper-Board.pdf.
+   manual/Talanoa-Staff-Guide.pdf, the paper board, manual/Talanoa-Paper-Board.pdf, and the health pages,
+   manual/Talanoa-Health-Pages.pdf.
 
    Needs Chromium and Node's playwright-core. If they aren't found, say where:
        CHROMIUM=/usr/bin/chromium  PLAYWRIGHT_CORE=/path/to/node_modules/playwright-core
@@ -108,7 +109,7 @@ function serve() {
   await webp(await page.screenshot(), 'picker.webp');
   await page.evaluate(() => picker.classList.remove('open'));
   // 4. pages
-  for (const [name, file] of [['Ouch', 'page-ouch.webp'], ['Questions', 'page-questions.webp'], ['Mom & Dad', 'momdad.webp']]) {
+  for (const [name, file] of [['Ouch', 'page-ouch.webp'], ['Questions', 'page-questions.webp'], ['Mom & Dad', 'momdad.webp'], ['Body', 'page-body.webp']]) {
     await goTo(name); await webp(await page.screenshot(), file);
   }
   // 5. the Talk and Tongan pages, each just after a tap
@@ -204,6 +205,11 @@ function serve() {
   await paper.emulateMedia({ media: 'print' });
   await paper.pdf({ path: path.join(ROOT, 'manual', 'Talanoa-Paper-Board.pdf'), preferCSSPageSize: true, printBackground: true });
   console.log('  manual/Talanoa-Paper-Board.pdf');
+  // ... and just the health pages, for doctor visits (Settings → Health pages to print)
+  await paper.goto(URL0 + 'print.html?pages=Ouch,Body,Sick', { waitUntil: 'networkidle' });
+  await paper.waitForFunction(() => window.TT_PRINT_READY && [...document.images].every((i) => i.complete), null, { timeout: 20000 });
+  await paper.pdf({ path: path.join(ROOT, 'manual', 'Talanoa-Health-Pages.pdf'), preferCSSPageSize: true, printBackground: true });
+  console.log('  manual/Talanoa-Health-Pages.pdf');
 
   await browser.close();
   server.close();

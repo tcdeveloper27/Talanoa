@@ -4,7 +4,7 @@
    Everything the board needs is kept on the tablet, so it keeps working with no
    internet. Voice clips go in their own cache ("tt-voices") that survives app
    updates; the page fills it for whichever voice is selected. */
-var VERSION = 'aff89467cd46';
+var VERSION = 'c36b2605578f';
 var CACHE = 'tt-app-' + VERSION;
 var VOICE_CACHE = 'tt-voices';
 var PRECACHE = [
@@ -21,6 +21,7 @@ var PRECACHE = [
  "img/1f1f9-1f1f4.webp",
  "img/1f300.webp",
  "img/1f319.webp",
+ "img/1f321-fe0f.webp",
  "img/1f333.webp",
  "img/1f34e.webp",
  "img/1f354.webp",
@@ -97,22 +98,29 @@ var PRECACHE = [
  "img/1f576-fe0f.webp",
  "img/1f57a.webp",
  "img/1f5bc-fe0f.webp",
+ "img/1f5d3-fe0f.webp",
  "img/1f5fa-fe0f.webp",
  "img/1f600.webp",
  "img/1f602.webp",
  "img/1f60a.webp",
  "img/1f60b.webp",
+ "img/1f60c.webp",
  "img/1f60d.webp",
  "img/1f612.webp",
  "img/1f614.webp",
  "img/1f616.webp",
  "img/1f620.webp",
  "img/1f622.webp",
+ "img/1f623.webp",
  "img/1f624.webp",
  "img/1f628.webp",
  "img/1f62c.webp",
+ "img/1f62d.webp",
  "img/1f62e.webp",
  "img/1f634.webp",
+ "img/1f635-200d-1f4ab.webp",
+ "img/1f637.webp",
+ "img/1f641.webp",
  "img/1f647.webp",
  "img/1f64b.webp",
  "img/1f64f.webp",
@@ -132,6 +140,7 @@ var PRECACHE = [
  "img/1f91d.webp",
  "img/1f920.webp",
  "img/1f922.webp",
+ "img/1f927.webp",
  "img/1f929.webp",
  "img/1f92b.webp",
  "img/1f92e.webp",
@@ -154,6 +163,7 @@ var PRECACHE = [
  "img/1f9b6.webp",
  "img/1f9b7.webp",
  "img/1f9c3.webp",
+ "img/1f9cd.webp",
  "img/1f9d1-200d-1f91d-200d-1f9d1.webp",
  "img/1f9d1-200d-2695-fe0f.webp",
  "img/1f9d8.webp",
@@ -165,10 +175,12 @@ var PRECACHE = [
  "img/1f9fb.webp",
  "img/1f9fc.webp",
  "img/1f9fe.webp",
+ "img/1fa78.webp",
  "img/1fa79.webp",
  "img/1fa7a.webp",
  "img/1fa91.webp",
  "img/1faa5.webp",
+ "img/1fac1.webp",
  "img/1faf4.webp",
  "img/1faf5.webp",
  "img/1faf6.webp",
@@ -176,6 +188,7 @@ var PRECACHE = [
  "img/231a.webp",
  "img/23ed-fe0f.webp",
  "img/23f0.webp",
+ "img/23f1-fe0f.webp",
  "img/23f3.webp",
  "img/23f8-fe0f.webp",
  "img/2600-fe0f.webp",
@@ -186,7 +199,21 @@ var PRECACHE = [
  "img/2753.webp",
  "img/2764-fe0f.webp",
  "img/2795.webp",
- "img/2b50.webp"
+ "img/2b50.webp",
+ "pictures/back.webp",
+ "pictures/body.webp",
+ "pictures/bottom.webp",
+ "pictures/cant-poop.webp",
+ "pictures/chest.webp",
+ "pictures/fell.webp",
+ "pictures/hand.webp",
+ "pictures/itchy.webp",
+ "pictures/knee.webp",
+ "pictures/neck.webp",
+ "pictures/pee-hurts.webp",
+ "pictures/privates.webp",
+ "pictures/shoulder.webp",
+ "pictures/throat.webp"
 ];
 
 self.addEventListener('install', function (e) {
