@@ -82,6 +82,13 @@ def check_mom_under_dad(lib):
         sys.exit('Every Dad tile must have the matching Mom tile directly below it:\n' + '\n'.join(problems))
 
 
+def check_abc_last(lib):
+    """Tim's rule (2026-10-06): the letter board (ABC) is always the last page; new pages go above it."""
+    if any(p.get('keyboard') for p in lib['pages'][:-1]):
+        sys.exit('The ABC page (the letter board) must be the last page in library.js: move it to the end, '
+                 'and put new pages above it.')
+
+
 def all_tiles(lib):
     """Every speakable tile: the top row, then each page's tiles in order."""
     return lib['core'] + [t for p in lib['pages'] for t in p['tiles'] if not blank(t)]
@@ -365,6 +372,7 @@ def write_outputs(lib, pictures, clips, photo_files):
 def main():
     lib = load_library()
     check_mom_under_dad(lib)
+    check_abc_last(lib)
     photo_files = photos(lib)
     jobs, spoken = recordings(lib)
     print(f'{len(lib["pages"])} pages, {len(all_tiles(lib))} tiles, {len(jobs) - 2} different sentences')

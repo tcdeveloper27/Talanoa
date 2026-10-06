@@ -4,7 +4,7 @@
    Everything the board needs is kept on the tablet, so it keeps working with no
    internet. Voice clips go in their own cache ("tt-voices") that survives app
    updates; the page fills it for whichever voice is selected. */
-var VERSION = 'c36b2605578f';
+var VERSION = 'f96de4171794';
 var CACHE = 'tt-app-' + VERSION;
 var VOICE_CACHE = 'tt-voices';
 var PRECACHE = [
@@ -61,6 +61,7 @@ var PRECACHE = [
  "img/1f442.webp",
  "img/1f449.webp",
  "img/1f44b.webp",
+ "img/1f44c.webp",
  "img/1f44d.webp",
  "img/1f44e.webp",
  "img/1f455.webp",
@@ -95,6 +96,7 @@ var PRECACHE = [
  "img/1f50c.webp",
  "img/1f50d.webp",
  "img/1f524.webp",
+ "img/1f552.webp",
  "img/1f576-fe0f.webp",
  "img/1f57a.webp",
  "img/1f5bc-fe0f.webp",
@@ -121,6 +123,7 @@ var PRECACHE = [
  "img/1f635-200d-1f4ab.webp",
  "img/1f637.webp",
  "img/1f641.webp",
+ "img/1f642.webp",
  "img/1f647.webp",
  "img/1f64b.webp",
  "img/1f64f.webp",
