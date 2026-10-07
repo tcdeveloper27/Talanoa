@@ -698,7 +698,8 @@ function sleepSoon(){
   clearTimeout(sleepT);
   sleepT = setTimeout(function(){ if (actx && actx.state === 'running' && !(nowPlaying && nowPlaying.quick && !nowPlaying.ended)) actx.suspend(); }, 20000);
 }
-function wakeSound(){ if (actx && actx.state === 'suspended'){ try { actx.resume().catch(function(){}); } catch(e){} } }
+/* A touch wakes it; it goes back to sleep in 20 s if nothing plays (a swipe, Settings). A clip that plays cancels that. */
+function wakeSound(){ if (actx && actx.state === 'suspended'){ try { actx.resume().catch(function(){}); } catch(e){} sleepSoon(); } }
 document.addEventListener('pointerdown', wakeSound, true);      /* the finger touching wakes the sound before it lifts */
 document.addEventListener('visibilitychange', function(){ if (document.hidden && actx && actx.state === 'running'){ clearTimeout(sleepT); actx.suspend(); } });
 /* Play a decoded clip now. Returns false if it can't. */

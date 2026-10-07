@@ -4,7 +4,7 @@
    Everything the board needs is kept on the phone, so it keeps working with no
    internet. Voice clips go in their own cache ("tt-voices") that survives app
    updates; the page fills it for whichever voice is selected. */
-var VERSION = 'c75cb41f522c';
+var VERSION = 'a482be1b4feb';
 var CACHE = 'tt-app-' + VERSION;
 var VOICE_CACHE = 'tt-voices';
 var PRECACHE = [

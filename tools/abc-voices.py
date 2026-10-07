@@ -393,6 +393,10 @@ def main():
                 os.remove(os.path.join(vdir, f))
         out.setdefault('stamps', {})[v['id']] = {n: s for n, s in out['stamps'].get(v['id'], {}).items() if n + '.mp3' in keep}
         out['letters'][v['id']], out['words'][v['id']] = letters, dict(sorted(wmap.items()))
+        # doubtful clips: this run's, plus the earlier notes for clips kept as they were (not remade, still used)
+        remade, kept = {t[1] for t in todo}, set(letters) | set(wmap)
+        unsure = [u for u in (old.get('unsure') or {}).get(v['id'], [])
+                  if u.split(' (heard')[0] not in remade and u.split(' (heard')[0] in kept] + unsure
         out['unsure'][v['id']] = unsure
         print(f'  {v["name"]}: {len(letters)} letters, {len(wmap)} words'
               + (f'; not confirmed by ear: {len(unsure)}' if unsure else ''), flush=True)

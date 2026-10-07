@@ -2208,6 +2208,7 @@ window.TT_ASSETS = {
 "well": "voices/bella/abc/w-well.mp3?v=88b791b03f",
 "what": "voices/bella/abc/w-what.mp3?v=ca7cab4c1f",
 "whats": "voices/bella/abc/w-whats.mp3?v=5181a8f034",
+"when": "voices/bella/abc/w-when.mp3?v=7e793013e4",
 "where": "voices/bella/abc/w-where.mp3?v=c73d069a39",
 "who": "voices/bella/abc/w-who.mp3?v=9a927744c6",
 "why": "voices/bella/abc/w-why.mp3?v=de5384e888",
@@ -2521,6 +2522,7 @@ window.TT_ASSETS = {
 "well": "voices/emma/abc/w-well.mp3?v=813b21bde2",
 "what": "voices/emma/abc/w-what.mp3?v=3a7cd84710",
 "whats": "voices/emma/abc/w-whats.mp3?v=67d198f910",
+"when": "voices/emma/abc/w-when.mp3?v=00613f134b",
 "where": "voices/emma/abc/w-where.mp3?v=0ba278af7a",
 "who": "voices/emma/abc/w-who.mp3?v=c845e0b975",
 "why": "voices/emma/abc/w-why.mp3?v=82aeed01fd",
@@ -2834,6 +2836,7 @@ window.TT_ASSETS = {
 "well": "voices/fenrir/abc/w-well.mp3?v=cc4671f454",
 "what": "voices/fenrir/abc/w-what.mp3?v=caeb14a759",
 "whats": "voices/fenrir/abc/w-whats.mp3?v=ee490fa7eb",
+"when": "voices/fenrir/abc/w-when.mp3?v=147c92e002",
 "where": "voices/fenrir/abc/w-where.mp3?v=c9356722e2",
 "who": "voices/fenrir/abc/w-who.mp3?v=9fdea2734c",
 "why": "voices/fenrir/abc/w-why.mp3?v=a818a876bf",
@@ -3147,6 +3150,7 @@ window.TT_ASSETS = {
 "well": "voices/george/abc/w-well.mp3?v=a6248404fd",
 "what": "voices/george/abc/w-what.mp3?v=eff1c620ac",
 "whats": "voices/george/abc/w-whats.mp3?v=4445c80936",
+"when": "voices/george/abc/w-when.mp3?v=a18850886e",
 "where": "voices/george/abc/w-where.mp3?v=5081b2397e",
 "who": "voices/george/abc/w-who.mp3?v=a5ba599ace",
 "why": "voices/george/abc/w-why.mp3?v=308a1fb832",
@@ -3460,6 +3464,7 @@ window.TT_ASSETS = {
 "well": "voices/heart/abc/w-well.mp3?v=e1128e214a",
 "what": "voices/heart/abc/w-what.mp3?v=a6c8a63338",
 "whats": "voices/heart/abc/w-whats.mp3?v=6fa87ed895",
+"when": "voices/heart/abc/w-when.mp3?v=bb6b2155c4",
 "where": "voices/heart/abc/w-where.mp3?v=32df813556",
 "who": "voices/heart/abc/w-who.mp3?v=bed6b743ec",
 "why": "voices/heart/abc/w-why.mp3?v=e393b4b3c8",
@@ -4087,6 +4092,7 @@ window.TT_ASSETS = {
 "well": "voices/sarah/abc/w-well.mp3?v=70053d29c9",
 "what": "voices/sarah/abc/w-what.mp3?v=f21a04239a",
 "whats": "voices/sarah/abc/w-whats.mp3?v=fe4d84e6b7",
+"when": "voices/sarah/abc/w-when.mp3?v=ce45c6b6dd",
 "where": "voices/sarah/abc/w-where.mp3?v=494045dfe1",
 "who": "voices/sarah/abc/w-who.mp3?v=44dc052a52",
 "why": "voices/sarah/abc/w-why.mp3?v=33186e138e",
@@ -4104,13 +4110,13 @@ window.TT_ASSETS = {
 }
 },
 "lists": {
-"bella": "voices/bella/abc/words.json?v=856e614918",
-"emma": "voices/emma/abc/words.json?v=43effd2ec0",
-"fenrir": "voices/fenrir/abc/words.json?v=9199679d64",
-"george": "voices/george/abc/words.json?v=656d7484e5",
-"heart": "voices/heart/abc/words.json?v=4ae8f73519",
+"bella": "voices/bella/abc/words.json?v=7da4e38f78",
+"emma": "voices/emma/abc/words.json?v=bbe9f755d9",
+"fenrir": "voices/fenrir/abc/words.json?v=dced05cc87",
+"george": "voices/george/abc/words.json?v=94d4a08174",
+"heart": "voices/heart/abc/words.json?v=86fa9a2e1c",
 "michael": "voices/michael/abc/words.json?v=632d2f7283",
-"sarah": "voices/sarah/abc/words.json?v=997ff9b23e"
+"sarah": "voices/sarah/abc/words.json?v=5cc23652a3"
 }
 }
 };
