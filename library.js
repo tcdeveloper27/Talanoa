@@ -8,12 +8,17 @@
            the same spots. A page with fewer than 12 keeps blank spaces
            so nothing shifts.
 
-   Each tile:  { icon:"🍕", label:"Pizza", say:"I want pizza" }
+   Each tile:  {"icon": "🍕", "label": "Pizza", "say": "I want pizza"}
+   Names and words go in double quotes, with a comma after each tile
+   except the last one on a page (the build stops if one is missing).
      icon  = the picture (an emoji; a matching 3D image is used)
      label = the word under the picture
      say   = what is spoken (leave out to speak the label)
-     img   = optional real photo instead, e.g. img:"photos/dad.jpg"
-             (a page can have one too, for its picture on the arrows)
+     img   = optional real photo instead, e.g. "img": "photos/dad.jpg"
+             (a page can have one too, for its picture on the arrows).
+             A drawn picture in pictures/ ("pictures/knee.webp") shows
+             like the emoji pictures instead of being cropped like a photo
+     color = the colour of a page, or of a top-row button ("#D89412")
      short = optional shorter label for when the full one won't fit
              on a small phone (the tile still says its whole sentence)
      fx    = what a tap throws, for fun: "sparkle" (the usual),
@@ -21,8 +26,8 @@
              gentle sparkles), or "ring" (no sparkles). A page can set
              one for all its tiles; a tile can override it. Settings
              can turn the fun down or off.
-     answer = true: a word he answers with (Yes, No, feelings, the
-             Talk page; a page can set it for all its tiles). Only
+     answer = true: a word he answers with (Yes, No, ʻIo, ʻIkai,
+             feelings, the Talk page; a page can set it for all its tiles). Only
              matters when Settings → "Calm answers" is switched on:
              then every answer gets the same gentle "soft", so no
              answer is more fun to pick than another. Off, they keep
@@ -44,18 +49,24 @@
    Maverik). Each different sentence gets its own recording.
 
    To leave a spot empty so the tiles after it don't move, put
-   {"empty": true} in its place. New pages go at the END, so the
-   pages he already knows stay the same number of swipes away.
+   {"empty": true} in its place. New pages go at the end, just above
+   ABC (the letter board is always the last page; the build stops if
+   it isn't), so the pages he already knows stay the same number of
+   swipes away. Only move a page if the family asks (2026-10-06: Body
+   and Sick went right after Ouch).
 
    A page with "keyboard": true and no tiles is an alphabet board:
    tap letters to spell, then Speak. It talks in the board's own
    voice: the letters and every word on the board are recorded by
-   tools/abc-voices.py (run it after changing words); any other word
-   is spelled out, letter by letter, in that same voice.
+   tools/abc-voices.py (run it after changing words: GitHub doesn't),
+   and Michael also says about 9,000 everyday words (LIST_VOICES in
+   that file); any other word is spelled out, letter by letter, in
+   that same voice.
 
-   After changing words, run  python3 tools/build.py  so the natural
-   voices and pictures are regenerated for the new tiles. Until then
-   a new tile still works: it uses the phone's own voice and emoji.
+   After changing words, run  python3 tools/build.py  (or let GitHub
+   run it: it does whenever library.js changes) so the natural voices
+   and pictures are made for the new tiles. Until then a new tile
+   still works: it uses the phone's own voice and the plain emoji.
    ============================================================ */
 window.TT_LIBRARY = {
   "core": [
@@ -321,7 +332,7 @@ window.TT_LIBRARY = {
       {"icon": "👌", "label": "Sai pē",       "means": "I'm fine",          "say": "Sai pē",       "sound": "Sigh, peh"},
       {"icon": "🙏", "label": "Kātaki",       "means": "Please",            "say": "Kātaki",       "sound": "Kah-tah-kee"},
       {"icon": "😔", "label": "Fakamolemole", "means": "Sorry",             "say": "Fakamolemole", "sound": "Fah-kah-moh-lay-moh-lay", "short": "Faka-molemole"},
-      {"icon": "🤝", "label": "ʻAlu ā",       "means": "Goodbye (go well)", "say": "ʻAlu ā",       "sound": "Ah-loo-ah"},
+      {"icon": "🤝", "label": "ʻAlu ā",       "means": "Goodbye, go well", "say": "ʻAlu ā",       "sound": "Ah-loo-ah"},
       {"icon": "🌙", "label": "Mohe ā",       "means": "Good night",        "say": "Mohe ā",       "sound": "/mˈoʊhɛ ɑː/"}
     ]},
 

@@ -6,12 +6,18 @@ Run from the repo root after changing library.js:
     python3 tools/build.py
 
 What it does
+  0. Checks library.js and stops with a message if something is wrong
+     (a typo, a Dad tile without its Mom tile underneath, ABC not the
+     last page, a photo that isn't uploaded).
   1. Pictures: copies the 3D Fluent Emoji image for every icon in
-     library.js into img/ (downloaded once from npm, MIT licence).
+     library.js into img/ (downloaded once from npm, MIT licence), and
+     remakes the home-screen icons in icons/.
   2. Voices:   records every phrase with each natural voice below using
      Kokoro (open-source, Apache 2.0), saved as small MP3s in voices/.
      Only new or changed phrases are recorded again.
-  3. Writes assets.js (what the app loads) and sw.js (the offline cache).
+  3. Writes assets.js (what the app loads), sw.js (the offline cache)
+     and each voice's abc/words.json (the ABC page's words).
+  4. Remakes the staff guide page, manual/index.html (tools/manual.py).
 
 One-time setup (about 400 MB of downloads, into ~/.cache/tilertalker):
     pip install kokoro-onnx soundfile pillow imageio-ffmpeg qrcode
@@ -323,8 +329,8 @@ def abc_board_words(lib):
 def abc_clips(lib):
     """The ABC page's letters and words in each voice, made by tools/abc-voices.py (not by this build:
     it needs a speech recogniser to pick clean versions). Only clips that exist are listed.
-    The letters and the board's own words go in assets.js. Every word a voice can say (the board's
-    and a few thousand everyday ones) goes in voices/<voice>/abc/words.json, word -> version, which
+    The letters and the board's own words go in assets.js. Every word a voice can say (the board's,
+    and for the voices in LIST_VOICES in tools/abc-voices.py about 9,000 everyday ones) goes in voices/<voice>/abc/words.json, word -> version, which
     the app loads for the chosen voice only; its clip is voices/<voice>/abc/w-<word>.mp3?v=<version>."""
     path = os.path.join(ROOT, 'voices', 'abc.json')
     out = {'letters': {}, 'words': {}, 'lists': {}}

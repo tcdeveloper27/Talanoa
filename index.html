@@ -326,6 +326,7 @@ try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('me
 
     <h3>Voice</h3>
     <div id="voiceList"></div>
+    <p class="sub" style="margin:4px 0 10px">On the ABC page, Michael says about 9,000 everyday words; the other voices say the board's words and spell the rest, letter by letter.</p>
     <div class="row" id="deviceRow">
       <label class="big" for="deviceVoice">Built-in voice (also used as a backup)</label>
       <select id="deviceVoice"></select>
@@ -348,8 +349,8 @@ try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('me
     <h3>Fun effects</h3>
     <div id="fxList">
       <label class="choice"><input type="radio" name="fx" value="lots"><span><strong>Lots</strong> <small>bounces, rings, sparkles, confetti, hearts, stars…</small></span></label>
-      <label class="choice"><input type="radio" name="fx" value="little"><span><strong>A little</strong> <small>bounces and rings, no sparkles</small></span></label>
-      <label class="choice"><input type="radio" name="fx" value="off"><span><strong>Off</strong> <small>just the blue outline</small></span></label>
+      <label class="choice"><input type="radio" name="fx" value="little"><span><strong>A little</strong> <small>bounces, rings and a small twinkling star; no flying sparkles</small></span></label>
+      <label class="choice"><input type="radio" name="fx" value="off"><span><strong>Off</strong> <small>just the blue outline (the words at the top still flash green)</small></span></label>
     </div>
     <label class="choice"><input type="checkbox" id="calmOn"><span><strong>Calm answers</strong> <small>Yes, No, every feeling and the Talk page all get the same few gentle sparkles, so no answer is more fun to pick than another. Off: they keep their usual sparkles.</small></span></label>
 
@@ -362,14 +363,14 @@ try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('me
     <label class="choice"><input type="checkbox" id="roomOn"><span><strong>Bottom row hidden behind the ◀ ● ■ buttons?</strong> <small>Tick this to move the board up above them. Usually it fits by itself.</small></span></label>
 
     <h3>Photos and voices</h3>
-    <p class="sub" style="margin:0 0 10px">Give any picture a photo from this phone's camera, or record a voice for it (a family member saying the Tongan words, for example). They're kept on this phone only, never put on the website.</p>
+    <p class="sub" style="margin:0 0 10px">Give any picture a photo (take one, or choose one already on this phone), or record a voice for it (a family member saying the Tongan words, for example). They're kept on this phone only, never put on the website.</p>
     <button class="plain" id="ownOpen">📷 🎙️ Change a picture or voice…</button>
     <div id="ownStat" class="sub" style="margin:-6px 0 10px"></div>
     <div class="btnrow"><button class="plain" id="ownSave">Save a backup</button><button class="plain" id="ownLoad">Restore a backup</button></div>
     <input type="file" id="ownFile" accept="application/json,.json" hidden>
 
     <h3>Most-used pictures</h3>
-    <p class="sub" style="margin:0 0 10px">Counted on this phone only, never sent anywhere. Taps in a row on the same picture count once.</p>
+    <p class="sub" style="margin:0 0 10px">Counted on this phone only, never sent anywhere. Quick repeat taps on the same picture (less than 3 seconds apart) count once.</p>
     <div class="seg" id="countSpan">
       <label class="choice"><input type="radio" name="span" value="7" checked> 7 days</label>
       <label class="choice"><input type="radio" name="span" value="30"> 30 days</label>
@@ -386,7 +387,7 @@ try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('me
     <button class="plain" id="checkUpdate">Check for updates now</button>
     <div id="clipStat" class="stat" hidden></div>
     <div class="warn"><strong>Tip:</strong> on the phone or tablet, open this page in Chrome, then menu ⋮ → <strong>Add to Home screen</strong> (or <strong>Install app</strong>). It opens full screen like an app and keeps working with no internet.</div>
-    <p class="sub">Pictures: <a href="https://github.com/microsoft/fluentui-emoji" target="_blank" rel="noopener">Fluent Emoji</a> © Microsoft, MIT licence. Voices: <a href="https://github.com/hexgrad/kokoro" target="_blank" rel="noopener">Kokoro</a>, Apache 2.0.</p>
+    <p class="sub">Pictures: <a href="https://github.com/microsoft/fluentui-emoji" target="_blank" rel="noopener">Fluent Emoji</a> © Microsoft, MIT licence. Voices: <a href="https://github.com/hexgrad/kokoro" target="_blank" rel="noopener">Kokoro</a>, Apache 2.0. ABC page words: wordfreq (CC BY-SA 4.0) and WordNet 3.0.</p>
 
     <a class="about-link" href="manual/">📖 Staff guide ›</a>
     <a class="about-link" href="print.html">🖨 Paper board to print ›</a>
@@ -825,7 +826,7 @@ function announce(item, el){
   show(shown, item);
   flashBanner();
   countTap(item);
-  if (item.show) openShow(shown);  /* About me: big enough to hand the phone over */
+  if (item.show) openShow(shown);  /* a tile marked "show" (none at the moment): big enough to hand the phone over */
   afterVoiceStarts(function(){ celebrate(el, item); });
 }
 /* The sparkles wait until the voice has started (150 ms at most). On a slower phone, starting
@@ -857,9 +858,9 @@ LIB.core.forEach(function(item){
 /* ============================================================
    THE ABC PAGE ("keyboard": true in library.js)
    Letters to spell with. It talks in the same voice as the rest of
-   the board: every letter's name, every word that's on the board and
-   a few thousand everyday words are recorded in each natural voice
-   (tools/abc-voices.py). Speak says the words it has in that voice and
+   the board: every letter's name and every word that's on the board
+   are recorded in each natural voice, and Michael also says about
+   9,000 everyday words (tools/abc-voices.py, LIST_VOICES). Speak says the words it has in that voice and
    spells out any other word, letter by letter, in that same voice, so
    it's always one voice. The board's words come with the app
    (assets.js); the long list is loaded for the chosen voice only
@@ -1054,6 +1055,7 @@ function render(dir){
 function showPageInfo(){
   var page = pages[current];
   paint(titleBtn, page.color);
+  titleBtn.setAttribute('aria-label', 'Page: ' + page.name + '. Tap to see all pages');
   titleBtn.innerHTML = '';
   titleBtn.appendChild(picture(page));
   var txt = document.createElement('div'); txt.className = 'txt';
@@ -1380,8 +1382,8 @@ function buildPageList(){
    for a cashier or someone across the room to read, and for loud
    places where the voice is hard to hear. "Say it again" repeats
    them; Close, Back, or a minute without a tap puts the board back.
-   The About me tile opens this by itself. Settings → Reading can
-   turn the banner tap off (About me still works).
+   A tile marked "show": true would open this by itself (none is, at
+   the moment). Settings → Reading can turn the banner tap off.
    ============================================================ */
 var showView = document.getElementById('showView'), showWords = document.getElementById('showWords');
 var showBox = document.getElementById('showText'), showCloseT = null, SHOW_BIG_FOR = 60 * 1000;
@@ -1469,7 +1471,7 @@ function buildCounts(){
   });
   var unused = ALL_ITEMS.filter(function(it){ return !sum[it._key]; });
   var since = c.since ? ' (counting since ' + new Date(c.since + 'T12:00').toLocaleDateString([], {month: 'short', day: 'numeric'}) + ')' : '';
-  document.getElementById('unusedSum').textContent = 'Not used in the last ' + days + ' days: ' + unused.length + ' pictures' + since;
+  document.getElementById('unusedSum').textContent = 'Not used in the last ' + days + ' days: ' + unused.length + (unused.length === 1 ? ' picture' : ' pictures') + since;
   document.getElementById('unusedList').textContent = unused.map(function(it){ return it.label + ' (' + placeOf(it._key) + ')'; }).join(', ');
 }
 var spanRadios = document.querySelectorAll('#countSpan input');
@@ -1679,10 +1681,10 @@ function startRecording(){
     recording = {mr: mr, start: Date.now(), cancel: false,
                  tick: setInterval(recTick, 250), limit: setTimeout(function(){ stopRecording(); }, MAX_REC * 1000)};
     mr.start();
-    note('Recording… say the words, then tap Stop.');
+    note('Recording… say the words, then tap Stop. (It stops by itself after ' + MAX_REC + ' seconds.)');
     drawEditor();
   }, function(){
-    note('The microphone is blocked. Allow it for Talanoa (in Chrome: tap the lock or ⓘ by the address; in the app: long-press its icon → App info → Permissions), then try again.');
+    note('The microphone didn\'t start. Close any call or other app using it. Then in Chrome: ⋮ → Settings → Site settings → Microphone, and allow this site. Try again.');
   });
 }
 function recTick(){
@@ -1828,7 +1830,7 @@ function warmVoice(){
 function refreshOffline(){
   var el = document.getElementById('offlineStat');
   if (!navigator.serviceWorker){ el.textContent = 'Offline use needs a newer browser. Online it works normally.'; return; }
-  if (!navigator.serviceWorker.controller){ el.textContent = 'Getting ready for offline use… (reopen the app once)'; return; }
+  if (!navigator.serviceWorker.controller){ el.textContent = 'Getting ready for offline use… Look again in a minute. If it stays like this, close Talanoa and open it again with the internet on.'; return; }
   var urls = voiceUrls();
   if (!urls.length || !('caches' in window)){ el.textContent = '✓ Ready to use with no internet.'; return; }
   caches.open(VOICE_CACHE).then(function(c){ return c.keys(); }).then(function(keys){
@@ -1876,12 +1878,12 @@ function maybeApply(){
 function showVersion(text){
   var el = document.getElementById('updateStat');
   if (text){ el.textContent = text; return; }
-  if (!navigator.serviceWorker || !navigator.serviceWorker.controller){ el.textContent = 'Version: not installed yet'; return; }
+  if (!navigator.serviceWorker || !navigator.serviceWorker.controller){ el.textContent = 'Version: still setting up'; return; }
   var checked = parseInt(store('tt_checked') || '0', 10);
   var when = checked ? new Date(checked).toLocaleString([], {month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'}) : 'not yet';
   var ch = new MessageChannel();
   ch.port1.onmessage = function(e){
-    el.textContent = updateReady ? 'A new version is ready and will switch on when the board is not in use.'
+    el.textContent = updateReady ? 'A new version is ready. It switches on by itself when the board isn\'t in use, or tap Check for updates now to switch now.'
                                  : 'Version ' + e.data.version + ' · last checked ' + when;
   };
   navigator.serviceWorker.controller.postMessage('version', [ch.port2]);
@@ -1987,7 +1989,7 @@ function fitNavBar(){
 if (document.readyState === 'complete') fitNavBar(); else window.addEventListener('load', fitNavBar);
 function showScreen(){
   var el = document.getElementById('screenStat');
-  el.textContent = 'Screen ' + innerWidth + ' × ' + innerHeight + ', navigation bar ' + Math.round(bottomInset()) + ' px' +
+  el.textContent = 'Screen ' + innerWidth + ' × ' + innerHeight + ', navigation bar reported as ' + Math.round(bottomInset()) + ' px' +
                    (coverOn() ? ' (fitted above it)' : '') + (ROOM ? '; board moved up by hand' : '');
 }
 

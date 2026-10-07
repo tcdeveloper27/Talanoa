@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Choose the everyday words the ABC page can say in the board's own voice.
+"""Choose the everyday words the ABC page can say as whole words (in the voices listed in LIST_VOICES in
+tools/abc-voices.py: Michael).
 
 The words on the board are always included (tools/abc-voices.py finds them in library.js). This
 picks the rest and writes them to tools/abc-common-words.txt, one per line:
@@ -138,8 +139,9 @@ def main():
                 more.add(f)
 
     words = sorted(set(common) | things | more)
-    head = ['# Everyday words the ABC page can say in the board\'s own voice (besides the words on the',
-            '# board itself). Made by tools/abc-vocab.py: do not edit by hand, re-run it. Your own words',
+    head = ['# Everyday words the ABC page can say as whole words in the voices listed in LIST_VOICES in',
+            '# tools/abc-voices.py (Michael), besides the words on the board itself. Made by',
+            '# tools/abc-vocab.py: do not edit by hand, re-run it. Your own words',
             '# (names, favourite things) go in tools/abc-added-words.txt.',
             '# Chosen with wordfreq (Robyn Speer; its data is CC BY-SA 4.0, so this list is too) and',
             '# WordNet 3.0 (Princeton University).']

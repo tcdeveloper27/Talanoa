@@ -8,9 +8,9 @@
 <link rel="icon" href="icons/icon-192.png">
 <!-- The paper version of the board: every page as one sheet, in the same
      colours and the same spots as on the phone, to print and laminate.
-     Made straight from library.js, so it always matches the app. Photos and
-     recordings made on this phone (Settings → Photos and voices) are used too
-     when this page is opened on that phone. -->
+     Made straight from library.js, so it always matches the app. Photos made
+     on this phone (Settings → Photos and voices) are used too when this page
+     is opened on that phone. Sheets are numbered as the pages are on the phone. -->
 <style>
   :root{--ink:#2B1D0E;--bg:#E9E2D2;}
   *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
@@ -36,6 +36,7 @@
   .cb{background:var(--c);color:#fff;border-radius:1.8cqw;padding:.8cqw .4cqw;display:flex;flex-direction:column;align-items:center;gap:.3cqw;
       font-weight:900;font-size:2.3cqw;line-height:1.05;text-align:center;}
   .cb img,.cb .em{height:5.6cqw;width:5.6cqw;object-fit:contain;font-size:4.4cqw;line-height:5.6cqw;}
+  .cb img.photo{object-fit:cover;border-radius:1cqw;}
   .grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(3,1fr);gap:1.6cqw;}
   .tile{border:.55cqw solid var(--pc);background:var(--tint);border-radius:2.4cqw;display:flex;flex-direction:column;align-items:center;
         justify-content:center;gap:.4cqw;padding:1cqw .8cqw;text-align:center;min-height:0;overflow:hidden;}
@@ -131,7 +132,9 @@ function coreRow(){
   var r = el('div', 'core');
   LIB.core.forEach(function(c){
     var b = el('div', 'cb'); b.style.setProperty('--c', readable(c.color || '#3C6E9F'));
-    b.appendChild(icon(c)); b.appendChild(el('div', '', c.short && c.label.length > 9 ? c.short : c.label));
+    var o = own['core|' + c.label], im;       /* a photo saved on this phone for a top-row button */
+    if (o && o.photo){ im = el('img', 'photo'); im.alt = ''; im.src = o.photo; } else im = icon(c);
+    b.appendChild(im); b.appendChild(el('div', '', c.short && c.label.length > 9 ? c.short : c.label));
     r.appendChild(b);
   });
   return r;
@@ -153,7 +156,7 @@ function pageSheet(p, n, total){
     if (blank(t)){ g.appendChild(el('div', 'tile slot')); continue; }
     var d = el('div', 'tile'), key = p.name + '|' + t.label;
     d.appendChild(pic(t, key));
-    d.appendChild(el('div', 'lab', t.label));
+    d.appendChild(el('div', 'lab', t.short && t.label.indexOf(' ') < 0 ? t.short : t.label));   /* one long word: its short form (Faka-molemole) breaks better */
     if (t.means) d.appendChild(el('div', 'says', t.means));
     else if (t.say && plain(t.say) !== plain(t.label)) d.appendChild(el('div', 'says', '“' + t.say + '”'));
     g.appendChild(d);
@@ -177,7 +180,7 @@ function cover(total){
   var logo = el('img', 'logo'); logo.src = 'icons/icon-192.png'; logo.alt = ''; s.appendChild(logo);
   s.appendChild(el('h1', '', 'Talanoa paper board'));
   s.appendChild(el('div', 'sub', 'tah-lah-NOH-ah · Tongan for “talking together”'));
-  s.appendChild(el('p', '', 'The same pictures as on the phone, in the same places, on paper. Use it whenever the phone can’t be used:'));
+  s.appendChild(el('p', '', 'The same pictures as on the phone, in the same places, on paper. Use it whenever the phone can’t be used, and to show words:'));
   var ul = el('ul');
   ['while the phone is charging, or if it’s lost or broken', 'in the shower, the bath, the pool, or out in the rain',
    'to show words while you talk with him (point to the pictures as you say them)'].forEach(function(t){ ul.appendChild(el('li', '', t)); });
@@ -186,7 +189,7 @@ function cover(total){
   var ul2 = el('ul');
   ['He points to a picture. Say the words out loud (they’re written under each picture), and answer them, just as if the phone had spoken.',
    'Give him time. Finding the right page and picture can take a while.',
-   'The top row is on every sheet, in the same place as on the phone.',
+   'The top row is on every sheet except the ABC sheet, above the pictures as on the phone.',
    'Laminate the sheets and keep them on a ring, in the same order as the phone’s pages.'].forEach(function(t){ ul2.appendChild(el('li', '', t)); });
   s.appendChild(ul2);
   s.appendChild(el('h2', '', 'The ' + (total - 1) + ' pages'));
@@ -199,7 +202,7 @@ function cover(total){
   if (me){
     var c = el('div', 'card'), b = el('b');
     b.appendChild(icon(me)); b.appendChild(document.createTextNode('About me'));
-    c.appendChild(b); c.appendChild(el('p', '', me.say)); c.appendChild(el('small', '', '✂ cut out and keep in a wallet or bag'));
+    c.appendChild(b); c.appendChild(el('p', '', me.say.replace(/this phone/g, 'my phone')));   /* on a card, "this phone" points at nothing */ c.appendChild(el('small', '', '✂ cut out and keep in a wallet or bag'));
     s.appendChild(c);
   }
   return s;
@@ -215,10 +218,10 @@ function build(){
     var tip = document.querySelector('.tip'), b = el('b', '', 'Just the ' + list + ' pages,');
     tip.textContent = ''; tip.appendChild(b);
     tip.appendChild(document.createTextNode(' in the same colours and spots as on the phone. Print them for doctor and hospital visits, and keep a set in his bag.'));
-    some.forEach(function(p, i){ box.appendChild(p.keyboard ? abcSheet(p, i + 1, some.length) : pageSheet(p, i + 1, some.length)); });
+    some.forEach(function(p){ var n = LIB.pages.indexOf(p) + 1; box.appendChild(p.keyboard ? abcSheet(p, n, LIB.pages.length) : pageSheet(p, n, LIB.pages.length)); });
   } else {
     box.appendChild(cover(total));
-    LIB.pages.forEach(function(p, i){ box.appendChild(p.keyboard ? abcSheet(p, i + 2, total) : pageSheet(p, i + 2, total)); });
+    LIB.pages.forEach(function(p, i){ box.appendChild(p.keyboard ? abcSheet(p, i + 1, LIB.pages.length) : pageSheet(p, i + 1, LIB.pages.length)); });   /* the phone's page numbers */
   }
   window.TT_PRINT_READY = true;
 }

@@ -1,7 +1,7 @@
 /* Talanoa offline cache.
    sw.js is generated from tools/sw-template.js by tools/build.py; edit the template.
 
-   Everything the board needs is kept on the tablet, so it keeps working with no
+   Everything the board needs is kept on the phone, so it keeps working with no
    internet. Voice clips go in their own cache ("tt-voices") that survives app
    updates; the page fills it for whichever voice is selected. */
 var VERSION = '__VERSION__';

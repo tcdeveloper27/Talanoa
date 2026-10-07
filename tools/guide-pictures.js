@@ -145,6 +145,10 @@ function serve() {
   await page.setViewportSize({ width: 632, height: 3600 });
   await page.evaluate(() => openSettings());
   await page.waitForFunction(() => /Ready to use/.test(document.getElementById('offlineStat').textContent) && /Version \w/.test(document.getElementById('updateStat').textContent), null, { timeout: 15000 });
+  // the sheet is at most 92% of the screen's height: make the screen tall enough to show all of it, Done included
+  const tall = await page.evaluate(() => document.querySelector('#panel .sheet').scrollHeight);
+  await page.setViewportSize({ width: 632, height: Math.ceil(tall / 0.92) + 40 });
+  await page.waitForTimeout(300);
   const sheet = await box('#panel .sheet');
   const S = await page.evaluate(() => {
     const s = document.querySelector('#panel .sheet').getBoundingClientRect();
@@ -165,7 +169,9 @@ function serve() {
     };
   });
   Object.assign(boxes, S);
-  const cuts = [0, S.s_pages.y - 44, S.s_own.y - 44, sheet.height];   // tools/manual.py cuts in the same places
+  // cut halfway between two sections, so no slider or option is cut in two (tools/manual.py cuts in the same places)
+  const mid = (a, b) => Math.round((a.y + a.height + b.y) / 2);
+  const cuts = [0, mid(S.s_vol, S.s_pages), mid(S.s_screen, S.s_own), sheet.height];
   for (const [i, name] of [[0, 'settings-top.webp'], [1, 'settings-mid.webp'], [2, 'settings-bottom.webp']])
     await webp(await page.screenshot({ clip: { x: sheet.x, y: sheet.y + cuts[i], width: sheet.width, height: cuts[i + 1] - cuts[i] } }), name);
 
@@ -196,6 +202,7 @@ function serve() {
   await paper.setViewportSize({ width: 820, height: 1100 });
   await paper.goto(URL0 + 'print.html', { waitUntil: 'networkidle' });
   await paper.waitForFunction(() => window.TT_PRINT_READY && [...document.images].every((i) => i.complete), null, { timeout: 20000 });
+  await paper.addStyleTag({ content: '.bar{display:none !important}' });   // the on-screen toolbar would cover the sheet's name
   const talkSheet = await paper.evaluate(() => {
     const s = [...document.querySelectorAll('.sheet')].find((x) => /Talk/.test((x.querySelector('.head b') || {}).textContent || ''));
     s.scrollIntoView(); const r = s.getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height };

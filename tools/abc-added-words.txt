@@ -1,4 +1,5 @@
 # Words of your own for the ABC page: names, places, favourite things. One per line; a # starts a
 # note. Spell a word the way it's typed on the ABC page. After adding words, re-run
-# tools/abc-voices.py (see the top of that file) so they're recorded in every voice; until then
-# they're spelled out letter by letter.
+# tools/abc-voices.py (see the top of that file), then tools/build.py, so they're recorded in the
+# voices listed in LIST_VOICES there (Michael); until then, and in the other voices, they're
+# spelled out letter by letter.

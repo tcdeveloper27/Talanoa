@@ -6,7 +6,7 @@ tools/build.py, so the guide stays correct when the words change. Screenshot
 callout positions come from manual/boxes.json (measured when the screenshots
 were taken). Run by tools/build.py; can also be run on its own.
 """
-import html, json, os, re, sys
+import math, html, json, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, 'tools'))
@@ -104,9 +104,11 @@ def main():
         badge(8, *at('lit', 1, 0, -14, 14)),
     ])
 
-    # callouts on the three settings crops (each cut 44 CSS px above "Pages to show" and "Photos and voices")
+    # callouts on the three settings crops (each cut halfway between two sections, as tools/guide-pictures.js does)
     sw = boxes['s_voice']['sheetW']
-    cuts = [0, boxes['s_pages']['y'] - 44, boxes['s_own']['y'] - 44, boxes['s_pages']['sheetH']]
+    def mid(a, b):
+        return math.floor((boxes[a]['y'] + boxes[a]['height'] + boxes[b]['y']) / 2 + 0.5)   # JavaScript's Math.round
+    cuts = [0, mid('s_vol', 's_pages'), mid('s_screen', 's_own'), boxes['s_pages']['sheetH']]
     def sat(name, part):
         r = boxes[name]
         y = r['y'] + min(r['height'] / 2, 22) - cuts[part]

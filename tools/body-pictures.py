@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Draw the pictures for the health pages that no emoji covers (a back, a knee, a throat...).
 
-One friendly figure, the same on every picture, with the sore spot glowing red, so he learns to
-read them the same way. The skin is the emoji yellow of the Ouch page's arm, leg and foot.
+One friendly figure, the same on every Body picture, with the sore spot glowing red, so he learns
+to read them the same way. The skin is the emoji yellow of the Ouch page's arm, leg and foot. On
+the Sick page, Itchy (bumps and scratches) and Fell (the figure falling) use the same figure; Pee
+hurts and Can't poop are the toilet emoji with a red glow or a no-entry sign.
 
-Writes pictures/<name>.webp at 256 x 256, like the emoji pictures. Needs rsvg-convert and Pillow:
+Writes pictures/<name>.webp at 256 x 256, like the emoji pictures. Needs rsvg-convert, Pillow and
+the Fluent Emoji files tools/build.py downloads into ~/.cache/tilertalker (run the build once first):
     python3 tools/body-pictures.py
 """
 import base64, io, os, re, subprocess, sys

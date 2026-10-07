@@ -1,5 +1,6 @@
-# Everyday words the ABC page can say in the board's own voice (besides the words on the
-# board itself). Made by tools/abc-vocab.py: do not edit by hand, re-run it. Your own words
+# Everyday words the ABC page can say as whole words in the voices listed in LIST_VOICES in
+# tools/abc-voices.py (Michael), besides the words on the board itself. Made by
+# tools/abc-vocab.py: do not edit by hand, re-run it. Your own words
 # (names, favourite things) go in tools/abc-added-words.txt.
 # Chosen with wordfreq (Robyn Speer; its data is CC BY-SA 4.0, so this list is too) and
 # WordNet 3.0 (Princeton University).

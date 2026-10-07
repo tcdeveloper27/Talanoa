@@ -10,10 +10,10 @@ by GitHub; until it is re-run, a new word is simply spelled out letter by letter
     python3 tools/abc-voices.py --side-by-side=3   # every voice, three at a time, one process each (GPU)
     TALANOA_ASR="node /path/to/asr.js --model=small.en" python3 tools/abc-voices.py   # and check by ear
 
-It's thousands of clips per voice, so run it on the GPU (see /root/.claude/CLAUDE.md on VM 100), with
-the recogniser kept loaded:
-    normandy-gpu run -e TALANOA_WHISPER=small.en -e TALANOA_WHISPER_DIR=W:/gpu-worker/models/whisper \\
-        -- python tools/abc-voices.py michael
+A voice in LIST_VOICES (Michael) is thousands of clips, so run it on a GPU, with the recogniser kept
+loaded (on VM 100: normandy-gpu, one line):
+    normandy-gpu run -e TALANOA_WHISPER=small.en -e TALANOA_WHISPER_DIR=W:/gpu-worker/models/whisper -- python tools/abc-voices.py michael
+Then run tools/build.py, so the app picks up the new words (GitHub doesn't run this script).
 
 What it makes, for each voice in tools/build.py:
   voices/<voice>/abc/letter-a.mp3 ... letter-z.mp3   each letter's name ("ay", "bee", ...)
@@ -26,9 +26,10 @@ What it makes, for each voice in tools/build.py:
 Why it's more than "say the letter": Kokoro's voices put a stray sound in front of a very short
 utterance that starts with a vowel (Michael says E as "Lee", S as "Yes"). Full sentences are
 fine. So each word is made a few ways (as a one-word sentence; on its own; as the first word of a
-longer sentence, cut out at the pause; with the stray start trimmed; slower) and, if TALANOA_ASR
-names a speech recogniser, the first version it hears correctly is kept, or else the one it heard
-closest. Without one, the first version is kept.
+longer sentence, cut out at the pause; with the stray start trimmed; slower). With a recogniser
+(TALANOA_WHISPER=<model>, kept loaded, or TALANOA_ASR=<command>), the first version heard
+correctly is kept; if none is, the closest one for a word, the first one for a letter. Without
+a recogniser, the first version is kept.
 """
 import hashlib, io, json, os, re, subprocess, sys, tempfile, time
 
