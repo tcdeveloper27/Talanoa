@@ -618,7 +618,7 @@ function speakDevice(text){
 }
 
 /* ---------------- audio clips ---------------- */
-var audioCache = {}, audioOrder = [], nowPlaying = null, token = 0;
+var audioCache = {}, audioOrder = [], nowPlaying = null, token = 0, pinned = {};
 
 /* A sound player that failed (or was made before the offline helper took over) can stay broken:
    throw it away so the next tap makes a fresh one. (2026-10-05: on Tim's phone a whole page fell
@@ -634,10 +634,100 @@ function getAudio(src){
   if (a && a.error){ dropAudio(src); a = null; }            /* broken: make a fresh one */
   if (!a){
     a = new Audio(); a.preload = 'auto'; a.src = src;
+    /* Back to the start as soon as it has finished, so the next tap plays straight away:
+       a rewind done at the moment of the tap holds up the voice (measured 2026-10-07). */
+    a.addEventListener('ended', function(){ try { a.currentTime = 0; } catch(e){} });
     audioCache[src] = a; audioOrder.push(src);
-    if (audioOrder.length > 60){ var old = audioOrder.shift(); if (audioCache[old] !== nowPlaying) delete audioCache[old]; }
+    if (audioOrder.length > 60){                 /* forget the oldest one (never the top row's) */
+      for (var i = 0; i < audioOrder.length; i++){
+        var old = audioOrder[i];
+        if (pinned[old] || audioCache[old] === nowPlaying) continue;
+        audioOrder.splice(i, 1); delete audioCache[old]; break;
+      }
+    }
   }
   return a;
+}
+/* The top row (Yes, No, Help, Stop...) is on every page, so its clips are made ready at the
+   start and kept. (Until 2026-10-07 they were only fetched at the first tap.) */
+function preloadCore(){
+  pinned = {};
+  LIB.core.forEach(function(it){ var src = clipFor(slug(it.label), it.say || it.label, it); if (src){ pinned[src] = 1; prepare(src); getAudio(src); } });
+}
+
+/* ---------------- quick sound (Web Audio) ----------------
+   2026-10-07 (Tim: "look into the latency between pressing a tile and hearing the sound"): on
+   Android an <audio> player only fetches and sets up its clip at the first play, so a tap took
+   about 100-300 ms to be heard. The clips of the page on screen, the top row and the letters are
+   now decoded ahead of time and played with Web Audio, which starts within a few ms, skipping the
+   clip's quiet lead-in. The <audio> players stay as the fallback, and for a speed other than
+   normal (Web Audio can't slow a voice down without lowering it). Sound sleeps after 20 s of
+   quiet to save battery; a finger touching the screen wakes it before the finger lifts. */
+var AC = window.AudioContext || window.webkitAudioContext, actx = null, quick = {}, quickOrder = [], quickWait = {}, sleepT = null;
+var QUICK_MAX = 48;
+function audioCtx(){
+  if (!actx && AC){ try { actx = new AC({latencyHint: 'interactive'}); } catch(e){ try { actx = new AC(); } catch(e2){ actx = null; } } }
+  return actx;
+}
+/* Where the voice starts: the level, averaged over 10 ms (as tools/build.py trims the clips), first
+   goes above -48 dB; playing starts 12 ms before that. A stray click near the start doesn't count. */
+function leadIn(buf){
+  var d = buf.getChannelData(0), n = d.length, w = Math.max(1, Math.round(buf.sampleRate * 0.01)), sum = 0, i;
+  for (i = 0; i < n; i++){
+    sum += Math.abs(d[i]); if (i >= w) sum -= Math.abs(d[i - w]);
+    if (i >= w - 1 && sum / w > 0.004) return Math.max(0, (i - w + 1) / buf.sampleRate - 0.012);
+  }
+  return 0;
+}
+function prepare(src){
+  var c = audioCtx();
+  if (!c || quick[src] || quickWait[src]) return;
+  quickWait[src] = fetch(src).then(function(r){ if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+    .then(function(b){ return new Promise(function(ok, no){ var p = c.decodeAudioData(b, ok, no); if (p && p.then) p.then(ok, no); }); })
+    .then(function(buf){
+      quick[src] = {buf: buf, at: leadIn(buf)}; quickOrder.push(src);
+      while (quickOrder.length > QUICK_MAX){
+        var i = 0; while (i < quickOrder.length && (pinned[quickOrder[i]] || (nowPlaying && nowPlaying.quickSrc === quickOrder[i]))) i++;
+        if (i >= quickOrder.length) break;
+        delete quick[quickOrder.splice(i, 1)[0]];
+      }
+    }).catch(function(){}).then(function(){ delete quickWait[src]; });
+}
+function sleepSoon(){
+  clearTimeout(sleepT);
+  sleepT = setTimeout(function(){ if (actx && actx.state === 'running' && !(nowPlaying && nowPlaying.quick && !nowPlaying.ended)) actx.suspend(); }, 20000);
+}
+function wakeSound(){ if (actx && actx.state === 'suspended'){ try { actx.resume().catch(function(){}); } catch(e){} } }
+document.addEventListener('pointerdown', wakeSound, true);      /* the finger touching wakes the sound before it lifts */
+document.addEventListener('visibilitychange', function(){ if (document.hidden && actx && actx.state === 'running'){ clearTimeout(sleepT); actx.suspend(); } });
+/* Play a decoded clip now. Returns false if it can't. */
+function playQuick(src, q){
+  var c = actx, s, g;
+  try {
+    s = c.createBufferSource(); s.buffer = q.buf;
+    g = c.createGain(); g.gain.value = vol;
+    s.connect(g); g.connect(c.destination);
+    s.start(0, q.at);
+  } catch(e){ return false; }
+  var t0 = c.currentTime, len = q.buf.duration;
+  var p = {quick: s, quickSrc: src, src: new URL(src, location.href).href, paused: false, ended: false, error: null,
+           pause: function(){ if (!p.paused && !p.ended){ p.paused = true; try { s.stop(); } catch(e){} } }};
+  Object.defineProperty(p, 'currentTime', {get: function(){ return p.ended ? len : Math.min(len, q.at + Math.max(0, c.currentTime - t0)); }});
+  s.onended = function(){ if (!p.paused) p.ended = true; sleepSoon(); };
+  nowPlaying = p;
+  clearTimeout(sleepT);
+  return true;
+}
+/* Say a clip the quick way if it's decoded and the speed is normal. Returns true if it took it. */
+function sayQuick(src, my, html){
+  var q = quick[src];
+  if (!q || speed !== 1 || !actx || actx.state === 'closed') return false;
+  if (actx.state === 'running') return playQuick(src, q);
+  /* asleep (the first tap, or after a quiet spell): wake it and play; the <audio> way if it doesn't wake in time */
+  var woke = false, t = setTimeout(function(){ if (!woke && my === token) html(); }, 350);
+  actx.resume().then(function(){ woke = true; clearTimeout(t); if (my === token && !playQuick(src, q)) html(); },
+                     function(){ clearTimeout(t); if (my === token) html(); });
+  return true;
 }
 /* The natural-voice recording is found by the sentence itself, so tiles that
    say the same thing share one (see assets.js). */
@@ -651,23 +741,25 @@ function clipFor(id, text, item){
   return set && set[text] ? set[text] : null;
 }
 function preload(items){
-  items.forEach(function(it){ if (blank(it)) return; var src = clipFor(slug(it.label), it.say || it.label, it); if (src) getAudio(src); });
+  items.forEach(function(it){ if (blank(it)) return; var src = clipFor(slug(it.label), it.say || it.label, it); if (src){ prepare(src); getAudio(src); } });
 }
 
 function stopTalking(){
   token++;
   if (synth) synth.cancel();
-  if (nowPlaying){ try { nowPlaying.pause(); nowPlaying.currentTime = 0; } catch(e){} nowPlaying = null; }
+  if (nowPlaying){ try { nowPlaying.pause(); if (!nowPlaying.quick) nowPlaying.currentTime = 0; } catch(e){} nowPlaying = null; }
 }
 
 /* Play the clip; if it errors, is refused, or hasn't started within 1.5 s,
    say it with the built-in voice instead. Never silent. (The built-in voice
    reads a tile's "sound" if it has one: "Mah-loh" for Mālō.) */
-function say(id, text, item, again){
+function say(id, text, item, again, html){
   stopTalking();
   var my = token, src = clipFor(id, text, item);
   var words = item && item.sound && item.sound.charAt(0) !== '/' ? item.sound : text;   /* "/…/" is for the natural voice only */
   if (!src){ speakDevice(words); return; }
+  if (!html && sayQuick(src, my, function(){ say(id, text, item, again, true); })) return;   /* decoded: Web Audio */
+  if (!html) prepare(src);                                      /* ready the quick way for the next tap */
   var a = getAudio(src), started = false, done = false;
   function tidy(){ a.removeEventListener('playing', onPlaying); a.removeEventListener('error', fallback); }
   function onPlaying(){ started = true; tidy(); }
@@ -683,7 +775,7 @@ function say(id, text, item, again){
   }
   a.addEventListener('playing', onPlaying);
   a.addEventListener('error', fallback);
-  try { a.currentTime = 0; } catch(e){}
+  if (a.currentTime > 0 || a.ended){ try { a.currentTime = 0; } catch(e){} }   /* rewind only if needed: it holds up the voice */
   a.defaultPlaybackRate = speed; a.playbackRate = speed;
   a.preservesPitch = true; a.mozPreservesPitch = true; a.webkitPreservesPitch = true;
   a.volume = vol;
@@ -728,13 +820,22 @@ function announce(item, el){
   if (item.kb){ keyPress(item, el); return; }      /* a key on the ABC page */
   var text = item.say || item.label;
   var shown = item.means ? text + ' (' + item.means + ')' : text;   /* Mālō (Thank you) */
-  show(shown, item);
   lastSaid = {id: slug(item.label), text: text, item: item};
-  say(slug(item.label), text, item);
+  say(slug(item.label), text, item);   /* the voice first: everything else can wait a moment */
+  show(shown, item);
   flashBanner();
   countTap(item);
   if (item.show) openShow(shown);  /* About me: big enough to hand the phone over */
-  celebrate(el, item);            /* the fun comes last, so it can never delay the voice */
+  afterVoiceStarts(function(){ celebrate(el, item); });
+}
+/* The sparkles wait until the voice has started (150 ms at most). On a slower phone, starting
+   them at the same moment held up the voice by 50-150 ms (measured 2026-10-07). */
+function afterVoiceStarts(fn){
+  var a = nowPlaying, done = false;
+  function go(){ if (done) return; done = true; if (a && !a.quick) a.removeEventListener('playing', go); fn(); }
+  if (!a || a.quick){ go(); return; }                 /* nothing to wait for (Web Audio starts at once) */
+  a.addEventListener('playing', go);
+  setTimeout(go, 150);
 }
 
 /* ---------------- core bar ---------------- */
@@ -821,7 +922,7 @@ function keyPress(k, el){
   }
   if (k.kb !== 'speak' && navigator.vibrate){ try { navigator.vibrate(20); } catch(e){} }
   showTyped();
-  celebrate(el, k);
+  afterVoiceStarts(function(){ celebrate(el, k); });
 }
 
 function abcClip(kind, k){
@@ -882,7 +983,7 @@ function sayTyped(text){
       finish(false);
     }
     a.addEventListener('ended', ended); a.addEventListener('error', failed);
-    try { a.currentTime = 0; } catch(e){}
+    if (a.currentTime > 0 || a.ended){ try { a.currentTime = 0; } catch(e){} }
     a.playbackRate = speed; a.volume = vol; nowPlaying = a;
     var pr = a.play(); if (pr && pr.catch) pr.catch(failed);
   }
@@ -971,7 +1072,7 @@ function showPageInfo(){
   if (page.keyboard){
     showTyped();
     loadAbcList();                         /* (again, if it couldn't be fetched before) */
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(ch){ var c = abcClip('letters', ch); if (c) getAudio(c); });
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(ch){ var c = abcClip('letters', ch); if (c){ prepare(c); getAudio(c); } });
   }
 }
 
@@ -1148,6 +1249,7 @@ picker.addEventListener('click', function(e){ if (e.target === picker) picker.cl
 
 render('');
 fitLabels(coreEl);
+preloadCore();                             /* the top row's clips, ready for the first tap */
 loadAbcList();                             /* the ABC page's long word list for this voice */
 window.addEventListener('resize', function(){ fitLabels(coreEl); if (gridEl) fitLabels(gridEl); });
 var STRONG = store('tt_strong') === '1', BIG = store('tt_big') !== '0', ROOM = store('tt_room') === '1';
@@ -1201,6 +1303,7 @@ function buildVoiceList(){
     lab.appendChild(r); lab.appendChild(t);
     r.addEventListener('change', function(){
       voiceId = o.id; store('tt_voice', voiceId);
+      preloadCore();
       sample();
       loadAbcList();
       warmVoice();
@@ -1797,6 +1900,7 @@ document.getElementById('checkUpdate').addEventListener('click', function(){
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
   navigator.serviceWorker.addEventListener('controllerchange', function(){
     dropAudio();                           /* players made before this helper took over can fail later */
+    preloadCore();
     if (pages[current]) preload(pages[current].tiles);
     if (!hadController){ hadController = true; warmVoice(); return; }   /* first install, nothing to switch */
     updateReady = true;
