@@ -15,9 +15,11 @@ What it does
   2. Voices:   records every phrase with each natural voice below using
      Kokoro (open-source, Apache 2.0), saved as small MP3s in voices/.
      Only new or changed phrases are recorded again.
-  3. Writes assets.js (what the app loads), sw.js (the offline cache)
-     and each voice's abc/words.json (the ABC page's words).
+  3. Writes assets.js (what the app loads) and each voice's
+     abc/words.json (the ABC page's words).
   4. Remakes the staff guide page, manual/index.html (tools/manual.py).
+  5. Writes sw.js (the offline cache): the app, its pictures and the
+     staff guide. (--offline-list does only this step.)
 
 One-time setup (about 400 MB of downloads, into ~/.cache/tilertalker):
     pip install kokoro-onnx soundfile pillow imageio-ffmpeg qrcode
@@ -301,7 +303,8 @@ def file_hash(paths):
     h = hashlib.sha1()
     for p in sorted(paths):
         h.update(p.encode())
-        h.update(open(os.path.join(ROOT, p.split('?')[0]), 'rb').read())
+        f = p.split('?')[0]
+        h.update(open(os.path.join(ROOT, f + 'index.html' if f.endswith('/') else f), 'rb').read())   # 'manual/' = its index.html
     return h.hexdigest()[:12]
 
 
@@ -365,9 +368,30 @@ def write_outputs(lib, pictures, clips, photo_files):
           'window.TT_ASSETS = ' + json.dumps(assets, ensure_ascii=False, indent=0) + ';\n')
     open(os.path.join(ROOT, 'assets.js'), 'w', encoding='utf-8').write(js)
 
+
+def guide_files():
+    """The staff guide (manual/) and every picture it shows, so it opens with no internet too.
+    The PDFs aren't included: they're big, and only for printing."""
+    page = os.path.join(ROOT, 'manual', 'index.html')
+    if not os.path.isfile(page):
+        return []
+    found = ['manual/']
+    for ref in re.findall(r'\bsrc="([^"#?]+)"', open(page, encoding='utf-8').read()):
+        if re.match(r'^[a-z]+:', ref):
+            continue
+        rel = os.path.normpath(os.path.join('manual', ref)).replace(os.sep, '/')
+        if not rel.startswith('..') and os.path.isfile(os.path.join(ROOT, rel)):
+            found.append(rel)
+    return found
+
+
+def write_sw(pictures, photo_files):
+    """sw.js: the offline helper, with the list of files kept on the phone. Written last, after the
+    staff guide, because the version is a hash of everything on the list."""
     shell = ['index.html', 'credits.html', 'print.html', 'library.js', 'assets.js', 'manifest.webmanifest',
              'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-512-maskable.png']
     precache = shell + sorted(set(pictures.values())) + photo_files
+    precache += [f for f in guide_files() if f not in precache]
     version = file_hash(precache + ['tools/sw-template.js'])
     tpl = open(os.path.join(ROOT, 'tools', 'sw-template.js'), encoding='utf-8').read()
     sw = tpl.replace('__VERSION__', version).replace('__PRECACHE__', json.dumps(['./'] + precache, indent=1))
@@ -388,8 +412,18 @@ def main():
     write_outputs(lib, pictures, clips, photo_files)
     import manual
     manual.main()
+    write_sw(pictures, photo_files)
     print('Done.')
 
 
+def offline_list_only():
+    """python3 tools/build.py --offline-list: just rewrite sw.js from what's already built (used by
+    tools/guide-pictures.js after it remakes the staff guide)."""
+    lib = load_library()
+    src = open(os.path.join(ROOT, 'assets.js'), encoding='utf-8').read()
+    assets = json.loads(src[src.index('{'):src.rindex('}') + 1])
+    write_sw(assets['img'], photos(lib))
+
+
 if __name__ == '__main__':
-    main()
+    offline_list_only() if '--offline-list' in sys.argv else main()

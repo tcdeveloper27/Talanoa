@@ -191,6 +191,8 @@ function serve() {
 
   // Rebuild the guide with the new pictures, then print it
   execFileSync(process.env.PYTHON || 'python3', [path.join(ROOT, 'tools', 'manual.py')], { stdio: 'inherit' });
+  // the guide is kept on the phone for offline use, so the offline list (and its version) must follow it
+  execFileSync(process.env.PYTHON || 'python3', [path.join(ROOT, 'tools', 'build.py'), '--offline-list'], { stdio: 'inherit' });
   const doc = await ctx.newPage();
   await doc.goto(URL0 + 'manual/', { waitUntil: 'networkidle' });
   await doc.emulateMedia({ media: 'print' });

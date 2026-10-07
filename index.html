@@ -181,6 +181,8 @@ try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('me
     animation:twinkle 1.6s ease-in-out infinite;
   }
   @keyframes twinkle{0%,100%{transform:scale(.35) rotate(0deg);opacity:.35}50%{transform:scale(1) rotate(40deg);opacity:1}}
+  /* the phone asks for less motion: the star still marks the tile, but stands still (like the glow above) */
+  @media (prefers-reduced-motion:reduce){body:not(.fx-off) .tile.lit::before,body:not(.fx-off) .core-btn.lit::before{animation:none;}}
 
   /* ---------- Page picker ---------- */
   .overlay{
@@ -243,6 +245,7 @@ try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('me
   #insetProbe{position:fixed;left:0;bottom:0;width:1px;height:0;padding-bottom:env(safe-area-inset-bottom,0px);visibility:hidden;pointer-events:none;}
   .sheet .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
   .sheet .btnrow button.plain{margin:0;}
+  [hidden]{display:none !important;}   /* "hidden" always wins (a .btnrow's display:grid had kept Keep / Throw it away showing) */
   .sheet button.plain:disabled{opacity:.45;cursor:default;}
   .sheet button.plain.rec{background:#C8342B;border-color:#C8342B;color:#fff;}
 
@@ -661,9 +664,10 @@ function preloadCore(){
    Android an <audio> player only fetches and sets up its clip at the first play, so a tap took
    about 100-300 ms to be heard. The clips of the page on screen, the top row and the letters are
    now decoded ahead of time and played with Web Audio, which starts within a few ms, skipping the
-   clip's quiet lead-in. The <audio> players stay as the fallback, and for a speed other than
-   normal (Web Audio can't slow a voice down without lowering it). Sound sleeps after 20 s of
-   quiet to save battery; a finger touching the screen wakes it before the finger lifts. */
+   clip's quiet lead-in. The <audio> players stay as the fallback (a clip not decoded yet). At a
+   speed other than normal, each decoded clip gets a slowed copy that keeps its pitch (stretch(),
+   below; until 2026-10-07 those speeds used the slower <audio> players). Sound sleeps after 20 s
+   of quiet to save battery; a finger touching the screen wakes it before the finger lifts. */
 var AC = window.AudioContext || window.webkitAudioContext, actx = null, quick = {}, quickOrder = [], quickWait = {}, sleepT = null;
 var QUICK_MAX = 48;
 function audioCtx(){
@@ -687,12 +691,64 @@ function prepare(src){
     .then(function(b){ return new Promise(function(ok, no){ var p = c.decodeAudioData(b, ok, no); if (p && p.then) p.then(ok, no); }); })
     .then(function(buf){
       quick[src] = {buf: buf, at: leadIn(buf)}; quickOrder.push(src);
+      if (speed !== 1) slowSoon(src);                /* at another speed, make its slowed copy now, not at the tap */
       while (quickOrder.length > QUICK_MAX){
         var i = 0; while (i < quickOrder.length && (pinned[quickOrder[i]] || (nowPlaying && nowPlaying.quickSrc === quickOrder[i]))) i++;
         if (i >= quickOrder.length) break;
         delete quick[quickOrder.splice(i, 1)[0]];
       }
     }).catch(function(){}).then(function(){ delete quickWait[src]; });
+}
+/* Another speed (Settings → Speed): the voice is slowed down (or sped up) here without changing its
+   pitch (WSOLA, the way Chrome itself does it for an <audio> player), so taps stay as quick as at
+   1.00. Checked 2026-10-07 on 42 of Michael's clips at 0.6, 0.8 and 1.3: exact length, pitch within
+   1 %, and Whisper heard them as well as ffmpeg's own slow-down. */
+function stretch(x, sr, rate){
+  var N = Math.round(sr * 0.03) & ~1, H = N / 2, tol = Math.round(sr * 0.01), n = x.length, k, i;
+  if (rate === 1 || n < N * 2) return x;
+  var win = new Float32Array(N);
+  for (i = 0; i < N; i++) win[i] = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / N);
+  var outLen = Math.ceil(n / rate) + N, out = new Float32Array(outLen), norm = new Float32Array(outLen);
+  var prev = 0, step = Math.max(1, Math.round(sr / 12000));       /* compare at ~12 kHz: plenty for speech */
+  for (k = 0; ; k++){
+    var ideal = Math.round(k * H * rate), o = k * H, best = ideal;
+    if (ideal + N >= n || o + N >= outLen) break;
+    if (k > 0){                                    /* the start near "ideal" that best continues what was just written */
+      var t = prev + H, bestC = -Infinity, lo = Math.max(0, ideal - tol), hi = Math.min(n - N - 1, ideal + tol);
+      if (t + N < n){
+        for (var p = lo; p <= hi; p += step){
+          var c = 0;
+          for (i = 0; i < N; i += step * 2) c += x[p + i] * x[t + i];
+          if (c > bestC){ bestC = c; best = p; }
+        }
+      }
+    }
+    for (i = 0; i < N; i++){ out[o + i] += x[best + i] * win[i]; norm[o + i] += win[i]; }
+    prev = best;
+  }
+  var len = Math.min(outLen, Math.round(n / rate)), y = new Float32Array(len);
+  for (i = 0; i < len; i++) y[i] = norm[i] > 1e-3 ? out[i] / norm[i] : 0;
+  return y;
+}
+/* The decoded clip at the current speed (made once per speed, kept with the clip). */
+function atSpeed(q){
+  if (speed === 1) return q;
+  if (!q.slow || q.slow.rate !== speed){
+    var sr = q.buf.sampleRate, y = stretch(q.buf.getChannelData(0), sr, speed), b = actx.createBuffer(q.buf.numberOfChannels, y.length, sr);
+    for (var ch = 0; ch < b.numberOfChannels; ch++) b.getChannelData(ch).set(y);
+    q.slow = {rate: speed, buf: b, at: q.at / speed};
+  }
+  return q.slow;
+}
+var slowQ = [];
+function slowSoon(src){
+  if (slowQ.indexOf(src) === -1) slowQ.push(src);
+  if (slowQ.length === 1) setTimeout(slowNext, 30);
+}
+function slowNext(){                               /* one clip at a time, so the board never stutters */
+  var src = slowQ.shift(), q = src && quick[src];
+  if (q && speed !== 1 && actx){ try { atSpeed(q); } catch(e){} }
+  if (slowQ.length) setTimeout(slowNext, 30);
 }
 function sleepSoon(){
   clearTimeout(sleepT);
@@ -720,10 +776,11 @@ function playQuick(src, q){
   clearTimeout(sleepT);
   return true;
 }
-/* Say a clip the quick way if it's decoded and the speed is normal. Returns true if it took it. */
+/* Say a clip the quick way if it's decoded (at any speed). Returns true if it took it. */
 function sayQuick(src, my, html){
   var q = quick[src];
-  if (!q || speed !== 1 || !actx || actx.state === 'closed') return false;
+  if (!q || !actx || actx.state === 'closed') return false;
+  try { q = atSpeed(q); } catch(e){ return false; }     /* usually made ahead of time; if not, now (a few ms) */
   if (actx.state === 'running') return playQuick(src, q);
   /* asleep (the first tap, or after a quiet spell): wake it and play; the <audio> way if it doesn't wake in time */
   var woke = false, t = setTimeout(function(){ if (!woke && my === token) html(); }, 350);
@@ -869,7 +926,7 @@ LIB.core.forEach(function(item){
    (With "Built-in voice" chosen in Settings, the phone's voice says
    it all instead.) The words go up in the banner too, so they can be
    shown big. What's typed stays until Clear, even after turning the
-   page.
+   page or an automatic update restarting the app.
    ============================================================ */
 var typed = '';
 var KEYS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(function(ch){ return {label: ch, kb: 'letter'}; })
@@ -1011,11 +1068,13 @@ function visiblePages(){
   return v.length ? v : allPages;
 }
 var pages = visiblePages(), current = 0;
-/* After an automatic update the app reloads; come back to the same page. */
+/* After an automatic update the app reloads; come back to the same page, with any words typed on the ABC page. */
 try {
   var resume = sessionStorage.getItem('tt_resume_page');
   sessionStorage.removeItem('tt_resume_page');
   pages.forEach(function(p, i){ if (p.name === resume) current = i; });
+  typed = sessionStorage.getItem('tt_resume_typed') || '';
+  sessionStorage.removeItem('tt_resume_typed');
 } catch(e){}
 var stage = document.getElementById('stage'), gridEl = null;
 var prevBtn = document.getElementById('prev'), nextBtn = document.getElementById('next'), titleBtn = document.getElementById('title');
@@ -1316,6 +1375,7 @@ function buildVoiceList(){
 }
 function sample(){
   var text = 'Hi! This is my voice.';
+  lastSaid = {id: '_sample', text: text};          /* so "Say it again" on the big words repeats this */
   show(text);
   say('_sample', text);
 }
@@ -1328,7 +1388,8 @@ document.getElementById('deviceVoice').addEventListener('change', function(e){
 var sEl = document.getElementById('speed'), sV = document.getElementById('speedVal');
 sEl.value = speed; sV.textContent = speed.toFixed(2);
 sEl.addEventListener('input', function(e){ speed = parseFloat(e.target.value); sV.textContent = speed.toFixed(2); store('tt_speed', speed); });
-sEl.addEventListener('change', function(){ show('This is how fast I talk'); say('_speed', 'This is how fast I talk'); });
+sEl.addEventListener('change', function(){ if (speed !== 1) Object.keys(quick).forEach(slowSoon); });   /* slowed copies at the new speed */
+sEl.addEventListener('change', function(){ lastSaid = {id: '_speed', text: 'This is how fast I talk'}; show(lastSaid.text); say('_speed', lastSaid.text); });
 
 var vEl = document.getElementById('vol'), vV = document.getElementById('volVal');
 vEl.value = vol; vV.textContent = vol.toFixed(1);
@@ -1588,8 +1649,15 @@ function openEditor(item, color){
   drawEditor();
   editor.classList.add('open');
 }
+/* Closing with a new recording not yet kept asks first, instead of quietly throwing it away. */
 function closeEditor(){
-  stopRecording(true); dropPending(); stopTalking();
+  if (recording && !confirm('Still recording. Stop and throw this recording away?')) return;
+  stopRecording(true); stopTalking();
+  if (pending && edItem && confirm('Keep the new recording for “' + edItem.label + '”?\n\nOK keeps it. Cancel throws it away.')){
+    var b = pending.blob, key = edItem._key; dropPending();
+    saveOwn(key, {voice: b}).then(function(){ if (chooser.classList.contains('open')) buildChooser(); });
+  }
+  dropPending();
   editor.classList.remove('open');
   if (chooser.classList.contains('open')) buildChooser();
 }
@@ -1766,21 +1834,28 @@ document.getElementById('ownFile').addEventListener('change', function(e){
   var f = e.target.files && e.target.files[0], stat = document.getElementById('ownStat');
   e.target.value = '';
   if (!f) return;
-  f.text().then(function(t){
-    var data = JSON.parse(t);
-    if (!data || data.app !== 'talanoa' || !Array.isArray(data.items)) throw new Error('not a backup');
-    return openOwn().then(function(){
+  /* Each kind of failure says what went wrong, so the person knows what to try next. */
+  function fail(msg){ return function(err){ var x = new Error(msg); x.cause = err; throw x; }; }
+  f.text().catch(fail('That file couldn’t be read. Try choosing it again, or copy it onto this phone first.')).then(function(t){
+    var data;
+    try { data = JSON.parse(t); }
+    catch(err){ throw new Error(/^\s*\{/.test(t) ? 'That backup file is damaged or only partly copied (it stops partway). Copy it onto the phone again.'
+                                                 : 'That file isn’t a Talanoa backup. Choose the file named “talanoa-photos-and-voices-…”.'); }
+    if (!data || data.app !== 'talanoa' || !Array.isArray(data.items)) throw new Error('That file isn’t a Talanoa backup. Choose the file named “talanoa-photos-and-voices-…”.');
+    return openOwn().catch(fail('This phone won’t let Talanoa keep photos and voices (private browsing, or site storage turned off in Chrome).')).then(function(){
       return Promise.all(data.items.map(function(it){
         return Promise.all([it.photo ? fromData(it.photo) : null, it.voice ? fromData(it.voice) : null])
           .then(function(b){ return {key: it.key, photo: b[0], voice: b[1]}; });
-      }));
+      })).catch(fail('Part of that backup is damaged, so nothing was put back. Try another copy of the file.'));
     }).then(function(recs){
       var st = ownStore('readwrite');
       recs.forEach(function(r){ if (r.photo || r.voice){ st.put(r); useOwn(r); } });
-      return new Promise(function(ok, no){ st.transaction.oncomplete = ok; st.transaction.onerror = function(){ no(st.transaction.error); }; })
+      return new Promise(function(ok, no){ st.transaction.oncomplete = ok; st.transaction.onerror = st.transaction.onabort = function(){ no(st.transaction.error); }; })
+        .catch(function(err){ throw new Error(err && err.name === 'QuotaExceededError' ? 'The phone is out of space, so the backup couldn’t be put back. Free some space and try again.'
+                                                                                       : 'The phone couldn’t save the backup' + (err && err.name ? ' (' + err.name + ')' : '') + '. Try again.'); })
         .then(function(){ redrawPictures(); showOwnStat(); stat.textContent = '✓ Put back ' + recs.length + (recs.length === 1 ? ' picture or voice.' : ' pictures and voices.'); });
     });
-  }).catch(function(){ stat.textContent = 'That file isn’t a Talanoa backup.'; });
+  }).catch(function(err){ stat.textContent = (err && err.message) || 'The backup couldn’t be put back. Try again.'; });
 });
 
 /* ---------------- offline ---------------- */
@@ -1801,6 +1876,7 @@ function abcListReady(){ return abcList.voice === voiceId && abcList.url === ASS
 var warming = null;
 function warmVoice(){
   if (!('caches' in window) || !navigator.serviceWorker || !navigator.serviceWorker.controller) return Promise.resolve();
+  offlineDone = false;                                /* the saving line in Settings follows along again */
   var urls, want = {}, whole, v;
   var job = loadAbcList().then(function(){
     v = voiceId; urls = voiceUrls();
@@ -1817,7 +1893,7 @@ function warmVoice(){
       });
       var todo = urls.filter(function(u){ return !have[u]; });
       function next(){
-        if (voiceId === v && todo.length && Date.now() - lastTap < 8000)    /* someone's using the board: wait */
+        if (voiceId === v && todo.length && Date.now() - lastTap < 8000 && !inSettings())   /* someone's using the board: wait */
           return new Promise(function(ok){ setTimeout(ok, 3000); }).then(next);
         var u = voiceId === v && todo.shift(); if (!u) return Promise.resolve();   /* stops if the voice is changed */
         return fetch(u).then(function(r){ return r.ok ? r.arrayBuffer() : null; }).catch(function(){}).then(next);
@@ -1828,6 +1904,11 @@ function warmVoice(){
   warming = job;
   return job;
 }
+/* Touches in Settings (or its photo-and-voice screens) don't pause the saving: only the board being used does. */
+function inSettings(){ return panel.classList.contains('open') || chooser.classList.contains('open') || editor.classList.contains('open'); }
+/* While Settings is open, the saving line keeps itself up to date (until everything is saved). */
+var offlineDone = false;
+setInterval(function(){ if (!offlineDone && panel.classList.contains('open')) refreshOffline(); }, 2000);
 function refreshOffline(){
   var el = document.getElementById('offlineStat');
   if (!navigator.serviceWorker){ el.textContent = 'Offline use needs a newer browser. Online it works normally.'; return; }
@@ -1838,6 +1919,7 @@ function refreshOffline(){
     var saved = {}, n = 0;
     keys.forEach(function(r){ saved[r.url] = 1; });
     urls.forEach(function(u){ if (saved[u]) n++; });
+    offlineDone = n === urls.length;
     el.textContent = n === urls.length
       ? '✓ Ready to use with no internet (pictures and voice saved on this device).'
       : 'Saving the voice for offline use: ' + n + ' of ' + urls.length + '…';
@@ -1866,7 +1948,10 @@ function checkForUpdate(){
   });
 }
 function applyUpdate(){
-  try { sessionStorage.setItem('tt_resume_page', pages[current] ? pages[current].name : ''); } catch(e){}
+  try {
+    sessionStorage.setItem('tt_resume_page', pages[current] ? pages[current].name : '');
+    if (typed) sessionStorage.setItem('tt_resume_typed', typed);
+  } catch(e){}
   location.reload();
 }
 function maybeApply(){
