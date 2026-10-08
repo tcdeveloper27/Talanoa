@@ -74,7 +74,7 @@ function serve() {
   // (waitForFunction doesn't wait for an async check, so this polls by hand.)
   await page.goto(URL0);
   await page.waitForFunction(() => navigator.serviceWorker.controller, null, { timeout: 30000 });
-  for (const end = Date.now() + 120000; ;) {
+  for (const end = Date.now() + 300000; ;) {          // ~9,300 clips through this small server: 2 min wasn't always enough
     const done = await page.evaluate(async () => {
       const want = voiceUrls(), have = new Set((await (await caches.open('tt-voices')).keys()).map((r) => r.url));
       return want.every((u) => have.has(u));
