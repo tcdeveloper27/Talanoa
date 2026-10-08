@@ -4,7 +4,7 @@
    Everything the board needs is kept on the phone, so it keeps working with no
    internet. Voice clips go in their own cache ("tt-voices") that survives app
    updates; the page fills it for whichever voice is selected. */
-var VERSION = '91d16e40fff7';
+var VERSION = 'aa56da179390';
 var CACHE = 'tt-app-' + VERSION;
 var VOICE_CACHE = 'tt-voices';
 var PRECACHE = [
@@ -91,6 +91,7 @@ var PRECACHE = [
  "img/1f4de.webp",
  "img/1f4f7.webp",
  "img/1f4fa.webp",
+ "img/1f500.webp",
  "img/1f501.webp",
  "img/1f504.webp",
  "img/1f50c.webp",
@@ -130,12 +131,14 @@ var PRECACHE = [
  "img/1f680.webp",
  "img/1f697.webp",
  "img/1f6aa.webp",
+ "img/1f6ab.webp",
  "img/1f6b6.webp",
  "img/1f6bd.webp",
  "img/1f6bf.webp",
  "img/1f6c1.webp",
  "img/1f6cf-fe0f.webp",
  "img/1f6d2.webp",
+ "img/1f6e0-fe0f.webp",
  "img/1f912.webp",
  "img/1f914.webp",
  "img/1f915.webp",
@@ -172,6 +175,7 @@ var PRECACHE = [
  "img/1f9d8.webp",
  "img/1f9e2.webp",
  "img/1f9e5.webp",
+ "img/1f9e9.webp",
  "img/1f9ed.webp",
  "img/1f9f8.webp",
  "img/1f9fa.webp",
@@ -217,6 +221,7 @@ var PRECACHE = [
  "pictures/privates.webp",
  "pictures/shoulder.webp",
  "pictures/throat.webp",
+ "abc-rank.txt",
  "manual/",
  "manual/img/main.webp",
  "manual/img/portrait.webp",

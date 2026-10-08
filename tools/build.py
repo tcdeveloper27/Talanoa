@@ -313,8 +313,15 @@ def abc_key(word):
     return re.sub(r'[^a-z]', '', word.lower())
 
 
+# The words numbers are said with on the ABC page (Settings → Numbers on the ABC page): 15 is
+# "fifteen", 2026 "two thousand twenty six". Every voice has them, like the board's own words.
+NUMBER_WORDS = ('zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen '
+                'sixteen seventeen eighteen nineteen twenty thirty forty fifty sixty seventy eighty ninety '
+                'hundred thousand').split()
+
+
 def abc_board_words(lib):
-    """Every English word on the board (labels and sentences), plus the page names."""
+    """Every English word on the board (labels and sentences), plus the page names and the number words."""
     found = {}
     texts = [p['name'] for p in lib['pages']]
     for t in all_tiles(lib):
@@ -326,6 +333,8 @@ def abc_board_words(lib):
             k = abc_key(w)
             if k and k not in found:
                 found[k] = w.lower()
+    for w in NUMBER_WORDS:
+        found.setdefault(w, w)
     return found                                      # key -> spoken form ("dont" -> "don't")
 
 
@@ -391,6 +400,8 @@ def write_sw(pictures, photo_files):
     shell = ['index.html', 'credits.html', 'print.html', 'library.js', 'assets.js', 'manifest.webmanifest',
              'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-512-maskable.png']
     precache = shell + sorted(set(pictures.values())) + photo_files
+    if os.path.isfile(os.path.join(ROOT, 'abc-rank.txt')):
+        precache.append('abc-rank.txt')        # the ABC page's word suggestions (tools/abc-rank.py)
     precache += [f for f in guide_files() if f not in precache]
     version = file_hash(precache + ['tools/sw-template.js'])
     tpl = open(os.path.join(ROOT, 'tools', 'sw-template.js'), encoding='utf-8').read()

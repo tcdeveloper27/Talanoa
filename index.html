@@ -111,6 +111,8 @@ try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('me
   #dots{display:flex;gap:clamp(3px,1.1vw,6px);margin-top:min(5px,.6vh);flex-wrap:wrap;}
   #dots i{width:clamp(6px,2.2vw,9px);height:clamp(6px,2.2vw,9px);border-radius:50%;background:rgba(255,255,255,.4);}
   #dots i.on{background:#fff;transform:scale(1.35);}
+  #dots.many{gap:clamp(2px,.8vw,5px);}                       /* more than 18 pages: smaller dots, so two rows still fit */
+  #dots.many i{width:clamp(5px,1.7vw,8px);height:clamp(5px,1.7vw,8px);}
 
   /* ---------- The 4 x 3 page of tiles ---------- */
   #stage{flex:1;min-height:0;position:relative;overflow:hidden;touch-action:none;}
@@ -119,6 +121,11 @@ try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('me
     display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(3,1fr);
     gap:clamp(8px,1.4vw,14px);padding:clamp(8px,1.4vw,14px);
   }
+  /* Settings → Bigger pictures: 6 on a screen, larger pictures and words */
+  .grid.six{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,1fr);}
+  @media (orientation:landscape){.grid.six{grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);}}
+  .grid.six .tile{font-size:clamp(18px,min(4.6vw,4.2vh),40px);}
+  .grid.six .emoji{font-size:clamp(52px,11vw,120px);}
   .grid.enter-next{animation:inR .18s ease-out;}
   .grid.enter-prev{animation:inL .18s ease-out;}
   @keyframes inR{from{transform:translateX(7%);opacity:.3}to{transform:none;opacity:1}}
@@ -280,6 +287,38 @@ try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('me
   .tile.key.wide .lab{font-size:clamp(13px,3.6vw,22px);}
   .tile.key.speak{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 5px 0 #2C6224;}
 
+  /* ---------- Building sentences (Settings, off unless chosen): 🔊 and ✕ on the left of the banner ---------- */
+  #sentBtns{position:absolute;left:6px;top:50%;transform:translateY(-50%);display:none;gap:6px;}
+  body.sent.has-sent #sentBtns{display:flex;}
+  body.sent.has-sent #banner{padding-left:112px;}
+  #sentBtns button{width:46px;height:46px;border:none;border-radius:12px;font-size:24px;line-height:1;cursor:pointer;
+                   background:rgba(255,255,255,.18);color:#fff;display:flex;align-items:center;justify-content:center;}
+  #sentSay{background:var(--green) !important;}
+  /* ---------- ABC page: word suggestions and numbers (Settings, off unless chosen) ---------- */
+  .grid.kb.sug{grid-template-rows:1.35fr .85fr repeat(5,1fr);}
+  .grid.kb.num{grid-template-rows:1.35fr repeat(6,1fr);}
+  .grid.kb.sug.num{grid-template-rows:1.35fr .85fr repeat(6,1fr);}
+  .sugrow,.numrow{grid-column:1/-1;display:grid;gap:inherit;min-height:0;}
+  .sugrow{grid-template-columns:repeat(3,1fr);}
+  .numrow{grid-template-columns:repeat(10,1fr);}
+  .tile.sug{font-size:clamp(16px,4.6vw,30px);font-weight:900;background:#fff;}
+  .tile.sug.none{visibility:hidden;}
+  .numrow .tile.key{font-size:clamp(18px,5vw,36px);}
+  /* ---------- Recent sentences with the big words (Settings, off unless chosen) ---------- */
+  #showRecent{flex:none;display:none;gap:8px;padding:0 10px;overflow-x:auto;}
+  #showRecent.on{display:flex;}
+  #showRecent button{flex:0 0 auto;max-width:70%;border:2px solid #0057FF;background:#fff;color:#0057FF;border-radius:14px;
+                     padding:8px 12px;font-size:17px;font-weight:800;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  /* ---------- Settings: find a word ---------- */
+  input.find{width:100%;padding:12px;font-size:18px;border:2px solid #3C6E9F;border-radius:12px;margin-bottom:6px;}
+  #findList button{display:block;width:100%;text-align:left;border:none;border-bottom:1px solid #EFE6D3;background:none;padding:10px 4px;font-size:16px;cursor:pointer;}
+  #findList button small{color:#777;}
+  /* ---------- Settings: this week ---------- */
+  .week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;align-items:end;height:90px;margin:6px 0 2px;}
+  .week i{display:block;background:#3C6E9F;border-radius:4px 4px 0 0;min-height:2px;}
+  .weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:12px;color:#555;text-align:center;}
+  .weekdays b{display:block;font-size:13px;color:#222;}
+
   /* ---------- Settings: most-used pictures ---------- */
   .seg{display:flex;gap:6px;margin-bottom:8px;}
   .seg .choice{flex:1;margin:0;padding:8px 10px;font-size:15px;}
@@ -309,7 +348,7 @@ try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('me
 </head>
 <body>
 
-<div id="banner"><span id="said">Tap a picture to talk</span><button id="gear" aria-label="Settings (hold)">⚙</button></div>
+<div id="banner"><div id="sentBtns"><button id="sentSay" aria-label="Say the whole sentence">🔊</button><button id="sentClear" aria-label="Start the sentence again">✕</button></div><span id="said">Tap a picture to talk</span><button id="gear" aria-label="Settings (hold)">⚙</button></div>
 <div id="core"></div>
 <div id="nav">
   <button class="arrow" id="prev" aria-label="Previous page"></button>
@@ -346,6 +385,10 @@ try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('me
     <h3>Pages to show</h3>
     <div class="pages" id="pageList"></div>
 
+    <h3>Find a word</h3>
+    <input type="search" id="findBox" class="find" placeholder="Type a word, like pizza" autocomplete="off" aria-label="Find a word on the board">
+    <div id="findList"></div>
+
     <h3>Turning pages</h3>
     <label class="choice"><input type="checkbox" id="swipeOn"><span><strong>Swipe to change pages</strong> <small>The ◀ ▶ arrows always work too.</small></span></label>
 
@@ -361,8 +404,15 @@ try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('me
     <label class="choice"><input type="checkbox" id="bigOn"><span><strong>Tap the words to show them big</strong> <small>Tapping the words at the top fills the screen with them, for a cashier, a noisy room, or someone across the table.</small></span></label>
     <label class="choice"><input type="checkbox" id="strongOn"><span><strong>Darker page names</strong> <small>Darkens the lighter colours a little (I want, Food, Fun, Mom &amp; Dad, Yes) so the white writing is easier to read.</small></span></label>
 
+    <h3>Talking in sentences</h3>
+    <label class="choice"><input type="checkbox" id="sentOn"><span><strong>Build sentences</strong> <small>Each picture is still said straight away, and its words also line up at the top. 🔊 says them all together; ✕ starts again.</small></span></label>
+    <label class="choice"><input type="checkbox" id="suggestOn"><span><strong>Word suggestions on the ABC page</strong> <small>Three words to pick from above the letters, from what's been typed so far (words he has spoken before come first).</small></span></label>
+    <label class="choice"><input type="checkbox" id="numbersOn"><span><strong>Numbers on the ABC page</strong> <small>A row of 0 to 9 under the letters. Numbers are said as words (15: "fifteen").</small></span></label>
+    <label class="choice"><input type="checkbox" id="recentOn"><span><strong>Recent sentences with the big words</strong> <small>The big words also show the last few things said; tap one to say it again.</small></span></label>
+
     <h3>Screen</h3>
     <div id="screenStat" class="sub" style="margin:0 0 8px"></div>
+    <label class="choice"><input type="checkbox" id="sixOn"><span><strong>Bigger pictures (6 on a screen)</strong> <small>Each page shows 6 bigger pictures; its other 6 are on the next screen ("Food 2").</small></span></label>
     <label class="choice"><input type="checkbox" id="roomOn"><span><strong>Bottom row hidden behind the ◀ ● ■ buttons?</strong> <small>Tick this to move the board up above them. Usually it fits by itself.</small></span></label>
 
     <h3>Photos and voices</h3>
@@ -380,6 +430,7 @@ try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('me
       <label class="choice"><input type="radio" name="span" value="90"> 90 days</label>
     </div>
     <div id="countList"></div>
+    <div id="weekBox"></div>
     <details class="unused" id="unusedBox"><summary id="unusedSum"></summary><div id="unusedList"></div></details>
     <label class="choice"><input type="checkbox" id="countOn"><span><strong>Count taps on this phone</strong></span></label>
     <button class="plain" id="countClear">Clear the counts</button>
@@ -431,6 +482,7 @@ try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('me
 
 <div id="showView" role="dialog" aria-label="The words, shown big">
   <div id="showText"><div id="showWords"></div></div>
+  <div id="showRecent" aria-label="Said before"></div>
   <div id="showBtns"><button id="showAgain">🔊 Say it again</button><button id="showClose">✕ Close</button></div>
 </div>
 
@@ -794,7 +846,11 @@ function clipFor(id, text, item){
   if (item && item._clip) return item._clip;              /* an ABC letter */
   var o = item && item._key && own[item._key];
   if (o && o.voice) return o.voice;
-  if (mine[id]) return mine[id];
+  if (item && item._word){                                /* the Words page: the ABC page's recording of that word */
+    var w = voiceId !== 'device' && abcClip('words', item._word);
+    if (w) return w;
+  }
+  else if (mine[id]) return mine[id];
   if (voiceId === 'device') return null;
   var set = ASSETS.clips[voiceId];
   return set && set[text] ? set[text] : null;
@@ -804,7 +860,7 @@ function preload(items){
 }
 
 function stopTalking(){
-  token++;
+  token++; typedLeft = 0;
   if (synth) synth.cancel();
   if (nowPlaying){ try { nowPlaying.pause(); if (!nowPlaying.quick) nowPlaying.currentTime = 0; } catch(e){} nowPlaying = null; }
 }
@@ -859,7 +915,7 @@ function show(text, item){
   litItem = item || null;
   lightUp();
   clearTimeout(showT);
-  showT = setTimeout(function(){ said.textContent = HINT; litItem = null; lightUp(); }, SHOW_FOR);
+  showT = setTimeout(function(){ said.textContent = HINT; litItem = null; lightUp(); showSentence(); }, SHOW_FOR);
 }
 function lightUp(){
   var els = document.querySelectorAll('.tile, .core-btn');
@@ -875,13 +931,29 @@ function flashBanner(){
   if (navigator.vibrate){ try { navigator.vibrate(28); } catch(e){} }
 }
 var lastSaid = null;              /* for "Say it again" on the big words */
+/* The last few things said, newest first (for "Recent sentences with the big words"). */
+var recent = [], RECENT = store('tt_recent') === '1';
+function setLast(e){
+  lastSaid = e;
+  var shown = e.shown || e.text;
+  recent = recent.filter(function(r){ return (r.shown || r.text) !== shown; });
+  recent.unshift(e);
+  if (recent.length > 6) recent.length = 6;
+}
+function sayEntry(e){
+  if (!e) return;
+  if (e.sentence) saySentence(e.sentence);
+  else if (e.typed) sayTyped(e.text);
+  else say(e.id, e.text, e.item);
+}
 function announce(item, el){
   if (item.kb){ keyPress(item, el); return; }      /* a key on the ABC page */
   var text = item.say || item.label;
   var shown = item.means ? text + ' (' + item.means + ')' : text;   /* Mālō (Thank you) */
-  lastSaid = {id: slug(item.label), text: text, item: item};
+  setLast({id: slug(item.label), text: text, item: item, shown: shown});
   say(slug(item.label), text, item);   /* the voice first: everything else can wait a moment */
   show(shown, item);
+  if (SENT) addToSentence({id: slug(item.label), text: text, item: item});
   flashBanner();
   countTap(item);
   if (item.show) openShow(shown);  /* a tile marked "show" (none at the moment): big enough to hand the phone over */
@@ -896,6 +968,65 @@ function afterVoiceStarts(fn){
   a.addEventListener('playing', go);
   setTimeout(go, 150);
 }
+
+/* ============================================================
+   BUILDING SENTENCES (Settings → Talking in sentences; off unless chosen)
+   Each picture is still said straight away, as always. Its words also
+   line up in the banner: 🔊 says the whole sentence, each piece in its
+   own recording; ✕ starts again. Words spoken on the ABC page join in
+   too. The sentence stays until ✕ (after 12 pieces the oldest drops off).
+   ============================================================ */
+var SENT = store('tt_sentence') === '1', sentence = [], SENT_MAX = 12, chain = 0;
+document.body.classList.toggle('sent', SENT);
+function sentenceText(parts){ return (parts || sentence).map(function(p){ return p.text; }).join(' '); }
+function showSentence(){
+  document.body.classList.toggle('has-sent', SENT && sentence.length > 0);
+  if (!SENT || !sentence.length) return;
+  var parts = sentence.map(function(p){ return p.text; }), i = 0;   /* the newest words stay in view */
+  said.textContent = parts.join(' ');
+  while (i < parts.length - 1 && said.scrollWidth > said.clientWidth + 1){ i++; said.textContent = '… ' + parts.slice(i).join(' '); }
+}
+function addToSentence(part){
+  sentence.push(part);
+  if (sentence.length > SENT_MAX) sentence.shift();
+  showSentence();
+}
+function clearSentence(){
+  sentence = []; chain++;
+  showSentence();
+  said.textContent = HINT; litItem = null; lightUp();
+}
+/* Each piece one after another: the next starts once the last has finished (or a tap stops it all). */
+function saySentence(parts){
+  var me = ++chain, i = 0;
+  function busy(){
+    var np = nowPlaying;
+    return typedLeft > 0 || (np && !np.paused && !np.ended) || !!(synth && synth.speaking);
+  }
+  function next(){
+    if (me !== chain || i >= parts.length) return;
+    var p = parts[i++];
+    if (p.typed) sayTyped(p.text); else say(p.id, p.text, p.item);
+    var my = token, t0 = Date.now(), quiet = 0;
+    (function wait(){
+      if (me !== chain || my !== token) return;                /* something else was said: stop */
+      if (busy()) quiet = 0; else quiet += 60;
+      if (Date.now() - t0 > 250 && quiet >= 120) setTimeout(next, 90);
+      else if (Date.now() - t0 < 20000) setTimeout(wait, 60);
+    })();
+  }
+  next();
+}
+function sentenceSay(e){
+  e.stopPropagation();
+  if (!sentence.length) return;
+  var parts = sentence.slice();
+  setLast({sentence: parts, text: sentenceText(parts)});
+  saySentence(parts);
+  flashBanner();
+}
+document.getElementById('sentSay').addEventListener('click', sentenceSay);
+document.getElementById('sentClear').addEventListener('click', function(e){ e.stopPropagation(); clearSentence(); });
 
 /* ---------------- core bar ---------------- */
 var coreEl = document.getElementById('core');
@@ -934,23 +1065,42 @@ var KEYS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(function(ch){ return {labe
            {label: 'Clear', kb: 'clear'}, {label: '🔊 Speak', kb: 'speak', name: 'Speak'}]);
 var SPELLED = {label: 'Spelled a word', icon: '🔤', _key: 'ABC|Spelled a word'};   /* how a spoken word is counted */
 
+/* Settings → Talking in sentences: word suggestions above the letters, and a row of numbers under
+   them (both off unless chosen). */
+var SUGGEST = store('tt_suggest') === '1', NUMBERS = store('tt_numbers') === '1';
+var DIGITS = '1234567890'.split('').map(function(d){ return {label: d, kb: 'digit'}; });
 function buildKeys(page){
   var g = document.createElement('div');
-  g.className = 'grid kb';
+  g.className = 'grid kb' + (SUGGEST ? ' sug' : '') + (NUMBERS ? ' num' : '');
   g._fx = 'ring';                         /* a bounce and a ring on each key: no sparkle storm while spelling */
   paint(g, page.color);
   var t = document.createElement('div'); t.className = 'typed';
   t.innerHTML = '<span class="txt"></span>';
   g.appendChild(t);
-  KEYS.forEach(function(k, i){
+  function key(k, i, box){
     var b = document.createElement('button');
-    b.className = 'tile key' + (k.kb === 'letter' ? '' : ' wide ' + k.kb);
+    b.className = 'tile key' + (k.kb === 'letter' || k.kb === 'digit' ? '' : ' wide ' + k.kb);
     b._item = k;
     b.setAttribute('aria-label', k.name || k.label);
     var l = document.createElement('div'); l.className = 'lab'; l.textContent = k.label; b.appendChild(l);
     b.style.setProperty('--i', i);
-    g.appendChild(b);
-  });
+    box.appendChild(b);
+  }
+  if (SUGGEST){
+    var sr = document.createElement('div'); sr.className = 'sugrow';
+    for (var si = 0; si < 3; si++){
+      var sb = document.createElement('button'); sb.className = 'tile sug none'; sb._item = {label: '', kb: 'sug', word: ''};
+      var sl = document.createElement('div'); sl.className = 'lab'; sb.appendChild(sl); sr.appendChild(sb);
+    }
+    g.appendChild(sr);
+    loadRank();
+  }
+  KEYS.forEach(function(k, i){ key(k, i, g); });
+  if (NUMBERS){
+    var nr = document.createElement('div'); nr.className = 'numrow';
+    DIGITS.forEach(function(k, i){ key(k, KEYS.length + i, nr); });
+    g.appendChild(nr);
+  }
   showTyped(g);
   return g;
 }
@@ -963,9 +1113,68 @@ function showTyped(root){
     if (!typed){ var ph = document.createElement('span'); ph.className = 'ph'; ph.textContent = ' Spell a word, then tap Speak'; b.appendChild(ph); }
     b.scrollLeft = b.scrollWidth;          /* keep the end of a long sentence in view */
   }
+  showSuggestions(root);
+}
+/* Words that start with what's being typed: words he has spoken before first (most used first), then
+   the most common words. Only words the chosen voice says whole (the rest would be spelled out). */
+var rank = null, rankLoading = null, TYPED_WORDS = 'tt_typedwords';
+function loadRank(){
+  if (rank || rankLoading) return rankLoading || Promise.resolve(rank);
+  rankLoading = fetch('abc-rank.txt').then(function(r){ return r.ok ? r.text() : ''; }).catch(function(){ return ''; })
+    .then(function(t){ rank = t.split('\n').map(function(w){ return w.trim(); }).filter(function(w){ return w && w.charAt(0) !== '#'; }); rankLoading = null; showSuggestions(); return rank; });
+  return rankLoading;
+}
+function typedWords(){ try { return JSON.parse(store(TYPED_WORDS) || '{}') || {}; } catch(e){ return {}; } }
+function rememberWords(text){
+  if (!countOn) return;                          /* kept with the tap counts: on this phone only, cleared with them */
+  var m = typedWords(), now = Date.now();
+  text.toLowerCase().split(/\s+/).forEach(function(w){ w = w.replace(/[^a-z]/g, ''); if (w.length > 1) m[w] = {n: ((m[w] || {}).n || 0) + 1, t: now}; });
+  var keys = Object.keys(m);
+  if (keys.length > 500) keys.sort(function(a, b){ return m[a].t - m[b].t; }).slice(0, keys.length - 500).forEach(function(k){ delete m[k]; });   /* the longest unused go */
+  store(TYPED_WORDS, JSON.stringify(m));
+}
+function canSayWhole(w){ return voiceId === 'device' || !!abcClip('words', w); }
+function suggestWords(){
+  var pre = (typed.match(/[a-zA-Z]*$/) || [''])[0].toLowerCase(), out = [], seen = {};
+  function add(w){ if (out.length < 3 && !seen[w] && w !== pre && w.indexOf(pre) === 0 && canSayWhole(w)){ seen[w] = 1; out.push(w); } }
+  var mine = typedWords();                       /* most spoken first; equal ones, the most recent first */
+  Object.keys(mine).sort(function(a, b){ return (mine[b].n - mine[a].n) || (mine[b].t - mine[a].t); }).forEach(add);
+  if (!pre) return out;                          /* before a word is started: only his own words */
+  (rank || []).forEach(add);
+  Object.keys((ASSETS.abc.words || {})[voiceId] || {}).forEach(add);
+  return out;
+}
+function showSuggestions(root){
+  if (!SUGGEST) return;
+  var bs = (root || document).querySelectorAll('.tile.sug');
+  if (!bs.length) return;
+  var ws = suggestWords();
+  for (var i = 0; i < bs.length; i++){
+    var w = ws[i] || '';
+    bs[i]._item.word = w; bs[i]._item.label = w;
+    bs[i].querySelector('.lab').textContent = w;
+    bs[i].classList.toggle('none', !w);
+    bs[i].setAttribute('aria-label', w ? 'Use the word ' + w : '');
+  }
+}
+/* Numbers are said as words, in the board's voice: 15 → "fifteen", 2026 → "two thousand twenty six". */
+var ONES = 'zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen'.split(' ');
+var TENS = 'zero ten twenty thirty forty fifty sixty seventy eighty ninety'.split(' ');
+function numberWords(n){
+  if (n < 20) return [ONES[n]];
+  if (n < 100) return [TENS[Math.floor(n / 10)]].concat(n % 10 ? [ONES[n % 10]] : []);
+  if (n < 1000) return [ONES[Math.floor(n / 100)], 'hundred'].concat(n % 100 ? numberWords(n % 100) : []);
+  if (n < 1000000) return numberWords(Math.floor(n / 1000)).concat(['thousand'], n % 1000 ? numberWords(n % 1000) : []);
+  return String(n).split('').map(function(d){ return ONES[+d]; });   /* a long number: digit by digit */
 }
 function keyPress(k, el){
-  if (k.kb === 'letter'){ typed += k.label; say('abc-' + k.label, k.label, {_clip: abcClip('letters', k.label)}); }
+  if (k.kb === 'sug'){
+    if (!k.word) return;
+    typed = typed.replace(/[a-zA-Z]*$/, '') + k.word.toUpperCase() + ' ';
+    say('abc-w-' + k.word, k.word, {_clip: abcClip('words', k.word)});
+  }
+  else if (k.kb === 'digit'){ typed += k.label; var nw = ONES[+k.label]; say('abc-' + nw, nw, {_clip: abcClip('words', nw)}); }
+  else if (k.kb === 'letter'){ typed += k.label; say('abc-' + k.label, k.label, {_clip: abcClip('letters', k.label)}); }
   else if (k.kb === 'space'){ if (typed && typed.slice(-1) !== ' ') typed += ' '; }
   else if (k.kb === 'back'){ typed = typed.slice(0, -1); }
   else if (k.kb === 'clear'){ typed = ''; }
@@ -973,10 +1182,12 @@ function keyPress(k, el){
     var words = typed.trim();
     if (words){
       show(words, null);
-      lastSaid = {text: words, typed: true};
+      setLast({text: words, typed: true});
       sayTyped(words);
       flashBanner();
       countTap(SPELLED);
+      rememberWords(words);
+      if (SENT) addToSentence({text: words, typed: true});
     }
   }
   if (k.kb !== 'speak' && navigator.vibrate){ try { navigator.vibrate(20); } catch(e){} }
@@ -1009,9 +1220,15 @@ function loadAbcList(){
 }
 /* Speak: each word it has in the board's voice; any other word spelled out. */
 var abcQueue = [];                 /* the clips Speak is playing (the tests read it) */
+var typedLeft = 0;                 /* clips of a spelled sentence still to come (building sentences waits for it) */
 function sayTyped(text){
   var parts = [];
   text.trim().split(/\s+/).forEach(function(w, wi){
+    var num = w.replace(/[^0-9]/g, '');
+    if (num && !/[a-z]/i.test(w)){                 /* a number: said as words; if the voice lacks one, the phone's voice says it all */
+      numberWords(parseInt(num, 10)).forEach(function(nw, ni){ parts.push({src: abcClip('words', nw), gap: ni ? 90 : (wi ? 160 : 0)}); });
+      return;
+    }
     var k = w.toLowerCase().replace(/[^a-z]/g, ''), clip = k && abcClip('words', k);
     if (!k) return;
     if (clip) parts.push({src: clip, gap: wi ? 160 : 0});
@@ -1021,8 +1238,9 @@ function sayTyped(text){
   if (!parts.length || parts.some(function(p){ return !p.src; })){ abcQueue = []; speakDevice(text.toLowerCase()); return; }   /* lower case, so CAT is read as a word */
   abcQueue = parts.map(function(p){ return p.src; });
   var my = token, i = 0;
+  typedLeft = parts.length;
   function next(){
-    if (my !== token || i >= parts.length) return;
+    if (my !== token || i >= parts.length){ typedLeft = 0; return; }
     var p = parts[i++];
     setTimeout(function(){ if (my === token) play(p.src, false); }, p.gap);
   }
@@ -1030,6 +1248,7 @@ function sayTyped(text){
     var a = getAudio(src), done = false;
     function finish(ok){
       if (done) return; done = true;
+      if (my === token) typedLeft = Math.max(0, parts.length - i);
       a.removeEventListener('ended', ended); a.removeEventListener('error', failed);
       if (ok) next(); else if (my === token){ stopTalking(); speakDevice(text.toLowerCase()); }   /* never silent */
     }
@@ -1050,17 +1269,30 @@ function sayTyped(text){
 }
 
 /* ---------------- pages ---------------- */
+/* A page marked "words": true (the Words page) says each word with the ABC page's recording of it: those
+   were made several ways and checked by a speech recogniser, which suits single words best. */
+LIB.pages.forEach(function(p){ if (p.words) p.tiles.forEach(function(t){ if (t && t.label) t._word = t.label.toLowerCase().replace(/[^a-z]/g, ''); }); });
 var PER_PAGE = 12;
+/* Settings → Screen → Bigger pictures: 6 on a screen, so each page becomes two screens ("Food", "Food 2").
+   A screen with nothing on it is left out. */
+var SIX = store('tt_six') === '1';
 var allPages = [];            /* long pages are split into "Food 2", "Food 3", ... */
-LIB.pages.forEach(function(p){
-  for (var i = 0; i < Math.max(1, p.tiles.length); i += PER_PAGE){
-    var part = i / PER_PAGE;
-    allPages.push({key: slug(p.name), name: p.name + (part ? ' ' + (part + 1) : ''), icon: p.icon, img: p.img, fx: p.fx,
-                   answer: p.answer, keyboard: p.keyboard,
-                   color: p.color || '#3C6E9F', tiles: p.tiles.slice(i, i + PER_PAGE)});
-  }
-  p.tiles.forEach(function(t){ if (!blank(t)) probeMine(slug(t.label)); });
-});
+function buildPages(){
+  var per = SIX ? 6 : PER_PAGE;
+  allPages = [];
+  LIB.pages.forEach(function(p){
+    for (var i = 0, part = 0; i < Math.max(1, p.tiles.length); i += per){
+      var tiles = p.tiles.slice(i, i + per);
+      if (i && !tiles.some(function(t){ return !blank(t); })) continue;
+      allPages.push({key: slug(p.name), name: p.name + (part ? ' ' + (part + 1) : ''), icon: p.icon, img: p.img, fx: p.fx,
+                     answer: p.answer, keyboard: p.keyboard, per: per,
+                     color: p.color || '#3C6E9F', tiles: tiles});
+      part++;
+    }
+  });
+}
+buildPages();
+LIB.pages.forEach(function(p){ p.tiles.forEach(function(t){ if (!blank(t)) probeMine(slug(t.label)); }); });
 showMineStat();
 
 function visiblePages(){
@@ -1087,10 +1319,10 @@ function wrap(i){ return (i % pages.length + pages.length) % pages.length; }
 function buildGrid(page){
   if (page.keyboard) return buildKeys(page);
   var g = document.createElement('div');
-  g.className = 'grid';
+  g.className = 'grid' + (page.per === 6 ? ' six' : '');
   g._fx = page.fx; g._answer = page.answer;
   paint(g, page.color);
-  for (var i = 0; i < PER_PAGE; i++){
+  for (var i = 0; i < (page.per || PER_PAGE); i++){
     var item = page.tiles[i];
     if (blank(item)){ var s = document.createElement('div'); s.className = 'slot'; g.appendChild(s); continue; }
     var t = makeTile(item);
@@ -1121,7 +1353,12 @@ function showPageInfo(){
   var txt = document.createElement('div'); txt.className = 'txt';
   var nm = document.createElement('div'); nm.className = 'name'; nm.textContent = page.name; txt.appendChild(nm);
   var dots = document.createElement('div'); dots.id = 'dots';
-  pages.forEach(function(_, i){ var d = document.createElement('i'); if (i === current) d.className = 'on'; dots.appendChild(d); });
+  /* one dot per page: with Bigger pictures both screens of a page ("Food", "Food 2") share its dot */
+  pages.forEach(function(q, i){
+    if (i && pages[i - 1].key === q.key) return;
+    var d = document.createElement('i'); if (q.key === page.key) d.className = 'on'; dots.appendChild(d);
+  });
+  if (dots.children.length > 18) dots.className = 'many';
   txt.appendChild(dots); titleBtn.appendChild(txt);
 
   var prev = pages[wrap(current - 1)], next = pages[wrap(current + 1)];
@@ -1334,6 +1571,8 @@ panel.addEventListener('click', function(e){ if (e.target === panel) panel.class
 function openSettings(){
   settle(); buildVoiceList(); buildPageList(); refreshOffline(); showVersion(); showFxLevel();
   calmBox.checked = CALM; bigBox.checked = BIG; strongBox.checked = STRONG; countBox.checked = countOn; roomBox.checked = ROOM;
+  sentBox.checked = SENT; suggestBox.checked = SUGGEST; numbersBox.checked = NUMBERS; recentBox.checked = RECENT; sixBox.checked = SIX;
+  findBox.value = ''; buildFind('');
   showScreen();
   buildCounts(); showOwnStat();
   panel.classList.add('open');
@@ -1352,6 +1591,60 @@ strongBox.addEventListener('change', function(){
   document.body.classList.toggle('strong', STRONG);
 });
 countBox.addEventListener('change', function(){ countOn = countBox.checked; store('tt_count', countOn ? '1' : '0'); buildCounts(); });
+
+/* Talking in sentences, and Bigger pictures (all off unless chosen) */
+var sentBox = document.getElementById('sentOn'), suggestBox = document.getElementById('suggestOn'), numbersBox = document.getElementById('numbersOn');
+var recentBox = document.getElementById('recentOn'), sixBox = document.getElementById('sixOn');
+sentBox.addEventListener('change', function(){
+  SENT = sentBox.checked; store('tt_sentence', SENT ? '1' : '0');
+  document.body.classList.toggle('sent', SENT);
+  if (!SENT) clearSentence();
+});
+function redrawAbc(){ if (pages[current] && pages[current].keyboard) render(''); }
+suggestBox.addEventListener('change', function(){ SUGGEST = suggestBox.checked; store('tt_suggest', SUGGEST ? '1' : '0'); redrawAbc(); });
+numbersBox.addEventListener('change', function(){ NUMBERS = numbersBox.checked; store('tt_numbers', NUMBERS ? '1' : '0'); redrawAbc(); });
+recentBox.addEventListener('change', function(){ RECENT = recentBox.checked; store('tt_recent', RECENT ? '1' : '0'); });
+sixBox.addEventListener('change', function(){
+  SIX = sixBox.checked; store('tt_six', SIX ? '1' : '0');
+  var here = pages[current] && pages[current].key;
+  buildPages(); pages = visiblePages();
+  var idx = -1;
+  pages.forEach(function(q, i){ if (idx === -1 && q.key === here) idx = i; });   /* the first screen of the same page */
+  current = idx === -1 ? 0 : idx;
+  render('');
+});
+
+/* Find a word: where is a picture? Tapping a result goes to its page and outlines it (nothing is said). */
+var findBox = document.getElementById('findBox'), findList = document.getElementById('findList'), findT = null;
+function plain(t){ return (t || '').normalize('NFD').replace(/[\u0300-\u036f\u02bb\u2018\u2019']/g, '').toLowerCase(); }
+function buildFind(q){
+  findList.innerHTML = '';
+  q = plain(q.trim());
+  if (q.length < 2) return;
+  var hits = [];
+  function look(item, screen, where){
+    if (blank(item)) return;
+    if (plain(item.label + ' ' + (item.say || '') + ' ' + (item.means || '')).indexOf(q) !== -1) hits.push({item: item, screen: screen, where: where});
+  }
+  LIB.core.forEach(function(t){ look(t, null, 'top row, always on screen'); });
+  allPages.forEach(function(pg){ if (!pg.keyboard) pg.tiles.forEach(function(t){ look(t, pg, pg.name + ' page'); }); });
+  if (!hits.length){ findList.innerHTML = '<div class="empty-note">Not on the board. It can be spelled on the ABC page.</div>'; return; }
+  hits.slice(0, 15).forEach(function(h){
+    var b = document.createElement('button'), shown = pages.indexOf(h.screen) !== -1 || !h.screen;
+    b.innerHTML = '';
+    var strong = document.createElement('strong'); strong.textContent = h.item.label;
+    var small = document.createElement('small'); small.textContent = '  ' + h.where + (shown ? '' : ' (hidden on this phone)');
+    b.appendChild(strong); b.appendChild(small);
+    b.addEventListener('click', function(){
+      panel.classList.remove('open');
+      if (h.screen && shown){ current = pages.indexOf(h.screen); render(''); }
+      litItem = h.item; lightUp();                     /* outlined where it is, for 30 seconds */
+      clearTimeout(findT); findT = setTimeout(function(){ if (litItem === h.item){ litItem = null; lightUp(); } }, SHOW_FOR);
+    });
+    findList.appendChild(b);
+  });
+}
+findBox.addEventListener('input', function(){ buildFind(findBox.value); });
 
 function buildVoiceList(){
   var box = document.getElementById('voiceList'); box.innerHTML = '';
@@ -1452,6 +1745,7 @@ var showBox = document.getElementById('showText'), showCloseT = null, SHOW_BIG_F
 function openShow(text){
   settle();
   showWords.textContent = text;
+  showRecents(text);
   showView.classList.add('open');
   fitShow();
   clearTimeout(showCloseT); showCloseT = setTimeout(closeShow, SHOW_BIG_FOR);
@@ -1466,13 +1760,27 @@ function fitShow(){
 }
 banner.addEventListener('click', function(e){
   if (!BIG || e.target === gear || said.textContent === HINT) return;
+  if (SENT && sentence.length){ setLast({sentence: sentence.slice(), text: sentenceText()}); openShow(sentenceText()); return; }   /* the whole sentence, even if the banner shows its end */
   openShow(said.textContent);
 });
 document.getElementById('showClose').addEventListener('click', closeShow);
 document.getElementById('showAgain').addEventListener('click', function(){
-  if (lastSaid){ if (lastSaid.typed) sayTyped(lastSaid.text); else say(lastSaid.id, lastSaid.text, lastSaid.item); }
+  sayEntry(lastSaid);
   clearTimeout(showCloseT); showCloseT = setTimeout(closeShow, SHOW_BIG_FOR);
 });
+/* Recent sentences with the big words (Settings, off unless chosen): tap one to show it and say it again. */
+var showRecentEl = document.getElementById('showRecent');
+function showRecents(text){
+  showRecentEl.innerHTML = '';
+  var list = RECENT ? recent.filter(function(r){ return (r.shown || r.text) !== text; }).slice(0, 5) : [];
+  showRecentEl.classList.toggle('on', list.length > 0);
+  list.forEach(function(r){
+    var b = document.createElement('button');
+    b.textContent = r.shown || r.text;
+    b.addEventListener('click', function(){ setLast(r); openShow(r.shown || r.text); sayEntry(r); });
+    showRecentEl.appendChild(b);
+  });
+}
 window.addEventListener('resize', function(){ if (showView.classList.contains('open')) fitShow(); });
 
 /* ============================================================
@@ -1535,12 +1843,42 @@ function buildCounts(){
   var since = c.since ? ' (counting since ' + new Date(c.since + 'T12:00').toLocaleDateString([], {month: 'short', day: 'numeric'}) + ')' : '';
   document.getElementById('unusedSum').textContent = 'Not used in the last ' + days + ' days: ' + unused.length + (unused.length === 1 ? ' picture' : ' pictures') + since;
   document.getElementById('unusedList').textContent = unused.map(function(it){ return it.label + ' (' + placeOf(it._key) + ')'; }).join(', ');
+  buildWeek(c);
+}
+/* This week: taps on each of the last 7 days, and pictures used for the first time (on this phone only). */
+function buildWeek(c){
+  var box = document.getElementById('weekBox'); box.innerHTML = '';
+  if (!countOn) return;
+  var ds = [], d = new Date();
+  for (var i = 6; i >= 0; i--){ var x = new Date(d.getFullYear(), d.getMonth(), d.getDate() - i); ds.push(x); }
+  var per = ds.map(function(x){ var day = c.days[dayStr(x)] || {}, n = 0; for (var k in day) n += day[k]; return n; });
+  var most = Math.max.apply(null, per.concat([1])), total = per.reduce(function(a, b){ return a + b; }, 0);
+  var h = document.createElement('div'); h.className = 'sub'; h.style.margin = '12px 0 0';
+  h.innerHTML = '<strong>This week:</strong> ' + total + (total === 1 ? ' tap' : ' taps') + ' in the last 7 days';
+  box.appendChild(h);
+  var bars = document.createElement('div'); bars.className = 'week';
+  per.forEach(function(n){ var b = document.createElement('i'); b.style.height = Math.round(100 * n / most) + '%'; b.title = n; bars.appendChild(b); });
+  box.appendChild(bars);
+  var labs = document.createElement('div'); labs.className = 'weekdays';
+  ds.forEach(function(x, i){ var t = document.createElement('div'); t.innerHTML = '<b>' + per[i] + '</b>' + x.toLocaleDateString([], {weekday: 'short'}); labs.appendChild(t); });
+  box.appendChild(labs);
+  /* new this week: counted in the last 7 days and never in the days before (only once counting has run longer than that) */
+  var weekStart = dayStr(ds[0]);
+  if (c.since && c.since < weekStart){
+    var before = {}, now = {};
+    Object.keys(c.days).forEach(function(day){ for (var k in c.days[day]) (day < weekStart ? before : now)[k] = 1; });
+    var fresh = Object.keys(now).filter(function(k){ return !before[k] && BY_KEY[k]; });
+    var nw = document.createElement('div'); nw.className = 'sub'; nw.style.margin = '8px 0 12px';
+    nw.textContent = fresh.length ? 'Used for the first time this week: ' + fresh.map(function(k){ return BY_KEY[k].label + ' (' + placeOf(k) + ')'; }).join(', ')
+                                  : 'No picture used for the first time this week.';
+    box.appendChild(nw);
+  }
 }
 var spanRadios = document.querySelectorAll('#countSpan input');
 for (var si = 0; si < spanRadios.length; si++) spanRadios[si].addEventListener('change', buildCounts);
 document.getElementById('countClear').addEventListener('click', function(){
   if (!confirm('Clear all the tap counts on this phone?')) return;
-  try { localStorage.removeItem(COUNTS); } catch(e){}
+  try { localStorage.removeItem(COUNTS); localStorage.removeItem(TYPED_WORDS); } catch(e){}   /* and the words remembered for suggestions */
   buildCounts();
 });
 

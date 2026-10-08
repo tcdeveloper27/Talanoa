@@ -158,9 +158,9 @@ function serve() {
     const lab = (id) => document.getElementById(id).closest('label');
     return {
       s_voice: R(document.getElementById('voiceList')), s_speed: R(document.getElementById('speed')), s_vol: R(document.getElementById('vol')),
-      s_pages: R(h3('Pages to show'), document.getElementById('pageList')), s_swipe: R(lab('swipeOn')),
+      s_pages: R(h3('Pages to show'), document.getElementById('pageList')), s_find: R(h3('Find a word'), document.getElementById('findBox')), s_swipe: R(lab('swipeOn')),
       s_fx: R(document.getElementById('fxList')), s_calm: R(lab('calmOn')), s_big: R(lab('bigOn')), s_strong: R(lab('strongOn')),
-      s_screen: R(h3('Screen'), lab('roomOn')),
+      s_sent: R(h3('Talking in sentences'), lab('recentOn')), s_screen: R(h3('Screen'), lab('roomOn')),
       s_own: R(h3('Photos and voices')), s_ownbtn: R(document.getElementById('ownOpen')), s_backup: R(document.getElementById('ownSave').parentNode),
       s_counts: R(document.getElementById('countSpan'), document.getElementById('unusedBox')), s_counton: R(lab('countOn'), document.getElementById('countClear')),
       s_status: R(document.getElementById('offlineStat')), s_update: R(document.getElementById('checkUpdate')),

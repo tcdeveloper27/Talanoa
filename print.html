@@ -194,6 +194,7 @@ function cover(total){
   s.appendChild(ul2);
   s.appendChild(el('h2', '', 'The ' + (total - 1) + ' pages'));
   var ol = el('ol', 'list');
+  ol.style.columns = String(Math.max(3, Math.ceil(LIB.pages.length / 6)));   /* at most 6 lines, so the About me card fits */
   LIB.pages.forEach(function(p){ ol.appendChild(el('li', '', p.name)); });
   s.appendChild(ol);
   var me = null;                          /* the tile marked "card": true (the top row's "Hi, I'm Brenton") */

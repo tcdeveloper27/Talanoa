@@ -32,6 +32,10 @@
              then every answer gets the same gentle "soft", so no
              answer is more fun to pick than another. Off, they keep
              their own fx, just as before.
+     words = true (on a page): single words (the Words page). Each
+             tile is said with the ABC page's recording of its word,
+             which tools/abc-voices.py makes several ways and checks
+             by ear; the tile's own recording is the fallback.
      show  = true: also shows the words full screen, big enough to
              hand the phone to someone
      card  = true: printed as the cut-out "About me" card on the
@@ -334,6 +338,21 @@ window.TT_LIBRARY = {
       {"icon": "😔", "label": "Fakamolemole", "means": "Sorry",             "say": "Fakamolemole", "sound": "Fah-kah-moh-lay-moh-lay", "short": "Faka-molemole"},
       {"icon": "🤝", "label": "ʻAlu ā",       "means": "Goodbye, go well", "say": "ʻAlu ā",       "sound": "Ah-loo-ah"},
       {"icon": "🌙", "label": "Mohe ā",       "means": "Good night",        "say": "Mohe ā",       "sound": "/mˈoʊhɛ ɑː/"}
+    ]},
+
+    {"name": "Words", "icon": "🧩", "color": "#6A1B9A", "words": true, "tiles": [
+      {"icon": "🙋", "label": "I",         "say": "I"},
+      {"icon": "👉", "label": "You",       "say": "You"},
+      {"icon": "🤲", "label": "Want",      "say": "Want"},
+      {"icon": "👍", "label": "Like",      "say": "Like"},
+      {"icon": "🚶", "label": "Go",        "say": "Go"},
+      {"icon": "🫴", "label": "Get",       "say": "Get"},
+      {"icon": "🛠️", "label": "Do",        "say": "Do"},
+      {"icon": "👀", "label": "Look",      "say": "Look"},
+      {"icon": "➕", "label": "More",      "say": "More"},
+      {"icon": "🚫", "label": "Not",       "say": "Not"},
+      {"icon": "🔀", "label": "Different", "say": "Different"},
+      {"icon": "✅", "label": "Finished",  "say": "Finished"}
     ]},
 
     {"name": "ABC", "icon": "🔤", "color": "#3A3A3A", "keyboard": true, "tiles": []}
