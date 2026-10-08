@@ -405,9 +405,9 @@ try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('me
     <label class="choice"><input type="checkbox" id="strongOn"><span><strong>Darker page names</strong> <small>Darkens the lighter colours a little (I want, Food, Fun, Mom &amp; Dad, Yes) so the white writing is easier to read.</small></span></label>
 
     <h3>Talking in sentences</h3>
-    <label class="choice"><input type="checkbox" id="sentOn"><span><strong>Build sentences</strong> <small>Each picture is still said straight away, and its words also line up at the top. 🔊 says them all together; ✕ starts again.</small></span></label>
-    <label class="choice"><input type="checkbox" id="suggestOn"><span><strong>Word suggestions on the ABC page</strong> <small>Three words to pick from above the letters, from what's been typed so far (words he has spoken before come first).</small></span></label>
-    <label class="choice"><input type="checkbox" id="numbersOn"><span><strong>Numbers on the ABC page</strong> <small>A row of 0 to 9 under the letters. Numbers are said as words (15: "fifteen").</small></span></label>
+    <label class="choice"><input type="checkbox" id="sentOn"><span><strong>Build sentences</strong> <small>Each picture is still said straight away, and its words also line up at the top. 🔊 says them all, one after another; ✕ starts again.</small></span></label>
+    <label class="choice"><input type="checkbox" id="suggestOn"><span><strong>Word suggestions on the ABC page</strong> <small>Three words to pick from above the letters, from what's been typed so far (words he has spoken before come first; they're remembered while Count taps on this phone is on).</small></span></label>
+    <label class="choice"><input type="checkbox" id="numbersOn"><span><strong>Numbers on the ABC page</strong> <small>A row of numbers (1 to 9, then 0) under the letters. Numbers are said as words (15: "fifteen").</small></span></label>
     <label class="choice"><input type="checkbox" id="recentOn"><span><strong>Recent sentences with the big words</strong> <small>The big words also show the last few things said; tap one to say it again.</small></span></label>
 
     <h3>Screen</h3>
@@ -499,6 +499,8 @@ try { if (localStorage.getItem('tt_fit') === 'cover') document.querySelector('me
      2. a recording of your own voice   (voice/<name>.mp3, see below)
      3. the natural voice chosen in Settings
      4. the phone's own built-in voice
+   (The Words page, "words": true, skips 2 and tries the ABC page's
+   recording of the word before 3: see clipFor.)
    A tap is never silent: anything that fails falls through to 4.
    ============================================================ */
 var LIB = window.TT_LIBRARY || {core: [], pages: []};
@@ -1877,7 +1879,7 @@ function buildWeek(c){
 var spanRadios = document.querySelectorAll('#countSpan input');
 for (var si = 0; si < spanRadios.length; si++) spanRadios[si].addEventListener('change', buildCounts);
 document.getElementById('countClear').addEventListener('click', function(){
-  if (!confirm('Clear all the tap counts on this phone?')) return;
+  if (!confirm('Clear all the tap counts on this phone (and the words remembered for word suggestions)?')) return;
   try { localStorage.removeItem(COUNTS); localStorage.removeItem(TYPED_WORDS); } catch(e){}   /* and the words remembered for suggestions */
   buildCounts();
 });
@@ -2352,8 +2354,9 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
    On most Android phones a swipe in from the left or right edge of
    the screen means Back, and Back would close Talanoa. So the app
    keeps one spare step in its history. Back uses that up instead of
-   closing the app (and closes Settings or the page list if one is
-   open). The spare step is put back on the next tap.
+   closing the app (and closes whatever is open on top: the big words,
+   the photo-and-voice editor or its chooser, Settings, or the page
+   list). The spare step is put back on the next tap.
    ============================================================ */
 var spareStep = !!(history.state && history.state.tt);
 function keepSpareStep(){
@@ -2439,7 +2442,7 @@ try {
    ignores touches: nothing here can block a tap, move a tile or
    delay the voice. The drawing loop only runs while something is
    on screen, so it costs no battery in between.
-   Settings: Lots / A little (bounces and rings only) / Off.
+   Settings: Lots / A little (bounces, rings and the twinkling star; no flying sparkles) / Off.
    ============================================================ */
 var FX_LEVEL = store('tt_fx') || (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'little' : 'lots');
 if (['lots', 'little', 'off'].indexOf(FX_LEVEL) === -1) FX_LEVEL = 'lots';
