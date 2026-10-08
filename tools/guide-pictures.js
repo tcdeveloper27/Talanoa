@@ -74,13 +74,17 @@ function serve() {
   // (waitForFunction doesn't wait for an async check, so this polls by hand.)
   await page.goto(URL0);
   await page.waitForFunction(() => navigator.serviceWorker.controller, null, { timeout: 30000 });
-  for (const end = Date.now() + 300000; ;) {          // ~9,300 clips through this small server: 2 min wasn't always enough
-    const done = await page.evaluate(async () => {
+  // (2026-10-08: twice the count stopped short of the end; why wasn't caught, so if it stops rising for 20 s the app is
+  // asked to carry on saving, which fetches whatever is still missing)
+  for (let end = Date.now() + 300000, last = -1, since = Date.now(); ;) {   // ~9,300 clips through this small server
+    const left = await page.evaluate(async () => {
       const want = voiceUrls(), have = new Set((await (await caches.open('tt-voices')).keys()).map((r) => r.url));
-      return want.every((u) => have.has(u));
+      return want.filter((u) => !have.has(u)).length;
     });
-    if (done) break;
-    if (Date.now() > end) throw new Error('the voice did not finish saving for offline use');
+    if (left === 0) break;
+    if (left !== last) { last = left; since = Date.now(); }
+    else if (Date.now() - since > 20000) { await page.evaluate(() => warmVoice()); since = Date.now(); }
+    if (Date.now() > end) throw new Error('the voice did not finish saving for offline use (' + left + ' clips left)');
     await page.waitForTimeout(500);
   }
   await page.reload();
